@@ -46,3 +46,6 @@ app.*.map.json
 # Mac / sshfs related
 **/*.swp
 **/*._*
+
+# VSCode
+.vscode/
