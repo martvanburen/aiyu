@@ -49,3 +49,6 @@ app.*.map.json
 
 # VSCode
 .vscode/
+
+# Ignore .env containing API keys, etc.
+.env

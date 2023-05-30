@@ -1,7 +1,44 @@
-import 'package:flutter/material.dart';
+import 'dart:convert';
 
-void main() {
+import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:http/http.dart' as http;
+
+Future<void> main() async {
+  await dotenv.load();
   runApp(const AIYUApp());
+}
+
+Future<String> callGptAPI(String prompt) async {
+  // TODO(Mart):
+  // . Using dotenv to store the API key is not secure. Eventually
+  // . this app should be upgraded to communicate with a backend server,
+  // . which will then also hold the API key and make the calls for us.
+  const String url = 'https://api.openai.com/v1/chat/completions';
+  final response = await http.post(
+    Uri.parse(url),
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ${dotenv.env['OPENAI_KEY']}',
+    },
+    body: jsonEncode({
+      'model': 'gpt-3.5-turbo',
+      'messages': [
+        {
+          'role': 'user',
+          'content': prompt,
+        },
+      ],
+      'max_tokens': 100,
+    }),
+  );
+
+  if (response.statusCode == 200) {
+    var data = jsonDecode(utf8.decode(response.bodyBytes));
+    return data['choices'][0]['message']['content'].trim();
+  } else {
+    throw Exception('Failed to call GPT API: "${response.body}".');
+  }
 }
 
 class AIYUApp extends StatelessWidget {
@@ -165,23 +202,77 @@ class PageWidget extends StatelessWidget {
   }
 }
 
-class ModePage extends StatelessWidget {
+class ModePage extends StatefulWidget {
   final String mode;
 
   const ModePage({Key? key, required this.mode}) : super(key: key);
 
   @override
+  _ModePageState createState() => _ModePageState();
+}
+
+class _ModePageState extends State<ModePage> {
+  String gptResponse = '';
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    getGptResponse();
+  }
+
+  void getGptResponse() async {
+    String prompt =
+        "Can you help me practice the language I'm learning in ${widget.mode} mode?";
+    String response = await callGptAPI(prompt);
+    setState(() {
+      gptResponse = response;
+      isLoading = false;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    ThemeData theme = Theme.of(context);
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(mode),
+        title: Text(widget.mode),
       ),
-      body: Center(
-        child: ElevatedButton(
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-          child: const Text('Back'),
+      body: SafeArea(
+        child: Column(
+          children: <Widget>[
+            Expanded(
+              child: Container(
+                padding: const EdgeInsets.all(20.0),
+                margin: const EdgeInsets.all(10.0),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.surface,
+                ),
+                child: isLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : SingleChildScrollView(child: Text(gptResponse)),
+              ),
+            ),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                style: ButtonStyle(
+                  shape: MaterialStateProperty.all(
+                    const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.zero,
+                    ),
+                  ),
+                  padding:
+                      MaterialStateProperty.all(const EdgeInsets.all(20.0)),
+                ),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text('Done'),
+              ),
+            ),
+          ],
         ),
       ),
     );
