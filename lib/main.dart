@@ -102,17 +102,17 @@ class _MainScreenState extends State<MainScreen>
       body: TabBarView(
         controller: _tabController,
         children: const <Widget>[
-          EnglishPage(),
-          KoreanPage(),
-          ChinesePage(),
+          EnglishOptionsPage(),
+          KoreanOptionsPage(),
+          ChineseOptionsPage(),
         ],
       ),
     );
   }
 }
 
-class EnglishPage extends StatelessWidget {
-  const EnglishPage({Key? key}) : super(key: key);
+class EnglishOptionsPage extends StatelessWidget {
+  const EnglishOptionsPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -121,7 +121,7 @@ class EnglishPage extends StatelessWidget {
       locale: const Locale('en'),
       child: Builder(
         builder: (context) {
-          return PageWidget(
+          return OptionsPageWidget(
               title: AppLocalizations.of(context)!.tab_english,
               questionMode: AppLocalizations.of(context)!.questionMode,
               conversationMode: AppLocalizations.of(context)!.conversationMode);
@@ -131,8 +131,8 @@ class EnglishPage extends StatelessWidget {
   }
 }
 
-class KoreanPage extends StatelessWidget {
-  const KoreanPage({Key? key}) : super(key: key);
+class KoreanOptionsPage extends StatelessWidget {
+  const KoreanOptionsPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -141,7 +141,7 @@ class KoreanPage extends StatelessWidget {
       locale: const Locale('ko'),
       child: Builder(
         builder: (context) {
-          return PageWidget(
+          return OptionsPageWidget(
               title: AppLocalizations.of(context)!.tab_korean,
               questionMode: AppLocalizations.of(context)!.questionMode,
               conversationMode: AppLocalizations.of(context)!.conversationMode);
@@ -151,8 +151,8 @@ class KoreanPage extends StatelessWidget {
   }
 }
 
-class ChinesePage extends StatelessWidget {
-  const ChinesePage({Key? key}) : super(key: key);
+class ChineseOptionsPage extends StatelessWidget {
+  const ChineseOptionsPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -161,7 +161,7 @@ class ChinesePage extends StatelessWidget {
       locale: const Locale('zh'),
       child: Builder(
         builder: (context) {
-          return PageWidget(
+          return OptionsPageWidget(
               title: AppLocalizations.of(context)!.tab_chinese,
               questionMode: AppLocalizations.of(context)!.questionMode,
               conversationMode: AppLocalizations.of(context)!.conversationMode);
@@ -171,12 +171,12 @@ class ChinesePage extends StatelessWidget {
   }
 }
 
-class PageWidget extends StatelessWidget {
+class OptionsPageWidget extends StatelessWidget {
   final String title;
   final String questionMode;
   final String conversationMode;
 
-  const PageWidget(
+  const OptionsPageWidget(
       {Key? key,
       required this.title,
       required this.questionMode,
@@ -187,7 +187,8 @@ class PageWidget extends StatelessWidget {
     Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (context) => GPTPage(mode: mode, locale: locale)));
+            builder: (context) =>
+                LanguagePracticePage(mode: mode, locale: locale)));
   }
 
   @override
@@ -237,18 +238,19 @@ class PageWidget extends StatelessWidget {
   }
 }
 
-class GPTPage extends StatefulWidget {
+class LanguagePracticePage extends StatefulWidget {
   final String mode;
   final Locale locale;
 
-  const GPTPage({Key? key, required this.mode, required this.locale})
+  const LanguagePracticePage(
+      {Key? key, required this.mode, required this.locale})
       : super(key: key);
 
   @override
-  State<GPTPage> createState() => _GPTPageState();
+  State<LanguagePracticePage> createState() => _LanguagePracticePageState();
 }
 
-class _GPTPageState extends State<GPTPage> {
+class _LanguagePracticePageState extends State<LanguagePracticePage> {
   String gptResponse = "";
   bool isLoading = true;
 
