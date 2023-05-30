@@ -1,5 +1,5 @@
 import "package:flutter/material.dart";
-import "package:gpt_korean_practice/pages/language_practice_page.dart";
+import "package:ai_yu/pages/language_practice_page.dart";
 
 class OptionsPageWidget extends StatelessWidget {
   final String title;

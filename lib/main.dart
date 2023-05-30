@@ -1,9 +1,9 @@
 import "package:flutter/material.dart";
 import "package:flutter_dotenv/flutter_dotenv.dart";
 import "package:flutter_gen/gen_l10n/app_localizations.dart";
-import "package:gpt_korean_practice/pages/chinese_options_page.dart";
-import "package:gpt_korean_practice/pages/english_options_page.dart";
-import "package:gpt_korean_practice/pages/korean_options_page.dart";
+import "package:ai_yu/pages/chinese_options_page.dart";
+import "package:ai_yu/pages/english_options_page.dart";
+import "package:ai_yu/pages/korean_options_page.dart";
 
 Future<void> main() async {
   await dotenv.load();

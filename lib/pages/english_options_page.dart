@@ -1,6 +1,6 @@
 import "package:flutter/material.dart";
 import "package:flutter_gen/gen_l10n/app_localizations.dart";
-import "package:gpt_korean_practice/widgets/options_page_widget.dart";
+import "package:ai_yu/widgets/options_page_widget.dart";
 
 class EnglishOptionsPage extends StatelessWidget {
   const EnglishOptionsPage({Key? key}) : super(key: key);

@@ -1,6 +1,6 @@
 import "package:flutter/material.dart";
 import "package:flutter_gen/gen_l10n/app_localizations.dart";
-import "package:gpt_korean_practice/utils/gpt_api.dart";
+import "package:ai_yu/utils/gpt_api.dart";
 
 class LanguagePracticePage extends StatefulWidget {
   final String mode;
