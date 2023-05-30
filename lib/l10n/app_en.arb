@@ -1,0 +1,9 @@
+{
+    "title": "GPT Language Practice",
+    "tab_english": "English",
+    "tab_korean": "한국어",
+    "tab_chinese": "中文",
+    "questionMode": "Question Mode",
+    "conversationMode": "Conversation Mode",
+    "done": "Done"
+}

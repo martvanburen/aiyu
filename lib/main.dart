@@ -1,8 +1,9 @@
-import 'dart:convert';
+import "dart:convert";
 
-import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:http/http.dart' as http;
+import "package:flutter/material.dart";
+import "package:flutter_dotenv/flutter_dotenv.dart";
+import "package:flutter_gen/gen_l10n/app_localizations.dart";
+import "package:http/http.dart" as http;
 
 Future<void> main() async {
   await dotenv.load();
@@ -14,30 +15,30 @@ Future<String> callGptAPI(String prompt) async {
   // . Using dotenv to store the API key is not secure. Eventually
   // . this app should be upgraded to communicate with a backend server,
   // . which will then also hold the API key and make the calls for us.
-  const String url = 'https://api.openai.com/v1/chat/completions';
+  const String url = "https://api.openai.com/v1/chat/completions";
   final response = await http.post(
     Uri.parse(url),
     headers: {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer ${dotenv.env['OPENAI_KEY']}',
+      "Content-Type": "application/json",
+      "Authorization": "Bearer ${dotenv.env["OPENAI_KEY"]}",
     },
     body: jsonEncode({
-      'model': 'gpt-3.5-turbo',
-      'messages': [
+      "model": "gpt-3.5-turbo",
+      "messages": [
         {
-          'role': 'user',
-          'content': prompt,
+          "role": "user",
+          "content": prompt,
         },
       ],
-      'max_tokens': 100,
+      "max_tokens": 100,
     }),
   );
 
   if (response.statusCode == 200) {
     var data = jsonDecode(utf8.decode(response.bodyBytes));
-    return data['choices'][0]['message']['content'].trim();
+    return data["choices"][0]["message"]["content"].trim();
   } else {
-    throw Exception('Failed to call GPT API: "${response.body}".');
+    throw Exception("Failed to call GPT API: '${response.body}'.");
   }
 }
 
@@ -47,7 +48,9 @@ class AIYUApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'AI-YU',
+      title: "AI-YU",
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
@@ -61,7 +64,7 @@ class MainScreen extends StatefulWidget {
   const MainScreen({Key? key}) : super(key: key);
 
   @override
-  _MainScreenState createState() => _MainScreenState();
+  State<MainScreen> createState() => _MainScreenState();
 }
 
 class _MainScreenState extends State<MainScreen>
@@ -84,15 +87,15 @@ class _MainScreenState extends State<MainScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('GPT Language Practice'),
+        title: Text(AppLocalizations.of(context)!.title),
         titleSpacing: NavigationToolbar.kMiddleSpacing,
         centerTitle: true,
         bottom: TabBar(
           controller: _tabController,
-          tabs: const <Widget>[
-            Tab(text: 'English'),
-            Tab(text: '한국어'),
-            Tab(text: '中文'),
+          tabs: <Widget>[
+            Tab(text: AppLocalizations.of(context)!.tab_english),
+            Tab(text: AppLocalizations.of(context)!.tab_korean),
+            Tab(text: AppLocalizations.of(context)!.tab_chinese),
           ],
         ),
       ),
@@ -113,10 +116,18 @@ class EnglishPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const PageWidget(
-        title: "English",
-        questionMode: "Question Mode",
-        conversationMode: "Conversation Mode");
+    return Localizations.override(
+      context: context,
+      locale: const Locale('en'),
+      child: Builder(
+        builder: (context) {
+          return PageWidget(
+              title: AppLocalizations.of(context)!.tab_english,
+              questionMode: AppLocalizations.of(context)!.questionMode,
+              conversationMode: AppLocalizations.of(context)!.conversationMode);
+        },
+      ),
+    );
   }
 }
 
@@ -125,8 +136,18 @@ class KoreanPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const PageWidget(
-        title: "한국어", questionMode: "질문 모드", conversationMode: "대화 모드");
+    return Localizations.override(
+      context: context,
+      locale: const Locale('ko'),
+      child: Builder(
+        builder: (context) {
+          return PageWidget(
+              title: AppLocalizations.of(context)!.tab_korean,
+              questionMode: AppLocalizations.of(context)!.questionMode,
+              conversationMode: AppLocalizations.of(context)!.conversationMode);
+        },
+      ),
+    );
   }
 }
 
@@ -135,8 +156,18 @@ class ChinesePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const PageWidget(
-        title: "中文", questionMode: "问题模式", conversationMode: "对话模式");
+    return Localizations.override(
+      context: context,
+      locale: const Locale('zh'),
+      child: Builder(
+        builder: (context) {
+          return PageWidget(
+              title: AppLocalizations.of(context)!.tab_chinese,
+              questionMode: AppLocalizations.of(context)!.questionMode,
+              conversationMode: AppLocalizations.of(context)!.conversationMode);
+        },
+      ),
+    );
   }
 }
 
@@ -152,9 +183,11 @@ class PageWidget extends StatelessWidget {
       required this.conversationMode})
       : super(key: key);
 
-  void _navigateToPage(BuildContext context, String mode) {
+  void _navigateToPage(BuildContext context, String mode, Locale locale) {
     Navigator.push(
-        context, MaterialPageRoute(builder: (context) => ModePage(mode: mode)));
+        context,
+        MaterialPageRoute(
+            builder: (context) => GPTPage(mode: mode, locale: locale)));
   }
 
   @override
@@ -174,7 +207,8 @@ class PageWidget extends StatelessWidget {
               ),
             ),
             onPressed: () {
-              _navigateToPage(context, questionMode);
+              _navigateToPage(
+                  context, questionMode, Localizations.localeOf(context));
             },
             child: Text(questionMode, style: const TextStyle(fontSize: 16)),
           ),
@@ -192,7 +226,8 @@ class PageWidget extends StatelessWidget {
               ),
             ),
             onPressed: () {
-              _navigateToPage(context, conversationMode);
+              _navigateToPage(
+                  context, conversationMode, Localizations.localeOf(context));
             },
             child: Text(conversationMode, style: const TextStyle(fontSize: 16)),
           ),
@@ -202,17 +237,19 @@ class PageWidget extends StatelessWidget {
   }
 }
 
-class ModePage extends StatefulWidget {
+class GPTPage extends StatefulWidget {
   final String mode;
+  final Locale locale;
 
-  const ModePage({Key? key, required this.mode}) : super(key: key);
+  const GPTPage({Key? key, required this.mode, required this.locale})
+      : super(key: key);
 
   @override
-  _ModePageState createState() => _ModePageState();
+  State<GPTPage> createState() => _GPTPageState();
 }
 
-class _ModePageState extends State<ModePage> {
-  String gptResponse = '';
+class _GPTPageState extends State<GPTPage> {
+  String gptResponse = "";
   bool isLoading = true;
 
   @override
@@ -235,45 +272,53 @@ class _ModePageState extends State<ModePage> {
   Widget build(BuildContext context) {
     ThemeData theme = Theme.of(context);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.mode),
-      ),
-      body: SafeArea(
-        child: Column(
-          children: <Widget>[
-            Expanded(
-              child: Container(
-                padding: const EdgeInsets.all(20.0),
-                margin: const EdgeInsets.all(10.0),
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.surface,
-                ),
-                child: isLoading
-                    ? const Center(child: CircularProgressIndicator())
-                    : SingleChildScrollView(child: Text(gptResponse)),
-              ),
+    return Localizations.override(
+      context: context,
+      locale: widget.locale,
+      child: Builder(
+        builder: (context) {
+          return Scaffold(
+            appBar: AppBar(
+              title: Text(widget.mode),
             ),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                style: ButtonStyle(
-                  shape: MaterialStateProperty.all(
-                    const RoundedRectangleBorder(
-                      borderRadius: BorderRadius.zero,
+            body: SafeArea(
+              child: Column(
+                children: <Widget>[
+                  Expanded(
+                    child: Container(
+                      padding: const EdgeInsets.all(20.0),
+                      margin: const EdgeInsets.all(10.0),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.surface,
+                      ),
+                      child: isLoading
+                          ? const Center(child: CircularProgressIndicator())
+                          : SingleChildScrollView(child: Text(gptResponse)),
                     ),
                   ),
-                  padding:
-                      MaterialStateProperty.all(const EdgeInsets.all(20.0)),
-                ),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: const Text('Done'),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      style: ButtonStyle(
+                        shape: MaterialStateProperty.all(
+                          const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.zero,
+                          ),
+                        ),
+                        padding: MaterialStateProperty.all(
+                            const EdgeInsets.all(20.0)),
+                      ),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      child: Text(AppLocalizations.of(context)!.done),
+                    ),
+                  ),
+                ],
               ),
             ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
