@@ -1,16 +1,19 @@
-# gpt_korean_practice
+# GPT-Based Language Practice
 
-A new Flutter project.
+I've spent an incredible percent of my life on language learning. Recently,
+living in Korea, a huge amount of my time is spent practicing Korean.
 
-## Getting Started
+Even though I'm continually noticing my improvement, and am starting to
+understand even complicated Korean text, I frustratingly still find myself
+unable to have even the most basic of *real-life* Korean conversations.
 
-This project is a starting point for a Flutter application.
+This app is me experimenting with ways I can use GPT to most effectively tackle
+that problem.
 
-A few resources to get you started if this is your first Flutter project:
+## Idea #1: Quick Question Mode
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+TODO
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Idea #2: Conversation Mode
+
+TODO
