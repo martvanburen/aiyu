@@ -32,6 +32,8 @@ class _LanguagePracticePageState extends State<LanguagePracticePage> {
 
   late Future<bool> speechRecognitionInitialization;
 
+  final TextEditingController _promptInputController = TextEditingController();
+
   @override
   void initState() {
     super.initState();
@@ -79,19 +81,25 @@ class _LanguagePracticePageState extends State<LanguagePracticePage> {
     } else {
       startListening();
     }
-    setState(() {
-      isListening = !isListening;
-    });
+    if (mounted) {
+      setState(() {
+        isListening = !isListening;
+      });
+    }
   }
 
   void startListening() {
     speechRecognition.listen(
       onResult: (val) {
-        if (val.finalResult && val.recognizedWords != "" && mounted) {
+        if (mounted) {
+          final capitalizedText = val.recognizedWords[0].toUpperCase() +
+              val.recognizedWords.substring(1);
           setState(() {
-            isListening = false;
+            _promptInputController.text = capitalizedText;
+            if (val.finalResult) {
+              isListening = false;
+            }
           });
-          getGptResponse(val.recognizedWords);
         }
       },
       cancelOnError: true,
@@ -99,8 +107,27 @@ class _LanguagePracticePageState extends State<LanguagePracticePage> {
     );
   }
 
+  void clearPrompt() {
+    if (mounted) {
+      setState(() {
+        _promptInputController.text = '';
+      });
+    }
+  }
+
   void stopListening() {
     speechRecognition.cancel();
+    clearPrompt();
+  }
+
+  void sendAsStatement() {
+    getGptResponse('${_promptInputController.text}.');
+    clearPrompt();
+  }
+
+  void sendAsQuestion() {
+    getGptResponse('${_promptInputController.text}?');
+    clearPrompt();
   }
 
   @override
@@ -131,30 +158,80 @@ class _LanguagePracticePageState extends State<LanguagePracticePage> {
                           : SingleChildScrollView(child: Text(gptResponse)),
                     ),
                   ),
-                  FutureBuilder(
-                    future: speechRecognitionInitialization,
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const ElevatedButton(
-                          onPressed: null,
-                          child: Text('Initializing...'),
-                        );
-                      } else if (snapshot.error != null ||
-                          !snapshot.hasData ||
-                          !(snapshot.data as bool)) {
-                        return const ElevatedButton(
-                          onPressed: null,
-                          child: Text('Speech Unavailable'),
-                        );
-                      } else {
-                        return ElevatedButton(
-                          onPressed: toggleListening,
-                          child: Text(isListening
-                              ? 'Stop Listening'
-                              : 'Start Listening'),
-                        );
-                      }
-                    },
+                  Container(
+                    decoration: const BoxDecoration(
+                      border: Border(
+                        top: BorderSide(
+                          color: Colors.black,
+                          width: 1.0,
+                        ),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        SizedBox(
+                          height: 140.0,
+                          child: IconButton(
+                            style: ButtonStyle(
+                              shape: MaterialStateProperty.all(
+                                const RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.zero,
+                                ),
+                              ),
+                              padding: MaterialStateProperty.all(
+                                const EdgeInsets.all(20.0),
+                              ),
+                            ),
+                            onPressed: toggleListening,
+                            icon: Icon(
+                              isListening ? Icons.cancel : Icons.mic_none,
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          child: Container(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 10.0),
+                            child: TextField(
+                              controller: _promptInputController,
+                              maxLines: 4,
+                            ),
+                          ),
+                        ),
+                        Column(
+                          children: [
+                            IconButton(
+                              style: ButtonStyle(
+                                shape: MaterialStateProperty.all(
+                                  const RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.zero,
+                                  ),
+                                ),
+                                padding: MaterialStateProperty.all(
+                                  const EdgeInsets.all(20.0),
+                                ),
+                              ),
+                              onPressed: sendAsStatement,
+                              icon: const Icon(Icons.stop),
+                            ),
+                            IconButton(
+                              style: ButtonStyle(
+                                shape: MaterialStateProperty.all(
+                                  const RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.zero,
+                                  ),
+                                ),
+                                padding: MaterialStateProperty.all(
+                                  const EdgeInsets.all(20.0),
+                                ),
+                              ),
+                              onPressed: sendAsQuestion,
+                              icon: const Icon(Icons.question_mark),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                   SizedBox(
                     width: double.infinity,
@@ -167,11 +244,20 @@ class _LanguagePracticePageState extends State<LanguagePracticePage> {
                         ),
                         padding: MaterialStateProperty.all(
                             const EdgeInsets.all(20.0)),
+                        backgroundColor:
+                            MaterialStateProperty.all(Colors.grey.shade600),
+                        foregroundColor:
+                            MaterialStateProperty.all(Colors.white),
                       ),
                       onPressed: () {
                         Navigator.of(context).pop();
                       },
-                      child: Text(AppLocalizations.of(context)!.done),
+                      child: Text(
+                        AppLocalizations.of(context)!.done,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
                   ),
                 ],
