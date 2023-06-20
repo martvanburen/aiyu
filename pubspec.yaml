@@ -45,8 +45,10 @@ dependencies:
     sdk: flutter
   intl: any
 
-  # Speach-to-text.
+  # Speach-to-text and text-to-speech.
   speech_to_text: ^6.0.0
+  aws_polly: ^2.1.1
+  just_audio: ^0.9.34
 
 dev_dependencies:
   flutter_test:

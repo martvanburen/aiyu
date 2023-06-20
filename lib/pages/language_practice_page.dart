@@ -1,6 +1,9 @@
-import "package:flutter/material.dart";
-import "package:flutter_gen/gen_l10n/app_localizations.dart";
 import "package:ai_yu/utils/gpt_api.dart";
+import "package:flutter/material.dart";
+import "package:flutter_dotenv/flutter_dotenv.dart";
+import "package:flutter_gen/gen_l10n/app_localizations.dart";
+import 'package:aws_polly/aws_polly.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 
 class LanguagePracticePage extends StatefulWidget {
@@ -20,14 +23,38 @@ class _LanguagePracticePageState extends State<LanguagePracticePage> {
   bool isLoadingResponse = false;
   bool isListening = false;
 
-  stt.SpeechToText speech = stt.SpeechToText();
+  stt.SpeechToText speechRecognition = stt.SpeechToText();
 
-  late Future<bool> initializeSpeech;
+  final AwsPolly awsPolly = AwsPolly.instance(
+    poolId: dotenv.env["AWS_IDENTITY_POOL"]!,
+    region: AWSRegionType.APNortheast2,
+  );
+
+  late Future<bool> speechRecognitionInitialization;
 
   @override
   void initState() {
     super.initState();
-    initializeSpeech = speech.initialize();
+    speechRecognitionInitialization = speechRecognition.initialize();
+  }
+
+  Future<void> speak(String text) async {
+    late AWSPolyVoiceId voiceId;
+    switch (widget.locale) {
+      case const Locale('zh'):
+        voiceId = AWSPolyVoiceId.zhiyu;
+        break;
+      case const Locale('ko'):
+        voiceId = AWSPolyVoiceId.seoyeon;
+        break;
+      default:
+        voiceId = AWSPolyVoiceId.emma;
+    }
+    final url = await awsPolly.getUrl(input: text, voiceId: voiceId);
+    if (url == "") return;
+    final player = AudioPlayer();
+    await player.setUrl(url);
+    player.play();
   }
 
   void getGptResponse(String prompt) async {
@@ -42,6 +69,7 @@ class _LanguagePracticePageState extends State<LanguagePracticePage> {
         gptResponse = "$gptResponse\n\n$prompt:\n\n$response";
         isLoadingResponse = false;
       });
+      speak(response);
     }
   }
 
@@ -57,7 +85,7 @@ class _LanguagePracticePageState extends State<LanguagePracticePage> {
   }
 
   void startListening() {
-    speech.listen(
+    speechRecognition.listen(
       onResult: (val) {
         if (val.finalResult && val.recognizedWords != "" && mounted) {
           setState(() {
@@ -72,7 +100,7 @@ class _LanguagePracticePageState extends State<LanguagePracticePage> {
   }
 
   void stopListening() {
-    speech.cancel();
+    speechRecognition.cancel();
   }
 
   @override
@@ -104,7 +132,7 @@ class _LanguagePracticePageState extends State<LanguagePracticePage> {
                     ),
                   ),
                   FutureBuilder(
-                    future: initializeSpeech,
+                    future: speechRecognitionInitialization,
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return const ElevatedButton(
