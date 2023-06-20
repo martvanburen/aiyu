@@ -1,6 +1,7 @@
 import "package:flutter/material.dart";
 import "package:flutter_gen/gen_l10n/app_localizations.dart";
 import "package:ai_yu/utils/gpt_api.dart";
+import 'package:speech_to_text/speech_to_text.dart' as stt;
 
 class LanguagePracticePage extends StatefulWidget {
   final String mode;
@@ -16,22 +17,62 @@ class LanguagePracticePage extends StatefulWidget {
 
 class _LanguagePracticePageState extends State<LanguagePracticePage> {
   String gptResponse = "";
-  bool isLoading = true;
+  bool isLoadingResponse = false;
+  bool isListening = false;
+
+  stt.SpeechToText speech = stt.SpeechToText();
+
+  late Future<bool> initializeSpeech;
 
   @override
   void initState() {
     super.initState();
-    getGptResponse();
+    initializeSpeech = speech.initialize();
   }
 
-  void getGptResponse() async {
-    String prompt =
-        "Can you help me practice the language I'm learning in ${widget.mode} mode?";
+  void getGptResponse(String prompt) async {
+    if (mounted) {
+      setState(() {
+        isLoadingResponse = true;
+      });
+    }
     String response = await callGptAPI(prompt);
+    if (mounted) {
+      setState(() {
+        gptResponse = "$gptResponse\n\n$prompt:\n\n$response";
+        isLoadingResponse = false;
+      });
+    }
+  }
+
+  void toggleListening() {
+    if (isListening) {
+      stopListening();
+    } else {
+      startListening();
+    }
     setState(() {
-      gptResponse = response;
-      isLoading = false;
+      isListening = !isListening;
     });
+  }
+
+  void startListening() {
+    speech.listen(
+      onResult: (val) {
+        if (val.finalResult && val.recognizedWords != "" && mounted) {
+          setState(() {
+            isListening = false;
+          });
+          getGptResponse(val.recognizedWords);
+        }
+      },
+      cancelOnError: true,
+      localeId: widget.locale.languageCode,
+    );
+  }
+
+  void stopListening() {
+    speech.cancel();
   }
 
   @override
@@ -57,10 +98,35 @@ class _LanguagePracticePageState extends State<LanguagePracticePage> {
                       decoration: BoxDecoration(
                         color: theme.colorScheme.surface,
                       ),
-                      child: isLoading
+                      child: isLoadingResponse
                           ? const Center(child: CircularProgressIndicator())
                           : SingleChildScrollView(child: Text(gptResponse)),
                     ),
+                  ),
+                  FutureBuilder(
+                    future: initializeSpeech,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const ElevatedButton(
+                          onPressed: null,
+                          child: Text('Initializing...'),
+                        );
+                      } else if (snapshot.error != null ||
+                          !snapshot.hasData ||
+                          !(snapshot.data as bool)) {
+                        return const ElevatedButton(
+                          onPressed: null,
+                          child: Text('Speech Unavailable'),
+                        );
+                      } else {
+                        return ElevatedButton(
+                          onPressed: toggleListening,
+                          child: Text(isListening
+                              ? 'Stop Listening'
+                              : 'Start Listening'),
+                        );
+                      }
+                    },
                   ),
                   SizedBox(
                     width: double.infinity,
