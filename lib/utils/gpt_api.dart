@@ -16,7 +16,7 @@ Future<String> callGptAPI(String prompt) async {
       "Authorization": "Bearer ${dotenv.env["OPENAI_KEY"]}",
     },
     body: jsonEncode({
-      "model": "gpt-3.5-turbo",
+      "model": "gpt-3.5-turbo-0613",
       "messages": [
         {
           "role": "user",
@@ -31,6 +31,7 @@ Future<String> callGptAPI(String prompt) async {
     var data = jsonDecode(utf8.decode(response.bodyBytes));
     return data["choices"][0]["message"]["content"].trim();
   } else {
-    throw Exception("Failed to call GPT API: '${response.body}'.");
+    var data = jsonDecode(utf8.decode(response.bodyBytes));
+    return data["error"]["message"];
   }
 }
