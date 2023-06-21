@@ -64,12 +64,18 @@ class _LanguagePracticePageState extends State<LanguagePracticePage> {
 
   @override
   Widget build(BuildContext context) {
+    ThemeData theme = Theme.of(context);
+
     return Localizations.override(
       context: context,
       locale: widget.locale,
       child: Builder(
         builder: (context) => Scaffold(
-          appBar: AppBar(title: Text(widget.mode)),
+          appBar: AppBar(
+            title:
+                Text(widget.mode, style: TextStyle(color: theme.primaryColor)),
+            centerTitle: true,
+          ),
           body: SafeArea(
             child: Column(
               children: <Widget>[
@@ -105,20 +111,13 @@ class _LanguagePracticePageState extends State<LanguagePracticePage> {
   }
 
   SizedBox _buildDoneButton(BuildContext context) {
-    ThemeData theme = Theme.of(context);
-
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
         style: ButtonStyle(
-          shape: MaterialStateProperty.all(
-            const RoundedRectangleBorder(
-              borderRadius: BorderRadius.zero,
-            ),
-          ),
           padding: MaterialStateProperty.all(const EdgeInsets.all(20.0)),
-          backgroundColor: MaterialStateProperty.all(theme.cardColor),
-          foregroundColor: MaterialStateProperty.all(theme.primaryColor),
+          backgroundColor: MaterialStateProperty.all(Colors.white),
+          foregroundColor: MaterialStateProperty.all(Colors.black),
         ),
         onPressed: () {
           Navigator.of(context).pop();

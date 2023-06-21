@@ -96,11 +96,11 @@ class _LanguageInputWidgetState extends State<LanguageInputWidget> {
             decoration: BoxDecoration(
               border: Border(
                 top: BorderSide(
-                  color: theme.dividerColor,
+                  color: theme.primaryColor,
                   width: 2.0,
                 ),
                 bottom: BorderSide(
-                  color: theme.dividerColor,
+                  color: theme.primaryColor,
                   width: 2.0,
                 ),
               ),
