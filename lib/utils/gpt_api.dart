@@ -4,7 +4,7 @@ import "package:ai_yu/data_structures/gpt_message.dart";
 import "package:flutter_dotenv/flutter_dotenv.dart";
 import "package:http/http.dart" as http;
 
-Future<String> callGptAPI(List<GPTMessage> conversation) async {
+Future<String> callGptAPI(String mission, List<GPTMessage> conversation) async {
   // TODO(Mart):
   // . Using dotenv to store the API key is not secure. Eventually
   // . this app should be upgraded to communicate with a backend server,
@@ -20,6 +20,12 @@ Future<String> callGptAPI(List<GPTMessage> conversation) async {
       "content": content,
     };
   }));
+
+  // Add mission statement (as first message).
+  messages.insert(0, {
+    "role": "system",
+    "content": mission,
+  });
 
   // Make API call.
   const String url = "https://api.openai.com/v1/chat/completions";

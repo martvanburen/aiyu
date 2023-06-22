@@ -18,8 +18,11 @@ class AwsPollyService {
       case const Locale('ko'):
         _voiceId = AWSPolyVoiceId.seoyeon;
         break;
-      default:
+      case const Locale('en'):
         _voiceId = AWSPolyVoiceId.emma;
+      default:
+        throw UnimplementedError(
+            "Currently only Chinese, Korean and English are implemented.");
     }
   }
 

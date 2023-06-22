@@ -2,6 +2,7 @@ import "package:ai_yu/data_structures/gpt_message.dart";
 import "package:ai_yu/data_structures/gpt_mode.dart";
 import "package:ai_yu/utils/aws_polly_service.dart";
 import "package:ai_yu/utils/gpt_api.dart";
+import "package:ai_yu/utils/mission_decider.dart";
 import "package:ai_yu/widgets/conversation_display_widget.dart";
 import "package:ai_yu/widgets/language_input_widget.dart";
 import "package:flutter/material.dart";
@@ -21,6 +22,7 @@ class LanguagePracticePage extends StatefulWidget {
 }
 
 class _LanguagePracticePageState extends State<LanguagePracticePage> {
+  late final String mission;
   List<GPTMessage> conversation = [];
 
   bool isLoadingResponse = false;
@@ -33,6 +35,7 @@ class _LanguagePracticePageState extends State<LanguagePracticePage> {
   void initState() {
     super.initState();
     awsPollyService = AwsPollyService(locale: widget.locale);
+    mission = decideMission(locale: widget.locale, mode: widget.mode);
   }
 
   Future<void> speak(GPTMessage message) async {
@@ -83,7 +86,7 @@ class _LanguagePracticePageState extends State<LanguagePracticePage> {
     }
 
     // Next, call GPT and add GPT message (holding an unresolved Future).
-    final Future<String> responseFuture = callGptAPI(conversation);
+    final Future<String> responseFuture = callGptAPI(mission, conversation);
     final Future<String> audioUrlFuture = responseFuture.then((response) async {
       return await awsPollyService.getSpeechUrl(input: response);
     });

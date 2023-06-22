@@ -6,9 +6,12 @@ enum GPTMode { languagePracticeQuestionMode, languagePracticeConversationMode }
 String gptModeDisplayName(
     {required GPTMode mode, required BuildContext context}) {
   switch (mode) {
+    case GPTMode.languagePracticeQuestionMode:
+      return AppLocalizations.of(context)!.questionMode;
     case GPTMode.languagePracticeConversationMode:
       return AppLocalizations.of(context)!.conversationMode;
     default:
-      return AppLocalizations.of(context)!.questionMode;
+      throw UnimplementedError(
+          "Currently, only question and conversation modes are implemented.");
   }
 }
