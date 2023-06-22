@@ -72,19 +72,24 @@ class _LanguagePracticePageState extends State<LanguagePracticePage> {
   }
 
   void getGptResponse(String prompt) async {
-    final Future<String> responseFuture = callGptAPI(prompt);
-    final Future<String> audioUrlFuture = responseFuture.then((response) async {
-      return await awsPollyService.getSpeechUrl(input: response);
-    });
-
+    // Add user message first.
     GPTMessage userMessage =
         GPTMessage(GPTMessageSender.user, Future.value(prompt));
-    GPTMessage gptMessage = GPTMessage(GPTMessageSender.gpt, responseFuture,
-        audioUrl: audioUrlFuture);
-
     if (mounted) {
       setState(() {
         conversation.add(userMessage);
+      });
+    }
+
+    // Next, call GPT and add GPT message (holding an unresolved Future).
+    final Future<String> responseFuture = callGptAPI(conversation);
+    final Future<String> audioUrlFuture = responseFuture.then((response) async {
+      return await awsPollyService.getSpeechUrl(input: response);
+    });
+    GPTMessage gptMessage = GPTMessage(GPTMessageSender.gpt, responseFuture,
+        audioUrl: audioUrlFuture);
+    if (mounted) {
+      setState(() {
         conversation.add(gptMessage);
       });
     }
