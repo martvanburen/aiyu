@@ -3,10 +3,14 @@ import 'package:flutter/material.dart';
 
 class ConversationDisplayWidget extends StatelessWidget {
   final List<GPTMessage> conversation;
+  final Function(GPTMessage) onMessageTap;
+  final GPTMessage? currentlySpeakingMessage;
 
   const ConversationDisplayWidget({
     Key? key,
     required this.conversation,
+    required this.onMessageTap,
+    this.currentlySpeakingMessage,
   }) : super(key: key);
 
   @override
@@ -25,6 +29,7 @@ class ConversationDisplayWidget extends StatelessWidget {
           itemBuilder: (context, index) {
             var msg = conversation[conversation.length - 1 - index];
             var isUser = msg.sender == GPTMessageSender.user;
+            var isCurrentlySpeaking = msg == currentlySpeakingMessage;
             return Container(
               alignment: isUser ? Alignment.centerLeft : Alignment.centerRight,
               padding: const EdgeInsets.all(10.0),
@@ -43,13 +48,20 @@ class ConversationDisplayWidget extends StatelessWidget {
                   } else if (snapshot.hasError) {
                     return Text('Error: ${snapshot.error}.');
                   } else {
-                    return Text(
-                      snapshot.data!,
-                      style: TextStyle(
-                        color: isUser ? theme.primaryColor : Colors.black,
-                        fontSize: 16,
-                      ),
-                    );
+                    return GestureDetector(
+                        onTap: () {
+                          onMessageTap(msg);
+                        },
+                        child: Text(
+                          snapshot.data!,
+                          style: TextStyle(
+                            color: isUser ? theme.primaryColor : Colors.black,
+                            fontSize: 16,
+                            fontWeight: (isUser || isCurrentlySpeaking)
+                                ? FontWeight.bold
+                                : FontWeight.normal,
+                          ),
+                        ));
                   }
                 },
               ),
