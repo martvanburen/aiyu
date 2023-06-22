@@ -1,4 +1,5 @@
 import "package:ai_yu/data_structures/gpt_message.dart";
+import "package:ai_yu/data_structures/gpt_mode.dart";
 import "package:ai_yu/utils/aws_polly_service.dart";
 import "package:ai_yu/utils/gpt_api.dart";
 import "package:ai_yu/widgets/conversation_display_widget.dart";
@@ -8,7 +9,7 @@ import "package:flutter_gen/gen_l10n/app_localizations.dart";
 import 'package:just_audio/just_audio.dart';
 
 class LanguagePracticePage extends StatefulWidget {
-  final String mode;
+  final GPTMode mode;
   final Locale locale;
 
   const LanguagePracticePage(
@@ -116,8 +117,8 @@ class _LanguagePracticePageState extends State<LanguagePracticePage> {
       child: Builder(
         builder: (context) => Scaffold(
           appBar: AppBar(
-            title:
-                Text(widget.mode, style: TextStyle(color: theme.primaryColor)),
+            title: Text(gptModeDisplayName(mode: widget.mode, context: context),
+                style: TextStyle(color: theme.primaryColor)),
             centerTitle: true,
           ),
           body: SafeArea(

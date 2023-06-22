@@ -1,5 +1,4 @@
 import "package:flutter/material.dart";
-import "package:flutter_gen/gen_l10n/app_localizations.dart";
 import "package:ai_yu/widgets/options_page_widget.dart";
 
 class EnglishOptionsPage extends StatelessWidget {
@@ -12,10 +11,7 @@ class EnglishOptionsPage extends StatelessWidget {
       locale: const Locale('en'),
       child: Builder(
         builder: (context) {
-          return OptionsPageWidget(
-              title: AppLocalizations.of(context)!.tab_english,
-              questionMode: AppLocalizations.of(context)!.questionMode,
-              conversationMode: AppLocalizations.of(context)!.conversationMode);
+          return const OptionsPageWidget();
         },
       ),
     );

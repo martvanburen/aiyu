@@ -1,19 +1,11 @@
+import "package:ai_yu/data_structures/gpt_mode.dart";
 import "package:flutter/material.dart";
 import "package:ai_yu/pages/language_practice_page.dart";
 
 class OptionsPageWidget extends StatelessWidget {
-  final String title;
-  final String questionMode;
-  final String conversationMode;
+  const OptionsPageWidget({Key? key}) : super(key: key);
 
-  const OptionsPageWidget(
-      {Key? key,
-      required this.title,
-      required this.questionMode,
-      required this.conversationMode})
-      : super(key: key);
-
-  void _navigateToPage(BuildContext context, String mode, Locale locale) {
+  void _navigateToPage(BuildContext context, GPTMode mode, Locale locale) {
     Navigator.push(
         context,
         MaterialPageRoute(
@@ -38,10 +30,14 @@ class OptionsPageWidget extends StatelessWidget {
               ),
             ),
             onPressed: () {
-              _navigateToPage(
-                  context, questionMode, Localizations.localeOf(context));
+              _navigateToPage(context, GPTMode.languagePracticeQuestionMode,
+                  Localizations.localeOf(context));
             },
-            child: Text(questionMode, style: const TextStyle(fontSize: 16)),
+            child: Text(
+                gptModeDisplayName(
+                    mode: GPTMode.languagePracticeQuestionMode,
+                    context: context),
+                style: const TextStyle(fontSize: 16)),
           ),
         ),
         const SizedBox(height: 20.0),
@@ -57,10 +53,14 @@ class OptionsPageWidget extends StatelessWidget {
               ),
             ),
             onPressed: () {
-              _navigateToPage(
-                  context, conversationMode, Localizations.localeOf(context));
+              _navigateToPage(context, GPTMode.languagePracticeConversationMode,
+                  Localizations.localeOf(context));
             },
-            child: Text(conversationMode, style: const TextStyle(fontSize: 16)),
+            child: Text(
+                gptModeDisplayName(
+                    mode: GPTMode.languagePracticeConversationMode,
+                    context: context),
+                style: const TextStyle(fontSize: 16)),
           ),
         ),
       ],
