@@ -1,3 +1,4 @@
+import "package:ai_yu/data_structures/gpt_message.dart";
 import "package:ai_yu/utils/gpt_api.dart";
 import "package:ai_yu/widgets/conversation_display_widget.dart";
 import "package:ai_yu/widgets/language_input_widget.dart";
@@ -20,7 +21,7 @@ class LanguagePracticePage extends StatefulWidget {
 }
 
 class _LanguagePracticePageState extends State<LanguagePracticePage> {
-  String gptResponse = "";
+  List<GPTMessage> conversation = [];
   bool isLoadingResponse = false;
 
   final AwsPolly awsPolly = AwsPolly.instance(
@@ -50,16 +51,15 @@ class _LanguagePracticePageState extends State<LanguagePracticePage> {
   void getGptResponse(String prompt) async {
     if (mounted) {
       setState(() {
-        isLoadingResponse = true;
+        conversation
+            .add(GPTMessage(GPTMessageSender.user, Future.value(prompt)));
+        conversation.add(GPTMessage(
+            GPTMessageSender.gpt,
+            callGptAPI(prompt).then((value) {
+              speak(value);
+              return value;
+            })));
       });
-    }
-    String response = await callGptAPI(prompt);
-    if (mounted) {
-      setState(() {
-        gptResponse = "$gptResponse\n\n$prompt:\n\n$response";
-        isLoadingResponse = false;
-      });
-      speak(response);
     }
   }
 
@@ -81,8 +81,7 @@ class _LanguagePracticePageState extends State<LanguagePracticePage> {
             child: Column(
               children: <Widget>[
                 ConversationDisplayWidget(
-                  gptResponse: gptResponse,
-                  isLoadingResponse: isLoadingResponse,
+                  conversation: conversation,
                 ),
                 LanguageInputWidget(
                   locale: widget.locale,

@@ -1,13 +1,12 @@
+import 'package:ai_yu/data_structures/gpt_message.dart';
 import 'package:flutter/material.dart';
 
 class ConversationDisplayWidget extends StatelessWidget {
-  final String gptResponse;
-  final bool isLoadingResponse;
+  final List<GPTMessage> conversation;
 
   const ConversationDisplayWidget({
     Key? key,
-    required this.gptResponse,
-    required this.isLoadingResponse,
+    required this.conversation,
   }) : super(key: key);
 
   @override
@@ -16,14 +15,47 @@ class ConversationDisplayWidget extends StatelessWidget {
 
     return Expanded(
       child: Container(
-        padding: const EdgeInsets.all(20.0),
         margin: const EdgeInsets.all(10.0),
         decoration: BoxDecoration(
           color: theme.colorScheme.surface,
         ),
-        child: isLoadingResponse
-            ? const Center(child: CircularProgressIndicator())
-            : SingleChildScrollView(child: Text(gptResponse)),
+        child: ListView.builder(
+          reverse: true,
+          itemCount: conversation.length,
+          itemBuilder: (context, index) {
+            var msg = conversation[conversation.length - 1 - index];
+            var isUser = msg.sender == GPTMessageSender.user;
+            return Container(
+              alignment: isUser ? Alignment.centerLeft : Alignment.centerRight,
+              padding: const EdgeInsets.all(10.0),
+              child: FutureBuilder<String>(
+                future: msg.content,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const SizedBox(
+                      height: 15.0,
+                      width: 15.0,
+                      child: Center(
+                          child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                      )),
+                    );
+                  } else if (snapshot.hasError) {
+                    return Text('Error: ${snapshot.error}.');
+                  } else {
+                    return Text(
+                      snapshot.data!,
+                      style: TextStyle(
+                        color: isUser ? theme.primaryColor : Colors.black,
+                        fontSize: 16,
+                      ),
+                    );
+                  }
+                },
+              ),
+            );
+          },
+        ),
       ),
     );
   }
