@@ -19,7 +19,7 @@ class ConversationDisplayWidget extends StatelessWidget {
 
     return Expanded(
       child: Container(
-        margin: const EdgeInsets.all(10.0),
+        margin: const EdgeInsets.all(5.0),
         decoration: BoxDecoration(
           color: theme.colorScheme.surface,
         ),
@@ -32,7 +32,10 @@ class ConversationDisplayWidget extends StatelessWidget {
             var isCurrentlySpeaking = msg == currentlySpeakingMessage;
             return Container(
               alignment: isUser ? Alignment.centerLeft : Alignment.centerRight,
-              padding: const EdgeInsets.all(10.0),
+              margin: const EdgeInsets.all(10.0),
+              padding: isUser
+                  ? const EdgeInsets.only(right: 15.0)
+                  : const EdgeInsets.only(left: 15.0),
               child: FutureBuilder<String>(
                 future: msg.content,
                 builder: (context, snapshot) {
@@ -54,6 +57,7 @@ class ConversationDisplayWidget extends StatelessWidget {
                         },
                         child: Text(
                           snapshot.data!,
+                          textAlign: isUser ? TextAlign.left : TextAlign.right,
                           style: TextStyle(
                             color: isUser ? theme.primaryColor : Colors.black,
                             fontSize: 16,
