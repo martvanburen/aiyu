@@ -4,7 +4,8 @@ import "package:ai_yu/data_structures/gpt_message.dart";
 import "package:flutter_dotenv/flutter_dotenv.dart";
 import "package:http/http.dart" as http;
 
-Future<String> callGptAPI(String mission, List<GPTMessage> conversation) async {
+Future<GPTMessageContent> callGptAPI(
+    String mission, List<GPTMessage> conversation) async {
   // TODO(Mart):
   // . Using dotenv to store the API key is not secure. Eventually
   // . this app should be upgraded to communicate with a backend server,
@@ -38,16 +39,20 @@ Future<String> callGptAPI(String mission, List<GPTMessage> conversation) async {
     body: jsonEncode({
       "model": "gpt-3.5-turbo-0613",
       "messages": messages,
-      "max_tokens": 100,
+      "max_tokens": 300,
     }),
   );
 
   // Parse response.
   if (response.statusCode == 200) {
     var data = jsonDecode(utf8.decode(response.bodyBytes));
-    return data["choices"][0]["message"]["content"].trim();
+    var messageContentJSON =
+        jsonDecode(data["choices"][0]["message"]["content"].trim());
+    return GPTMessageContent(messageContentJSON["response"],
+        sentenceFeedback: messageContentJSON["feedback"],
+        sentenceCorrection: messageContentJSON["correction"]);
   } else {
     var data = jsonDecode(utf8.decode(response.bodyBytes));
-    return data["error"]["message"];
+    return GPTMessageContent(data["error"]["message"]);
   }
 }

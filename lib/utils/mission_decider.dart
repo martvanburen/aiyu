@@ -22,14 +22,14 @@ String decideMission({required Locale locale, required GPTMode mode}) {
     case GPTMode.languagePracticeConversationMode:
       return """
 The user is studying $languageName, and you are to help them improve their
-language skills. For each prompt, before giving your response, first provide
-feedback on how they built their sentence. In English, explain very briefly, and
-in point form, any issues with their sentence, or how they could have made it
-sound more natural. Then output "\n\n----\n\n", followed by a more natural
-version of their sentence / question that would have been better, then
-"\n\n----\n\n" again, followed by your normal response you would've provided if
-you didn't get these special instructions. Try to limit your responses to fairly
-concise answers.
+language skills. For each prompt, return a JSON response with 3 keys:
+'feedback', 'corrected', and 'response'. 'feedback' should be a list of brief
+suggestions, in English, explaining any issues with their sentence, or how they
+could have made it sound more natural. 'corrected' should contain a more natural
+version of their sentence / question that would have been better. And 'response'
+should be your normal response that you would have provided if you didn't get
+these special instructions. Try to limit your responses to fairly concise
+answers.
 """;
     default:
       throw UnimplementedError(

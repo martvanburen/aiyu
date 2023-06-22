@@ -36,7 +36,7 @@ class ConversationDisplayWidget extends StatelessWidget {
               padding: isUser
                   ? const EdgeInsets.only(right: 15.0)
                   : const EdgeInsets.only(left: 15.0),
-              child: FutureBuilder<String>(
+              child: FutureBuilder<GPTMessageContent>(
                 future: msg.content,
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
@@ -56,7 +56,7 @@ class ConversationDisplayWidget extends StatelessWidget {
                           onMessageTap(msg);
                         },
                         child: Text(
-                          snapshot.data!,
+                          snapshot.data!.body,
                           textAlign: isUser ? TextAlign.left : TextAlign.right,
                           style: TextStyle(
                             color: isUser ? theme.primaryColor : Colors.black,
