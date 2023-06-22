@@ -12,13 +12,13 @@ Future<GPTMessageContent> callGptAPI(
   // . which will then also hold the API key and make the calls for us.
 
   // Convert the conversation into the format the API expects.
-  List<Map<String, dynamic>> messages =
+  List<Map<String, String>> messages =
       await Future.wait(conversation.map((message) async {
     final content = await message.content;
 
     return {
       "role": message.sender == GPTMessageSender.user ? "user" : "assistant",
-      "content": content,
+      "content": content.unparsedContent ?? content.body,
     };
   }));
 
@@ -46,11 +46,22 @@ Future<GPTMessageContent> callGptAPI(
   // Parse response.
   if (response.statusCode == 200) {
     var data = jsonDecode(utf8.decode(response.bodyBytes));
-    var messageContentJSON =
-        jsonDecode(data["choices"][0]["message"]["content"].trim());
-    return GPTMessageContent(messageContentJSON["response"],
-        sentenceFeedback: messageContentJSON["feedback"],
-        sentenceCorrection: messageContentJSON["correction"]);
+    var messageContentRaw = data["choices"][0]["message"]["content"].trim();
+    try {
+      var messageContentParsed = jsonDecode(messageContentRaw);
+      var responseField = messageContentParsed["response"];
+      String? sentenceCorrection = messageContentParsed["corrected"];
+      List<String>? sentenceFeedback;
+      if (messageContentParsed["feedback"] is List<dynamic>) {
+        sentenceFeedback = List<String>.from(messageContentParsed["feedback"]);
+      }
+      return GPTMessageContent(responseField,
+          unparsedContent: messageContentRaw,
+          sentenceFeedback: sentenceFeedback,
+          sentenceCorrection: sentenceCorrection);
+    } catch (e) {
+      return GPTMessageContent(messageContentRaw);
+    }
   } else {
     var data = jsonDecode(utf8.decode(response.bodyBytes));
     return GPTMessageContent(data["error"]["message"]);

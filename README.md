@@ -40,7 +40,7 @@ some common questions about the word I'm studying such as:
 - [x] Audio output in English, Korean, Chinese.
 - [ ] Implement Mode #1.
 - [ ] Quick shortcuts to launch question mode.
-- [ ] Implement Mode #2.
+- [x] Implement Mode #2.
 - [ ] Integrate with Anki to add flashcards.
 - [ ] Add deeplinks.
 - [ ] Implement Mode #3.
