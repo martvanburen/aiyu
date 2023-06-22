@@ -1,4 +1,5 @@
 import "package:ai_yu/utils/gpt_api.dart";
+import "package:ai_yu/widgets/conversation_display_widget.dart";
 import "package:ai_yu/widgets/language_input_widget.dart";
 import "package:flutter/material.dart";
 import "package:flutter_dotenv/flutter_dotenv.dart";
@@ -79,7 +80,10 @@ class _LanguagePracticePageState extends State<LanguagePracticePage> {
           body: SafeArea(
             child: Column(
               children: <Widget>[
-                _buildResponseContainer(context),
+                ConversationDisplayWidget(
+                  gptResponse: gptResponse,
+                  isLoadingResponse: isLoadingResponse,
+                ),
                 LanguageInputWidget(
                   locale: widget.locale,
                   callbackFunction: getGptResponse,
@@ -89,23 +93,6 @@ class _LanguagePracticePageState extends State<LanguagePracticePage> {
             ),
           ),
         ),
-      ),
-    );
-  }
-
-  Expanded _buildResponseContainer(BuildContext context) {
-    ThemeData theme = Theme.of(context);
-
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.all(20.0),
-        margin: const EdgeInsets.all(10.0),
-        decoration: BoxDecoration(
-          color: theme.colorScheme.surface,
-        ),
-        child: isLoadingResponse
-            ? const Center(child: CircularProgressIndicator())
-            : SingleChildScrollView(child: Text(gptResponse)),
       ),
     );
   }
