@@ -4,16 +4,20 @@ import 'package:speech_to_text/speech_to_text.dart' as stt;
 class LanguageInputWidget extends StatefulWidget {
   final Locale locale;
   final ValueChanged<String> callbackFunction;
+  final bool shouldListenAndSendAutomatically;
 
   const LanguageInputWidget(
-      {Key? key, required this.locale, required this.callbackFunction})
+      {Key? key,
+      required this.locale,
+      required this.callbackFunction,
+      this.shouldListenAndSendAutomatically = false})
       : super(key: key);
 
   @override
-  State<LanguageInputWidget> createState() => _LanguageInputWidgetState();
+  State<LanguageInputWidget> createState() => LanguageInputWidgetState();
 }
 
-class _LanguageInputWidgetState extends State<LanguageInputWidget> {
+class LanguageInputWidgetState extends State<LanguageInputWidget> {
   bool isListening = false;
 
   stt.SpeechToText speechRecognition = stt.SpeechToText();
@@ -25,6 +29,9 @@ class _LanguageInputWidgetState extends State<LanguageInputWidget> {
   void initState() {
     super.initState();
     speechRecognitionInitialization = speechRecognition.initialize();
+    if (widget.shouldListenAndSendAutomatically) {
+      speechRecognitionInitialization.then((value) => startListening());
+    }
   }
 
   void toggleListening() {
@@ -33,25 +40,25 @@ class _LanguageInputWidgetState extends State<LanguageInputWidget> {
     } else {
       startListening();
     }
-    if (mounted) {
-      setState(() {
-        isListening = !isListening;
-      });
-    }
   }
 
   void startListening() {
+    if (mounted) {
+      setState(() {
+        isListening = true;
+      });
+    }
     speechRecognition.listen(
       onResult: (val) {
         if (mounted) {
-          final capitalizedText = val.recognizedWords[0].toUpperCase() +
-              val.recognizedWords.substring(1);
           setState(() {
+            final capitalizedText = val.recognizedWords[0].toUpperCase() +
+                val.recognizedWords.substring(1);
             _promptInputController.text = capitalizedText;
-            if (val.finalResult) {
-              isListening = false;
-            }
           });
+        }
+        if (val.finalResult) {
+          listeningCompletedHandler();
         }
       },
       cancelOnError: true,
@@ -62,6 +69,7 @@ class _LanguageInputWidgetState extends State<LanguageInputWidget> {
   void clearPrompt() {
     if (mounted) {
       setState(() {
+        isListening = false;
         _promptInputController.text = '';
       });
     }
@@ -70,6 +78,13 @@ class _LanguageInputWidgetState extends State<LanguageInputWidget> {
   void stopListening() {
     speechRecognition.cancel();
     clearPrompt();
+  }
+
+  void listeningCompletedHandler() async {
+    isListening = false;
+    if (widget.shouldListenAndSendAutomatically) {
+      sendAsQuestion();
+    }
   }
 
   void sendAsStatement() {

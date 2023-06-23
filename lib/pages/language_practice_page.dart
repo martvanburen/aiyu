@@ -26,6 +26,9 @@ class _LanguagePracticePageState extends State<LanguagePracticePage> {
   late final String mission;
   List<GPTMessage> conversation = [];
 
+  GlobalKey<LanguageInputWidgetState> languageInputWidgetKey =
+      GlobalKey<LanguageInputWidgetState>();
+
   bool isLoadingResponse = false;
 
   late final AwsPollyService awsPollyService;
@@ -65,11 +68,7 @@ class _LanguagePracticePageState extends State<LanguagePracticePage> {
 
     player.playerStateStream.listen((state) {
       if (state.processingState == ProcessingState.completed) {
-        if (mounted) {
-          setState(() {
-            currentlySpeakingMessage = null;
-          });
-        }
+        speakingCompletedHandler();
       }
     });
   }
@@ -80,6 +79,19 @@ class _LanguagePracticePageState extends State<LanguagePracticePage> {
       setState(() {
         currentlySpeakingMessage = null;
       });
+    }
+  }
+
+  void speakingCompletedHandler() async {
+    if (mounted) {
+      setState(() {
+        currentlySpeakingMessage = null;
+      });
+    }
+    // In conversation mode, start listening automatically after speaking
+    // is completed (if completed naturally, i.e. not cancelled).
+    if (widget.mode == GPTMode.languagePracticeConversationMode) {
+      languageInputWidgetKey.currentState?.startListening();
     }
   }
 
@@ -151,8 +163,11 @@ class _LanguagePracticePageState extends State<LanguagePracticePage> {
                   currentlySpeakingMessage: currentlySpeakingMessage,
                 ),
                 LanguageInputWidget(
+                  key: languageInputWidgetKey,
                   locale: widget.locale,
                   callbackFunction: getGptResponse,
+                  shouldListenAndSendAutomatically:
+                      widget.mode == GPTMode.languagePracticeConversationMode,
                 ),
                 _buildDoneButton(context),
               ],
