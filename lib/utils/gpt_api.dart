@@ -5,7 +5,8 @@ import "package:flutter_dotenv/flutter_dotenv.dart";
 import "package:http/http.dart" as http;
 
 Future<GPTMessageContent> callGptAPI(
-    String mission, List<GPTMessage> conversation) async {
+    String mission, List<GPTMessage> conversation,
+    {int numTokensToGenerate = 300}) async {
   // TODO(Mart):
   // . Using dotenv to store the API key is not secure. Eventually
   // . this app should be upgraded to communicate with a backend server,
@@ -39,7 +40,7 @@ Future<GPTMessageContent> callGptAPI(
     body: jsonEncode({
       "model": "gpt-3.5-turbo-0613",
       "messages": messages,
-      "max_tokens": 300,
+      "max_tokens": numTokensToGenerate,
     }),
   );
 

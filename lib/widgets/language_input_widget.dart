@@ -126,6 +126,7 @@ class _LanguageInputWidgetState extends State<LanguageInputWidget> {
                     child: TextField(
                       controller: _promptInputController,
                       maxLines: 4,
+                      textCapitalization: TextCapitalization.sentences,
                       onChanged: (value) => setState(() {}),
                     ),
                   ),
