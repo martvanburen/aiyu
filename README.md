@@ -31,6 +31,15 @@ some common questions about the word I'm studying such as:
 - Is this used in everyday speech? Or more just in written situations?
 - For each common usage of the word, make an real-life example sentence.
 
+## Idea #4: Enriching Flashcards
+
+Implement various deeplinks that enrich my Anki flashcards. When these links are
+clicked from a flashcard, the app would automatically find that flashcard
+through the Anki API and populate additional fields. Some potential examples:
+- Adding audio where it didn't exist before.
+- Adding an example sentence (and maybe also its audio).
+- Double-checking the translation is actually correct.
+
 ## Current Progress
 
 - [x] Basic app layout.
@@ -44,3 +53,4 @@ some common questions about the word I'm studying such as:
 - [ ] Integrate with Anki to add flashcards.
 - [ ] Add deeplinks.
 - [ ] Implement Mode #3.
+- [ ] Implement Mode #4.
