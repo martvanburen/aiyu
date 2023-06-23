@@ -39,7 +39,7 @@ some common questions about the word I'm studying such as:
 - [x] Voice input in English, Korean and Chinese.
 - [x] Audio output in English, Korean, Chinese.
 - [x] Implement Mode #1.
-- [ ] Quick shortcuts to launch question mode.
+- [x] Quick shortcuts to launch question mode.
 - [x] Implement Mode #2.
 - [ ] Integrate with Anki to add flashcards.
 - [ ] Add deeplinks.

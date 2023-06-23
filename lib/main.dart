@@ -1,20 +1,71 @@
+import "package:ai_yu/data_structures/gpt_mode.dart";
+import "package:ai_yu/pages/language_practice_page.dart";
 import "package:flutter/material.dart";
 import "package:flutter_dotenv/flutter_dotenv.dart";
 import "package:flutter_gen/gen_l10n/app_localizations.dart";
 import "package:ai_yu/pages/chinese_options_page.dart";
 import "package:ai_yu/pages/english_options_page.dart";
 import "package:ai_yu/pages/korean_options_page.dart";
+import "package:flutter_shortcuts/flutter_shortcuts.dart";
 
 Future<void> main() async {
   await dotenv.load();
-  runApp(const AIYUApp());
+  runApp(const AiYuApp());
 }
 
-class AIYUApp extends StatelessWidget {
-  const AIYUApp({Key? key}) : super(key: key);
+class AiYuApp extends StatefulWidget {
+  const AiYuApp({super.key});
+
+  @override
+  State<AiYuApp> createState() => _AiYuAppState();
+}
+
+class _AiYuAppState extends State<AiYuApp> {
+  String action = '';
+  final FlutterShortcuts flutterShortcuts = FlutterShortcuts();
+
+  @override
+  void initState() {
+    super.initState();
+    flutterShortcuts.initialize();
+    setFlutterShortcutActions();
+    handleFlutterShortcuts();
+  }
+
+  void setFlutterShortcutActions() {
+    flutterShortcuts.setShortcutItems(
+      shortcutItems: <ShortcutItem>[
+        const ShortcutItem(
+          id: "1",
+          action: "quick_question",
+          shortLabel: "Quick Question",
+          icon: "ic_launcher",
+          shortcutIconAsset: ShortcutIconAsset.androidAsset,
+        ),
+      ],
+    );
+  }
+
+  void handleFlutterShortcuts() {
+    flutterShortcuts.listenAction((String incomingAction) {
+      setState(() {
+        action = incomingAction;
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
+    late final Widget home;
+    switch (action) {
+      case "quick_question":
+        home = const LanguagePracticePage(
+            mode: GPTMode.languagePracticeQuestionMode, locale: Locale('en'));
+        break;
+      default:
+        home = const MainScreen();
+        break;
+    }
     return MaterialApp(
       title: "AI-YU",
       localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -43,7 +94,7 @@ class AIYUApp extends StatelessWidget {
           ),
         ),
       ),
-      home: const MainScreen(),
+      home: home,
     );
   }
 }

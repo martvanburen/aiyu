@@ -13,7 +13,7 @@ import 'package:ai_yu/main.dart';
 void main() {
   testWidgets('Counter increments smoke test', (WidgetTester tester) async {
     // Build our app and trigger a frame.
-    await tester.pumpWidget(const AIYUApp());
+    await tester.pumpWidget(const AiYuApp());
 
     // Verify that our counter starts at 0.
     expect(find.text('0'), findsOneWidget);

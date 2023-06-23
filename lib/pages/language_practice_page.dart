@@ -6,6 +6,7 @@ import "package:ai_yu/utils/mission_decider.dart";
 import "package:ai_yu/widgets/conversation_display_widget.dart";
 import "package:ai_yu/widgets/language_input_widget.dart";
 import "package:flutter/material.dart";
+import "package:flutter/services.dart";
 import "package:flutter_gen/gen_l10n/app_localizations.dart";
 import 'package:just_audio/just_audio.dart';
 
@@ -172,7 +173,11 @@ class _LanguagePracticePageState extends State<LanguagePracticePage> {
           foregroundColor: MaterialStateProperty.all(Colors.black),
         ),
         onPressed: () {
-          Navigator.of(context).pop();
+          if (Navigator.of(context).canPop()) {
+            Navigator.of(context).pop();
+          } else {
+            SystemNavigator.pop();
+          }
         },
         child: Text(
           AppLocalizations.of(context)!.done,
