@@ -96,13 +96,10 @@ class _LanguagePracticePageState extends State<LanguagePracticePage> {
   }
 
   void getGptResponse(String prompt) async {
-    var numTokensToGenerate = 300;
-    // If in question mode, clear history (should not keep track of
-    // conversation), and longer GPT output is allowed.
-    if (widget.mode == GPTMode.languagePracticeQuestionMode) {
-      conversation.clear();
-      numTokensToGenerate = 600;
-    }
+    // In question mode, allow longer output (since conversations will typically
+    // be shorter).
+    final numTokensToGenerate =
+        (widget.mode == GPTMode.languagePracticeQuestionMode) ? 600 : 300;
 
     // Add user message first.
     GPTMessage userMessage = GPTMessage(
