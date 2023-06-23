@@ -38,6 +38,13 @@ class _LanguagePracticePageState extends State<LanguagePracticePage> {
     mission = decideMission(locale: widget.locale, mode: widget.mode);
   }
 
+  @override
+  void dispose() {
+    super.dispose();
+    player.stop();
+    player.dispose();
+  }
+
   Future<void> speak(GPTMessage message) async {
     final url = await message.audioUrl;
     if (url == null || url == "") return;
