@@ -38,7 +38,7 @@ some common questions about the word I'm studying such as:
 - [x] Connect to GPT API.
 - [x] Voice input in English, Korean and Chinese.
 - [x] Audio output in English, Korean, Chinese.
-- [ ] Implement Mode #1.
+- [x] Implement Mode #1.
 - [ ] Quick shortcuts to launch question mode.
 - [x] Implement Mode #2.
 - [ ] Integrate with Anki to add flashcards.
