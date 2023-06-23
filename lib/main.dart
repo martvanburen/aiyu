@@ -37,8 +37,22 @@ class _AiYuAppState extends State<AiYuApp> {
       shortcutItems: <ShortcutItem>[
         const ShortcutItem(
           id: "1",
-          action: "quick_question",
+          action: "quick_question_en",
           shortLabel: "Quick Question",
+          icon: "ic_launcher",
+          shortcutIconAsset: ShortcutIconAsset.androidAsset,
+        ),
+        const ShortcutItem(
+          id: "2",
+          action: "quick_question_ko",
+          shortLabel: "빠른 질문",
+          icon: "ic_launcher",
+          shortcutIconAsset: ShortcutIconAsset.androidAsset,
+        ),
+        const ShortcutItem(
+          id: "3",
+          action: "quick_question_zh",
+          shortLabel: "快速提问",
           icon: "ic_launcher",
           shortcutIconAsset: ShortcutIconAsset.androidAsset,
         ),
@@ -58,9 +72,17 @@ class _AiYuAppState extends State<AiYuApp> {
   Widget build(BuildContext context) {
     late final Widget home;
     switch (action) {
-      case "quick_question":
+      case "quick_question_en":
         home = const LanguagePracticePage(
             mode: GPTMode.languagePracticeQuestionMode, locale: Locale('en'));
+        break;
+      case "quick_question_ko":
+        home = const LanguagePracticePage(
+            mode: GPTMode.languagePracticeQuestionMode, locale: Locale('ko'));
+        break;
+      case "quick_question_zh":
+        home = const LanguagePracticePage(
+            mode: GPTMode.languagePracticeQuestionMode, locale: Locale('zh'));
         break;
       default:
         home = const MainScreen();
