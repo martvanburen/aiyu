@@ -37,22 +37,22 @@ class _AiYuAppState extends State<AiYuApp> {
       shortcutItems: <ShortcutItem>[
         const ShortcutItem(
           id: "1",
-          action: "quick_question_en",
-          shortLabel: "Quick Question",
+          action: "start_conversation_en",
+          shortLabel: "Start Conversation",
           icon: "ic_launcher",
           shortcutIconAsset: ShortcutIconAsset.androidAsset,
         ),
         const ShortcutItem(
           id: "2",
-          action: "quick_question_ko",
-          shortLabel: "빠른 질문",
+          action: "start_conversation_ko",
+          shortLabel: "대화 시작",
           icon: "ic_launcher",
           shortcutIconAsset: ShortcutIconAsset.androidAsset,
         ),
         const ShortcutItem(
           id: "3",
-          action: "quick_question_zh",
-          shortLabel: "快速提问",
+          action: "start_conversation_zh",
+          shortLabel: "开始对话",
           icon: "ic_launcher",
           shortcutIconAsset: ShortcutIconAsset.androidAsset,
         ),
@@ -72,17 +72,20 @@ class _AiYuAppState extends State<AiYuApp> {
   Widget build(BuildContext context) {
     late final Widget home;
     switch (action) {
-      case "quick_question_en":
+      case "start_conversation_en":
         home = const LanguagePracticePage(
-            mode: GPTMode.languagePracticeQuestionMode, locale: Locale('en'));
+            mode: GPTMode.languagePracticeConversationMode,
+            locale: Locale('en'));
         break;
-      case "quick_question_ko":
+      case "start_conversation_ko":
         home = const LanguagePracticePage(
-            mode: GPTMode.languagePracticeQuestionMode, locale: Locale('ko'));
+            mode: GPTMode.languagePracticeConversationMode,
+            locale: Locale('ko'));
         break;
-      case "quick_question_zh":
+      case "start_conversation_zh":
         home = const LanguagePracticePage(
-            mode: GPTMode.languagePracticeQuestionMode, locale: Locale('zh'));
+            mode: GPTMode.languagePracticeConversationMode,
+            locale: Locale('zh'));
         break;
       default:
         home = const MainScreen();
