@@ -1,8 +1,12 @@
+#!/bin/bash
+
+docker build -t flutter-ai-yu .
+
 docker run \
     -it \
     --rm \
+    --net=host \
     --name flutter \
     -v $(pwd):/app \
-    -w /app \
-    instrumentisto/flutter \
-    flutter $@
+    flutter-ai-yu \
+    bash
