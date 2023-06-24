@@ -1,3 +1,5 @@
+import "dart:io";
+
 import "package:ai_yu/data_structures/gpt_mode.dart";
 import "package:ai_yu/pages/language_practice_page.dart";
 import "package:flutter/material.dart";
@@ -27,9 +29,11 @@ class _AiYuAppState extends State<AiYuApp> {
   @override
   void initState() {
     super.initState();
-    flutterShortcuts.initialize();
-    setFlutterShortcutActions();
-    handleFlutterShortcuts();
+    if (Platform.isAndroid || Platform.isIOS) {
+      flutterShortcuts.initialize();
+      setFlutterShortcutActions();
+      handleFlutterShortcuts();
+    }
   }
 
   void setFlutterShortcutActions() {

@@ -47,5 +47,9 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>To quickly speak messages to GPT.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>To quickly speak messages to GPT.</string>
 </dict>
 </plist>

@@ -28,5 +28,9 @@
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>To quickly speak messages to GPT.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>To quickly speak messages to GPT.</string>
 </dict>
 </plist>

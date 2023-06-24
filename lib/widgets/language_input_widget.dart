@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 
 class LanguageInputWidget extends StatefulWidget {
@@ -30,7 +31,9 @@ class LanguageInputWidgetState extends State<LanguageInputWidget> {
     super.initState();
     speechRecognitionInitialization = speechRecognition.initialize();
     if (widget.shouldListenAndSendAutomatically) {
-      speechRecognitionInitialization.then((value) => startListening());
+      speechRecognitionInitialization.then((speechRecognitionIsSupported) {
+        if (speechRecognitionIsSupported) startListening();
+      });
     }
   }
 
@@ -58,7 +61,7 @@ class LanguageInputWidgetState extends State<LanguageInputWidget> {
           });
         }
         if (val.finalResult) {
-          listeningCompletedHandler();
+          listeningCompletedHandler(val);
         }
       },
       cancelOnError: true,
@@ -80,10 +83,12 @@ class LanguageInputWidgetState extends State<LanguageInputWidget> {
     clearPrompt();
   }
 
-  void listeningCompletedHandler() async {
+  void listeningCompletedHandler(SpeechRecognitionResult val) async {
     isListening = false;
-    if (widget.shouldListenAndSendAutomatically) {
-      sendAsQuestion();
+    if (widget.shouldListenAndSendAutomatically &&
+        val.finalResult &&
+        val.isConfident()) {
+      sendAsStatement();
     }
   }
 
@@ -124,16 +129,37 @@ class LanguageInputWidgetState extends State<LanguageInputWidget> {
               children: [
                 SizedBox(
                   height: 140.0,
-                  child: IconButton(
-                    style: ButtonStyle(
-                      padding: MaterialStateProperty.all(
-                        const EdgeInsets.all(20.0),
-                      ),
-                    ),
-                    onPressed: toggleListening,
-                    icon: Icon(isListening ? Icons.cancel : Icons.mic_none,
-                        color: theme.primaryColor),
-                  ),
+                  child: FutureBuilder<bool>(
+                      future: speechRecognitionInitialization,
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const CircularProgressIndicator();
+                        } else if (snapshot.hasError ||
+                            snapshot.data == false) {
+                          return IconButton(
+                            style: ButtonStyle(
+                              padding: MaterialStateProperty.all(
+                                const EdgeInsets.all(20.0),
+                              ),
+                            ),
+                            onPressed: null,
+                            icon: const Icon(Icons.mic_off),
+                          );
+                        } else {
+                          return IconButton(
+                            style: ButtonStyle(
+                              padding: MaterialStateProperty.all(
+                                const EdgeInsets.all(20.0),
+                              ),
+                            ),
+                            onPressed: toggleListening,
+                            icon: Icon(
+                                isListening ? Icons.cancel : Icons.mic_none,
+                                color: theme.primaryColor),
+                          );
+                        }
+                      }),
                 ),
                 Expanded(
                   child: Container(
