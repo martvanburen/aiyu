@@ -1,4 +1,4 @@
-# GPT-Based Language Practice
+# AiYu - GPT-Based Language Practice
 
 This app is motivated by two developments:
 1) I've spent much of my life on language learning. Consistently the hardest
