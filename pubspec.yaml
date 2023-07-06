@@ -52,6 +52,9 @@ dependencies:
   aws_polly: ^2.1.1
   just_audio: ^0.9.34
 
+  # For storing key-value persistent data.
+  shared_preferences: ^2.2.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -1,9 +1,8 @@
 import "dart:io";
 
 import "package:ai_yu/data_structures/gpt_mode.dart";
+import "package:ai_yu/pages/home_page.dart";
 import "package:ai_yu/pages/language_practice_page.dart";
-import 'package:ai_yu/widgets/home_page/language_practice_launch_widget.dart';
-import 'package:ai_yu/widgets/home_page/wallet_display_widget.dart';
 import "package:flutter/material.dart";
 import "package:flutter_dotenv/flutter_dotenv.dart";
 import "package:flutter_gen/gen_l10n/app_localizations.dart";
@@ -91,7 +90,7 @@ class _AiYuAppState extends State<AiYuApp> {
             locale: Locale('zh'));
         break;
       default:
-        home = const MainScreen();
+        home = const HomePage();
         break;
     }
     return MaterialApp(
@@ -123,47 +122,6 @@ class _AiYuAppState extends State<AiYuApp> {
         ),
       ),
       home: home,
-    );
-  }
-}
-
-class MainScreen extends StatelessWidget {
-  const MainScreen({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Main Screen'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const WalletDisplayWidget(),
-            const SizedBox(height: 20),
-            const LanguagePracticeLaunchWidget(),
-            const SizedBox(height: 20),
-            Center(
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const LanguagePracticePage(
-                        mode: GPTMode.languagePracticeConversationMode,
-                        locale: Locale('en'),
-                      ),
-                    ),
-                  );
-                },
-                child: const Text('Configure Deeplinks.'),
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

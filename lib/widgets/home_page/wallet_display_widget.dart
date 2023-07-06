@@ -13,8 +13,7 @@ class _WalletDisplayWidgetState extends State<WalletDisplayWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final formatCurrency = NumberFormat.simpleCurrency(
-        locale: Localizations.localeOf(context).toString());
+    final formatCurrency = NumberFormat.simpleCurrency(locale: 'en_US');
 
     return Center(
       child: Column(
