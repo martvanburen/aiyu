@@ -2,12 +2,11 @@ import "dart:io";
 
 import "package:ai_yu/data_structures/gpt_mode.dart";
 import "package:ai_yu/pages/language_practice_page.dart";
+import 'package:ai_yu/widgets/home_page/language_practice_launch_widget.dart';
+import 'package:ai_yu/widgets/home_page/wallet_display_widget.dart';
 import "package:flutter/material.dart";
 import "package:flutter_dotenv/flutter_dotenv.dart";
 import "package:flutter_gen/gen_l10n/app_localizations.dart";
-import "package:ai_yu/pages/chinese_options_page.dart";
-import "package:ai_yu/pages/english_options_page.dart";
-import "package:ai_yu/pages/korean_options_page.dart";
 import "package:flutter_shortcuts/flutter_shortcuts.dart";
 
 Future<void> main() async {
@@ -128,52 +127,42 @@ class _AiYuAppState extends State<AiYuApp> {
   }
 }
 
-class MainScreen extends StatefulWidget {
+class MainScreen extends StatelessWidget {
   const MainScreen({Key? key}) : super(key: key);
-
-  @override
-  State<MainScreen> createState() => _MainScreenState();
-}
-
-class _MainScreenState extends State<MainScreen>
-    with SingleTickerProviderStateMixin {
-  late TabController _tabController;
-
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 3, vsync: this);
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.title),
-        titleSpacing: NavigationToolbar.kMiddleSpacing,
-        centerTitle: true,
-        bottom: TabBar(
-          controller: _tabController,
-          tabs: <Widget>[
-            Tab(text: AppLocalizations.of(context)!.tab_english),
-            Tab(text: AppLocalizations.of(context)!.tab_korean),
-            Tab(text: AppLocalizations.of(context)!.tab_chinese),
+        title: const Text('Main Screen'),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            const WalletDisplayWidget(),
+            const SizedBox(height: 20),
+            const LanguagePracticeLaunchWidget(),
+            const SizedBox(height: 20),
+            Center(
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const LanguagePracticePage(
+                        mode: GPTMode.languagePracticeConversationMode,
+                        locale: Locale('en'),
+                      ),
+                    ),
+                  );
+                },
+                child: const Text('Configure Deeplinks.'),
+              ),
+            ),
           ],
         ),
-      ),
-      body: TabBarView(
-        controller: _tabController,
-        children: const <Widget>[
-          EnglishOptionsPage(),
-          KoreanOptionsPage(),
-          ChineseOptionsPage(),
-        ],
       ),
     );
   }
