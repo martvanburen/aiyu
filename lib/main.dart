@@ -1,7 +1,7 @@
 import "dart:io";
 
 import "package:ai_yu/data_structures/gpt_mode.dart";
-import 'package:ai_yu/pages/home/home_page.dart';
+import 'package:ai_yu/pages/home_page.dart';
 import 'package:ai_yu/pages/conversation_page.dart';
 import "package:flutter/material.dart";
 import "package:flutter_dotenv/flutter_dotenv.dart";
