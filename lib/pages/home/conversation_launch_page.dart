@@ -1,6 +1,8 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:ai_yu/data_structures/gpt_mode.dart';
-import 'package:ai_yu/pages/language_practice_page.dart';
+import 'package:ai_yu/pages/conversation_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Item {
@@ -15,16 +17,14 @@ class Item {
   bool isExpanded;
 }
 
-class LanguagePracticeLaunchWidget extends StatefulWidget {
-  const LanguagePracticeLaunchWidget({super.key});
+class ConversationLaunchPage extends StatefulWidget {
+  const ConversationLaunchPage({super.key});
 
   @override
-  State<LanguagePracticeLaunchWidget> createState() =>
-      _LanguagePracticeLaunchWidgetState();
+  State<ConversationLaunchPage> createState() => _ConversationLaunchPage();
 }
 
-class _LanguagePracticeLaunchWidgetState
-    extends State<LanguagePracticeLaunchWidget> {
+class _ConversationLaunchPage extends State<ConversationLaunchPage> {
   bool _isConversationMode = false;
   Locale _selectedLocale = const Locale('en', 'English');
   List<String> _recentLanguages = ['-', '-', '-'];
@@ -86,71 +86,65 @@ class _LanguagePracticeLaunchWidgetState
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-        child: Container(
-      color: Colors.white,
-      padding: const EdgeInsets.all(20.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          _buildHeaderText(context),
-          _buildExpansionPanelList(),
-        ],
-      ),
-    ));
+    return Container(
+        color: Colors.white,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            _buildHeaderText(context),
+            _buildExpansionPanelList(),
+          ],
+        ));
   }
 
   Widget _buildHeaderText(BuildContext context) {
-    return Column(children: [
-      const Center(
-        child: Text(
-          "Practice chatting in your desired language:",
-          textAlign: TextAlign.center,
-        ),
+    return const Padding(
+      padding: EdgeInsets.all(30.0),
+      child: Text(
+        "Practice chatting in your desired language, and easily add new words to Anki.",
+        textAlign: TextAlign.center,
       ),
-      SizedBox(
-        width: MediaQuery.of(context).size.width / 2.0,
-        height: 40,
-        child: const Divider(color: Colors.grey),
-      ),
-    ]);
+    );
   }
 
   Widget _buildExpansionPanelList() {
-    return ExpansionPanelList(
-      expansionCallback: (int index, bool isExpanded) {
-        setState(() {
-          _panelItems[_currentOpenPanelIndex].isExpanded = false;
-          _currentOpenPanelIndex = index;
-          _panelItems[_currentOpenPanelIndex].isExpanded = !isExpanded;
-        });
-      },
-      elevation: 2,
-      expandedHeaderPadding: const EdgeInsets.all(0.0),
-      animationDuration: const Duration(milliseconds: 400),
-      children: _panelItems.map<ExpansionPanel>((Item item) {
-        return ExpansionPanel(
-          canTapOnHeader: true,
-          headerBuilder: (BuildContext context, bool isExpanded) {
-            return Column(children: [
-              ListTile(
-                title: Text(
-                  item.headerValue,
-                  style: TextStyle(
-                      color: Theme.of(context).primaryColor,
-                      fontWeight: FontWeight.bold),
-                ),
-              ),
-            ]);
+    return Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: ExpansionPanelList(
+          expansionCallback: (int index, bool isExpanded) {
+            setState(() {
+              _panelItems[_currentOpenPanelIndex].isExpanded = false;
+              _currentOpenPanelIndex = index;
+              _panelItems[_currentOpenPanelIndex].isExpanded = !isExpanded;
+            });
           },
-          body: Padding(
-              padding: const EdgeInsets.only(
-                  top: 0.0, left: 20.0, right: 20.0, bottom: 10.0),
-              child: item.expandedValue(context)),
-          isExpanded: item.isExpanded,
-        );
-      }).toList(),
-    );
+          elevation: 2,
+          expandedHeaderPadding: const EdgeInsets.all(0.0),
+          animationDuration: const Duration(milliseconds: 400),
+          children: _panelItems.map<ExpansionPanel>((Item item) {
+            return ExpansionPanel(
+              canTapOnHeader: true,
+              headerBuilder: (BuildContext context, bool isExpanded) {
+                return Column(children: [
+                  ListTile(
+                    title: Text(
+                      item.headerValue,
+                      style: TextStyle(
+                          color: Theme.of(context).primaryColor,
+                          fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ]);
+              },
+              body: Padding(
+                  padding: const EdgeInsets.only(
+                      top: 0.0, left: 20.0, right: 20.0, bottom: 10.0),
+                  child: item.expandedValue(context)),
+              isExpanded: item.isExpanded,
+              backgroundColor: Colors.white,
+            );
+          }).toList(),
+        ));
   }
 
   Widget _buildQuickLaunch(BuildContext context) {
@@ -158,11 +152,11 @@ class _LanguagePracticeLaunchWidgetState
       LayoutBuilder(
           builder: (BuildContext context, BoxConstraints constraints) {
         return Row(
-          mainAxisAlignment: MainAxisAlignment.end,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: _recentLanguages
               .map((language) => SizedBox(
-                    width: constraints.maxWidth / 3,
-                    child: ElevatedButton(
+                    width: max(0, (constraints.maxWidth / 3) - 5),
+                    child: FilledButton(
                       onPressed: language == '-'
                           ? null
                           : () => _navigateToPage(context,
