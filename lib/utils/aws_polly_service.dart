@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:ai_yu/utils/supported_languages_provider.dart';
 import 'package:aws_polly/aws_polly.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -14,19 +15,8 @@ class AwsPollyService {
         poolId: dotenv.env["AWS_IDENTITY_POOL"]!,
         region: AWSRegionType.APNortheast2,
       );
-      switch (locale) {
-        case const Locale('zh'):
-          _voiceId = AWSPolyVoiceId.zhiyu;
-          break;
-        case const Locale('ko'):
-          _voiceId = AWSPolyVoiceId.seoyeon;
-          break;
-        case const Locale('en'):
-          _voiceId = AWSPolyVoiceId.emma;
-        default:
-          throw UnimplementedError(
-              "Currently only Chinese, Korean and English are implemented.");
-      }
+      _voiceId =
+          SupportedLanguagesProvider.getPollyVoiceId(locale.languageCode);
     } else {
       // Platform does not support aws_polly package.
       _awsPolly = null;

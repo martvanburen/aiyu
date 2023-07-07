@@ -1,7 +1,6 @@
-import "dart:math";
-
-import "package:ai_yu/widgets/home_page/conversation_launch_widget.dart";
+import 'package:ai_yu/widgets/home_page/conversation_launch_dialog_widget.dart';
 import "package:ai_yu/pages/home/deeplink_list_page.dart";
+import "package:ai_yu/widgets/home_page/conversation_quick_launch_widget.dart";
 import "package:ai_yu/widgets/home_page/wallet_display_widget.dart";
 import "package:flutter/material.dart";
 import "package:flutter_gen/gen_l10n/app_localizations.dart";
@@ -14,6 +13,10 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  GlobalKey<ConversationLaunchDialogWidgetState>
+      conversationLaunchDialogWidgetKey =
+      GlobalKey<ConversationLaunchDialogWidgetState>();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -50,7 +53,9 @@ class _HomePageState extends State<HomePage> {
                     context: context,
                     builder: (BuildContext context) => AlertDialog(
                       title: const Text("Start Conversation"),
-                      content: const ConversationLaunchWidget(),
+                      content: ConversationLaunchDialogWidget(
+                        key: conversationLaunchDialogWidgetKey,
+                      ),
                       actions: <Widget>[
                         TextButton(
                           child: const Text("Cancel"),
@@ -62,6 +67,8 @@ class _HomePageState extends State<HomePage> {
                           child: const Text("Start"),
                           onPressed: () {
                             Navigator.of(context).pop();
+                            conversationLaunchDialogWidgetKey.currentState!
+                                .startConversation(context);
                           },
                         ),
                       ],
@@ -85,33 +92,7 @@ class _HomePageState extends State<HomePage> {
                       const Text(
                         "Practice chatting in your desired language, and easily add new words to Anki.",
                       ),
-                      const SizedBox(height: 10.0),
-                      LayoutBuilder(builder:
-                          (BuildContext context, BoxConstraints constraints) {
-                        return Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: <Widget>[
-                            const Expanded(
-                                child: Text(
-                              "Recent:",
-                              textAlign: TextAlign.center,
-                            )),
-                            SizedBox(
-                              width: constraints.maxWidth / 3.0,
-                              child: FilledButton(
-                                  child: const Text("Chinese"),
-                                  onPressed: () {}),
-                            ),
-                            const SizedBox(width: 10),
-                            SizedBox(
-                              width: constraints.maxWidth / 3.0,
-                              child: FilledButton(
-                                  child: const Text("Korean"),
-                                  onPressed: () {}),
-                            ),
-                          ],
-                        );
-                      }),
+                      const ConversationQuickLaunchWidget(),
                     ],
                   ),
                 ),

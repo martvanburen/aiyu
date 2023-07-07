@@ -38,7 +38,7 @@ Future<GPTMessageContent> callGptAPI(
       "Authorization": "Bearer ${dotenv.env["OPENAI_KEY"]}",
     },
     body: jsonEncode({
-      "model": "gpt-3.5-turbo-0613",
+      "model": "gpt-3.5-turbo",
       "messages": messages,
       "max_tokens": numTokensToGenerate,
     }),
