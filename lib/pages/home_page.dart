@@ -42,106 +42,103 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          children: <Widget>[
-            const WalletDisplayWidget(),
-            const Divider(
-              height: 60,
-              indent: 60,
-              endIndent: 60,
-              thickness: 1,
-              color: Colors.grey,
-            ),
-            Card(
-              margin: const EdgeInsets.symmetric(vertical: 10.0),
-              elevation: 2,
-              child: InkWell(
-                onTap: () {
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) => AlertDialog(
-                      title: const Text("Start Conversation"),
-                      content: ConversationLaunchDialogWidget(
-                        key: conversationLaunchDialogWidgetKey,
-                      ),
-                      actions: <Widget>[
-                        TextButton(
-                          child: const Text("Cancel"),
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
-                        ),
-                        FilledButton(
-                          child: const Text("Start"),
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                            conversationLaunchDialogWidgetKey.currentState!
-                                .startConversation(context);
-                          },
-                        ),
-                      ],
+      body: Column(
+        children: <Widget>[
+          const WalletDisplayWidget(),
+          Divider(
+            height: 35,
+            // indent: 60,
+            // endIndent: 60,
+            thickness: 2,
+            color: Theme.of(context).primaryColor,
+          ),
+          Card(
+            margin: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 20),
+            elevation: 2,
+            child: InkWell(
+              onTap: () {
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) => AlertDialog(
+                    title: const Text("Start Conversation"),
+                    content: ConversationLaunchDialogWidget(
+                      key: conversationLaunchDialogWidgetKey,
                     ),
-                  );
-                },
-                child: Padding(
-                  padding: const EdgeInsets.all(20.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: <Widget>[
-                      Text(
-                        "Conversation Practice",
-                        style: TextStyle(
-                          color: Theme.of(context).primaryColor,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18,
-                        ),
+                    actions: <Widget>[
+                      TextButton(
+                        child: const Text("Cancel"),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
                       ),
-                      const SizedBox(height: 10.0),
-                      const Text(
-                        "Practice chatting in your desired language, and easily add new words to Anki.",
+                      FilledButton(
+                        child: const Text("Start"),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                          conversationLaunchDialogWidgetKey.currentState!
+                              .startConversation(context);
+                        },
                       ),
-                      const ConversationQuickLaunchWidget(),
                     ],
                   ),
+                );
+              },
+              child: Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: <Widget>[
+                    Text(
+                      "Conversation Practice",
+                      style: TextStyle(
+                        color: Theme.of(context).primaryColor,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                      ),
+                    ),
+                    const SizedBox(height: 10.0),
+                    const Text(
+                      "Practice chatting in your desired language, and easily add new words to Anki.",
+                    ),
+                    const ConversationQuickLaunchWidget(),
+                  ],
                 ),
               ),
             ),
-            Card(
-              margin: const EdgeInsets.symmetric(vertical: 10.0),
-              elevation: 2,
-              child: InkWell(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const DeeplinkListPage()),
-                  );
-                },
-                child: Padding(
-                  padding: const EdgeInsets.all(20.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: <Widget>[
-                      Text(
-                        "Deeplink Actions",
-                        style: TextStyle(
-                          color: Theme.of(context).primaryColor,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18,
-                        ),
+          ),
+          Card(
+            margin: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 20),
+            elevation: 2,
+            child: InkWell(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const DeeplinkListPage()),
+                );
+              },
+              child: Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: <Widget>[
+                    Text(
+                      "Deeplink Actions",
+                      style: TextStyle(
+                        color: Theme.of(context).primaryColor,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
                       ),
-                      const SizedBox(height: 10.0),
-                      const Text(
-                          "Configure quick actions / deep-links to use in Anki flashcards."),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(height: 10.0),
+                    const Text(
+                        "Configure quick actions / deep-links to use in Anki flashcards."),
+                  ],
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

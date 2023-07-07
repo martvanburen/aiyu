@@ -13,12 +13,10 @@ class _WalletDisplayWidgetState extends State<WalletDisplayWidget> {
   @override
   Widget build(BuildContext context) {
     return Card(
-      margin: const EdgeInsets.symmetric(vertical: 10.0),
-      elevation: 2,
-      color: Colors.white,
-      surfaceTintColor: Colors.white,
+      margin: const EdgeInsets.only(top: 15.0),
+      elevation: 0,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 30.0, vertical: 20.0),
+        padding: const EdgeInsets.symmetric(horizontal: 40.0),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
