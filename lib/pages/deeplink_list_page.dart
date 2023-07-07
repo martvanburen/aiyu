@@ -9,8 +9,7 @@ class DeeplinkListPage extends StatefulWidget {
 
 class _DeeplinkListPageState extends State<DeeplinkListPage> {
   List<Deeplink> deepLinks = [
-    Deeplink(
-        link: "aiyu://action-one", name: "Function description for action 1."),
+    Deeplink(link: "aiyu://action-one", name: "First description."),
     Deeplink(
         link: "aiyu://action-two", name: "Function description for action 2."),
   ];

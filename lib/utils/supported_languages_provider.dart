@@ -22,7 +22,7 @@ class SupportedLanguagesProvider {
   static const defaultLanguageCode = "en";
 
   static throwUnimplementedError(String languageCode) => throw UnimplementedError(
-      "Currently only the following languages are implemented: ${_languageMap.keys}");
+      "Language code '$languageCode' is not yet implemented. Implemented languages: '${_languageMap.keys}'.");
 
   static List<String> getSupportedLanguages() {
     return _languageMap.keys.toList();

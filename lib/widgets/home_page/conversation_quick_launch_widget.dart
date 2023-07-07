@@ -51,35 +51,30 @@ class _ConversationQuickLaunchWidgetState
     } else {
       return Padding(
         padding: const EdgeInsets.only(top: 10.0),
-        child: LayoutBuilder(
-            builder: (BuildContext context, BoxConstraints constraints) {
-          return Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              const Expanded(
-                  child: Text(
-                "Recent:",
-                textAlign: TextAlign.left,
-                style: TextStyle(color: Colors.grey),
-              )),
-              ..._recentLanguages
-                  .take(2)
-                  .map((language) => Padding(
-                        padding: const EdgeInsets.only(left: 10.0),
-                        child: SizedBox(
-                            width: constraints.maxWidth / 3.0,
-                            child: FilledButton(
-                              onPressed: () =>
-                                  _navigateToPage(context, Locale(language)),
-                              child: Text(
-                                  SupportedLanguagesProvider.getDisplayName(
-                                      language)),
-                            )),
-                      ))
-                  .toList(),
-            ],
-          );
-        }),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            const Expanded(
+                child: Text(
+              "Recent:",
+              textAlign: TextAlign.left,
+              style: TextStyle(color: Colors.grey),
+            )),
+            ..._recentLanguages
+                .take(2)
+                .map((language) => Padding(
+                      padding: const EdgeInsets.only(left: 10.0),
+                      child: SizedBox(
+                          child: FilledButton(
+                        onPressed: () =>
+                            _navigateToPage(context, Locale(language)),
+                        child: Text(SupportedLanguagesProvider.getDisplayName(
+                            language)),
+                      )),
+                    ))
+                .toList(),
+          ],
+        ),
       );
     }
   }

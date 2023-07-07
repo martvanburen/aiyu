@@ -23,10 +23,22 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: Row(
           mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Text(AppLocalizations.of(context)!.title,
-                style: const TextStyle(fontWeight: FontWeight.bold)),
-            Text(" | ${AppLocalizations.of(context)!.subtitle}"),
+                style: TextStyle(
+                  fontSize: 30,
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).primaryColor,
+                )),
+            const Text("  |  ",
+                style: TextStyle(
+                  fontSize: 22,
+                )),
+            Text(AppLocalizations.of(context)!.subtitle,
+                style: const TextStyle(
+                  fontSize: 18,
+                )),
           ],
         ),
       ),
@@ -34,19 +46,17 @@ class _HomePageState extends State<HomePage> {
         padding: const EdgeInsets.all(20.0),
         child: Column(
           children: <Widget>[
-            const Padding(
-              padding: EdgeInsets.all(30.0),
-              child: WalletDisplayWidget(),
-            ),
-            Divider(
+            const WalletDisplayWidget(),
+            const Divider(
               height: 60,
               indent: 60,
               endIndent: 60,
               thickness: 1,
-              color: Theme.of(context).dividerColor,
+              color: Colors.grey,
             ),
             Card(
               margin: const EdgeInsets.symmetric(vertical: 10.0),
+              elevation: 2,
               child: InkWell(
                 onTap: () {
                   showDialog(
@@ -100,6 +110,7 @@ class _HomePageState extends State<HomePage> {
             ),
             Card(
               margin: const EdgeInsets.symmetric(vertical: 10.0),
+              elevation: 2,
               child: InkWell(
                 onTap: () {
                   Navigator.push(
