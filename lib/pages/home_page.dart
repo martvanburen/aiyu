@@ -1,5 +1,5 @@
 import 'package:ai_yu/widgets/home_page/conversation_launch_dialog_widget.dart';
-import "package:ai_yu/pages/home/deeplink_list_page.dart";
+import 'package:ai_yu/pages/deeplink_list_page.dart';
 import "package:ai_yu/widgets/home_page/conversation_quick_launch_widget.dart";
 import "package:ai_yu/widgets/home_page/wallet_display_widget.dart";
 import "package:flutter/material.dart";
