@@ -44,9 +44,7 @@ class _DeeplinkEditPageState extends State<DeeplinkEditPage> {
     return await showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text("Discard changes?"),
-        content: const Text(
-            "You have unsaved changes. Do you want to discard them and exit?"),
+        title: const Text("Discard Changes?"),
         actions: [
           TextButton(
             child: const Text("Cancel"),
@@ -62,6 +60,8 @@ class _DeeplinkEditPageState extends State<DeeplinkEditPage> {
   }
 
   void _saveAndExit() {
+    final deeplinks = Provider.of<DeeplinksModel>(context, listen: false);
+
     String path = _pathController.text.trim();
     String name = _nameController.text.trim();
     String prompt = _promptController.text.trim();
@@ -76,13 +76,16 @@ class _DeeplinkEditPageState extends State<DeeplinkEditPage> {
       return;
     }
 
+    if (deeplinks.pathExists(path)) {
+      _showValidationError("A deeplink with this path already exists.");
+      return;
+    }
+
     DeeplinkConfig deeplink = DeeplinkConfig(
       path: path,
       name: name,
       prompt: prompt,
     );
-
-    final deeplinks = Provider.of<DeeplinksModel>(context, listen: false);
     if (widget.deeplink != null) {
       int index = deeplinks.get.indexOf(widget.deeplink!);
       deeplinks.updateIndex(index, deeplink);

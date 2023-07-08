@@ -86,4 +86,8 @@ class DeeplinksModel extends ChangeNotifier {
     _saveToSharedPreferences();
     notifyListeners();
   }
+
+  bool pathExists(String path) {
+    return _deeplinks.any((deeplink) => deeplink.path == path);
+  }
 }
