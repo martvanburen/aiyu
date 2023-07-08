@@ -7,13 +7,9 @@ import "package:speech_to_text/speech_to_text.dart" as stt;
 class LanguageInputWidget extends StatefulWidget {
   final String language;
   final ValueChanged<String> callbackFunction;
-  final bool shouldListenAndSendAutomatically;
 
   const LanguageInputWidget(
-      {Key? key,
-      required this.language,
-      required this.callbackFunction,
-      this.shouldListenAndSendAutomatically = false})
+      {Key? key, required this.language, required this.callbackFunction})
       : super(key: key);
 
   @override
@@ -32,14 +28,17 @@ class LanguageInputWidgetState extends State<LanguageInputWidget> {
   void initState() {
     super.initState();
     speechRecognitionInitialization = speechRecognition.initialize();
-    if (widget.shouldListenAndSendAutomatically) {
-      speechRecognitionInitialization.then((speechRecognitionIsSupported) {
-        if (speechRecognitionIsSupported) startListening();
-      });
+  }
+
+  // Always check if mounted before setting state.
+  @override
+  void setState(fn) {
+    if (mounted) {
+      super.setState(fn);
     }
   }
 
-  void toggleListening() {
+  void _toggleListening() {
     if (isListening) {
       stopListening();
     } else {
@@ -47,23 +46,26 @@ class LanguageInputWidgetState extends State<LanguageInputWidget> {
     }
   }
 
-  void startListening() {
-    if (mounted) {
-      setState(() {
-        isListening = true;
-      });
+  void startListening() async {
+    bool isInitialized = await speechRecognitionInitialization;
+    if (!isInitialized || !mounted || isListening) {
+      return;
     }
+
+    setState(() {
+      isListening = true;
+      _promptInputController.text = "Listening...";
+    });
+
     speechRecognition.listen(
       onResult: (val) {
-        if (mounted) {
-          setState(() {
-            final capitalizedText = val.recognizedWords[0].toUpperCase() +
-                val.recognizedWords.substring(1);
-            _promptInputController.text = capitalizedText;
-          });
-        }
+        setState(() {
+          final capitalizedText = val.recognizedWords[0].toUpperCase() +
+              val.recognizedWords.substring(1);
+          _promptInputController.text = capitalizedText;
+        });
         if (val.finalResult) {
-          listeningCompletedHandler(val);
+          _listeningCompletedHandler(val);
         }
       },
       cancelOnError: true,
@@ -71,32 +73,33 @@ class LanguageInputWidgetState extends State<LanguageInputWidget> {
     );
   }
 
-  void clearPrompt() {
-    if (mounted) {
-      setState(() {
-        isListening = false;
-        _promptInputController.text = "";
-      });
-    }
+  void _clearPrompt() async {
+    setState(() {
+      isListening = false;
+      _promptInputController.text = "";
+    });
   }
 
-  void stopListening() {
+  void stopListening() async {
     speechRecognition.cancel();
-    clearPrompt();
+    _clearPrompt();
   }
 
-  void listeningCompletedHandler(SpeechRecognitionResult val) async {
-    isListening = false;
-    if (widget.shouldListenAndSendAutomatically &&
-        val.finalResult &&
-        val.isConfident()) {
-      sendPrompt();
+  void _listeningCompletedHandler(SpeechRecognitionResult val) async {
+    setState(() {
+      isListening = false;
+    });
+    final isConversationMode =
+        Provider.of<PreferencesModel>(context, listen: false)
+            .isConversationMode;
+    if (isConversationMode && val.finalResult && val.isConfident()) {
+      _sendPrompt();
     }
   }
 
-  void sendPrompt() {
+  void _sendPrompt() {
     widget.callbackFunction("${_promptInputController.text}.");
-    clearPrompt();
+    _clearPrompt();
   }
 
   @override
@@ -151,7 +154,7 @@ class LanguageInputWidgetState extends State<LanguageInputWidget> {
                                   const EdgeInsets.all(20.0),
                                 ),
                               ),
-                              onPressed: toggleListening,
+                              onPressed: _toggleListening,
                               icon: Icon(
                                   isListening ? Icons.cancel : Icons.mic_none,
                                   color: theme.primaryColor),
@@ -208,7 +211,7 @@ class LanguageInputWidgetState extends State<LanguageInputWidget> {
                           const EdgeInsets.all(20.0),
                         ),
                       ),
-                      onPressed: inputEmpty ? null : sendPrompt,
+                      onPressed: inputEmpty ? null : _sendPrompt,
                       icon: Icon(Icons.send, color: theme.primaryColor),
                     ),
                   ],

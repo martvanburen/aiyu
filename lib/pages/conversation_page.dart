@@ -1,3 +1,4 @@
+import "package:ai_yu/data_structures/global_state/preferences_model.dart";
 import "package:ai_yu/data_structures/global_state/wallet_model.dart";
 import "package:ai_yu/data_structures/gpt_message.dart";
 import "package:ai_yu/data_structures/gpt_mode.dart";
@@ -23,82 +24,92 @@ class LanguagePracticePage extends StatefulWidget {
 }
 
 class _LanguagePracticePageState extends State<LanguagePracticePage> {
-  late final String mission;
-  List<GPTMessage> conversation = [
-    GPTMessage(GPTMessageSender.gpt,
-        Future.value(GPTMessageContent("What would you like to discuss?"))),
-  ];
+  late final String _mission;
+  final List<GPTMessage> _conversation = [];
 
-  GlobalKey<LanguageInputWidgetState> languageInputWidgetKey =
+  final GlobalKey<LanguageInputWidgetState> _languageInputWidgetKey =
       GlobalKey<LanguageInputWidgetState>();
 
-  bool isLoadingResponse = false;
-
-  late final AwsPollyService awsPollyService;
-  final player = AudioPlayer();
-  GPTMessage? currentlySpeakingMessage;
+  late final AwsPollyService _awsPollyService;
+  late final AudioPlayer _player;
+  GPTMessage? _currentlySpeakingMessage;
 
   @override
   void initState() {
     super.initState();
-    awsPollyService = AwsPollyService(language: widget.language);
-    mission = decideMission(language: widget.language, mode: widget.mode);
+    _awsPollyService = AwsPollyService(language: widget.language);
+    _mission = decideMission(language: widget.language, mode: widget.mode);
+
+    _player = AudioPlayer();
+    _player.playerStateStream.listen((state) {
+      if (state.processingState == ProcessingState.completed) {
+        // Player must be explicitly stopped (end-of-track does not
+        // automatically stop player).
+        _player.stop();
+        _playerCompletedHandler();
+      } else if (state.processingState == ProcessingState.ready) {
+        _playerStartedHandler();
+      }
+    });
+
+    _prepareAndSpeakIntroMessage();
+  }
+
+  // Always check if mounted before setting state.
+  @override
+  void setState(fn) {
+    if (mounted) {
+      super.setState(fn);
+    }
   }
 
   @override
   void dispose() {
     super.dispose();
-    player.stop();
-    player.dispose();
+    _player.stop();
+    _player.dispose();
   }
 
-  Future<void> speak(GPTMessage message) async {
+  Future<void> _speak(GPTMessage message) async {
     final url = await message.audioUrl;
     if (url == null || url == "") return;
 
-    if (currentlySpeakingMessage != null) {
-      await player.stop();
+    if (_currentlySpeakingMessage != null) {
+      await _player.stop();
     }
 
-    if (mounted) {
-      setState(() {
-        currentlySpeakingMessage = message;
-      });
-    }
+    setState(() {
+      _currentlySpeakingMessage = message;
+    });
 
-    await player.setUrl(url);
-    player.play();
+    await _player.setUrl(url);
+    _player.play();
+  }
 
-    player.playerStateStream.listen((state) {
-      if (state.processingState == ProcessingState.completed) {
-        speakingCompletedHandler();
-      }
+  void _stopSpeaking() async {
+    _player.stop();
+    setState(() {
+      _currentlySpeakingMessage = null;
     });
   }
 
-  void stopSpeaking() async {
-    player.stop();
-    if (mounted) {
-      setState(() {
-        currentlySpeakingMessage = null;
-      });
+  void _playerStartedHandler() async {
+    _languageInputWidgetKey.currentState?.stopListening();
+  }
+
+  void _playerCompletedHandler() async {
+    setState(() {
+      _currentlySpeakingMessage = null;
+    });
+    final isConversationMode =
+        Provider.of<PreferencesModel>(context, listen: false)
+            .isConversationMode;
+    if (isConversationMode) {
+      _languageInputWidgetKey.currentState?.startListening();
     }
   }
 
-  void speakingCompletedHandler() async {
-    if (mounted) {
-      setState(() {
-        currentlySpeakingMessage = null;
-      });
-    }
-    // In conversation mode, start listening automatically after speaking
-    // is completed (if completed naturally, i.e. not cancelled).
-    if (widget.mode == GPTMode.conversationMode) {
-      languageInputWidgetKey.currentState?.startListening();
-    }
-  }
-
-  void getGptResponse(String prompt) async {
+  void _sendPromptToServer(String prompt) async {
     // In question mode, allow longer output (since conversations will typically
     // be shorter).
     final numTokensToGenerate =
@@ -107,37 +118,46 @@ class _LanguagePracticePageState extends State<LanguagePracticePage> {
     // Add user message first.
     GPTMessage userMessage = GPTMessage(
         GPTMessageSender.user, Future.value(GPTMessageContent(prompt)));
-    if (mounted) {
-      setState(() {
-        conversation.add(userMessage);
-      });
-    }
+    setState(() {
+      _conversation.add(userMessage);
+    });
 
     // Next, call GPT and add GPT message (holding an unresolved Future).
     final Future<GPTMessageContent> responseFuture = callGptAPI(
-        mission, conversation,
+        _mission, _conversation,
         numTokensToGenerate: numTokensToGenerate);
     final Future<String> audioUrlFuture = responseFuture.then((response) async {
-      return await awsPollyService.getSpeechUrl(input: response.body);
+      return await _awsPollyService.getSpeechUrl(input: response.body);
     });
     GPTMessage gptMessage = GPTMessage(GPTMessageSender.gpt, responseFuture,
         audioUrl: audioUrlFuture);
-    if (mounted) {
-      setState(() {
-        conversation.add(gptMessage);
-      });
-    }
+    setState(() {
+      _conversation.add(gptMessage);
+    });
 
     // On Future resolution, automatically speak audio.
-    audioUrlFuture.then((value) => speak(gptMessage));
+    audioUrlFuture.then((value) => _speak(gptMessage));
   }
 
-  void messageTapped(GPTMessage message) {
-    if (message == currentlySpeakingMessage) {
-      stopSpeaking();
+  void _messageTapped(GPTMessage message) {
+    if (message == _currentlySpeakingMessage) {
+      _stopSpeaking();
     } else {
-      speak(message);
+      _speak(message);
     }
+  }
+
+  void _prepareAndSpeakIntroMessage() async {
+    String body = "What would you like to discuss?";
+    GPTMessage introMessage = GPTMessage(
+        GPTMessageSender.gpt, Future.value(GPTMessageContent(body)),
+        audioUrl: _awsPollyService.getSpeechUrl(input: body));
+    _conversation.add(introMessage);
+
+    // After page has loaded, start speaking.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _speak(_conversation.first);
+    });
   }
 
   @override
@@ -171,15 +191,14 @@ class _LanguagePracticePageState extends State<LanguagePracticePage> {
             child: Column(
               children: <Widget>[
                 ConversationDisplayWidget(
-                  conversation: conversation,
-                  onMessageTap: messageTapped,
-                  currentlySpeakingMessage: currentlySpeakingMessage,
+                  conversation: _conversation,
+                  onMessageTap: _messageTapped,
+                  currentlySpeakingMessage: _currentlySpeakingMessage,
                 ),
                 LanguageInputWidget(
-                  key: languageInputWidgetKey,
+                  key: _languageInputWidgetKey,
                   language: widget.language,
-                  callbackFunction: getGptResponse,
-                  shouldListenAndSendAutomatically: false,
+                  callbackFunction: _sendPromptToServer,
                 ),
               ],
             ),
