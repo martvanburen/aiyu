@@ -1,25 +1,12 @@
 import 'package:ai_yu/data_structures/gpt_mode.dart';
-import 'package:flutter/material.dart';
+import 'package:ai_yu/utils/supported_languages_provider.dart';
 
-String decideMission({required Locale locale, required GPTMode mode}) {
-  late final String languageName;
-  switch (locale) {
-    case const Locale('zh'):
-      languageName = "Chinese";
-      break;
-    case const Locale('ko'):
-      languageName = "Korean";
-      break;
-    case const Locale('en'):
-      languageName = "English";
-    default:
-      throw UnimplementedError(
-          "Currently only Chinese, Korean and English are implemented.");
-  }
+String decideMission({required String language, required GPTMode mode}) {
+  final String languageName =
+      SupportedLanguagesProvider.getDisplayName(language);
 
   switch (mode) {
-    case GPTMode.languagePracticeQuestionMode:
-    case GPTMode.languagePracticeConversationMode:
+    case GPTMode.conversationMode:
       return """
 The user is studying $languageName, and you are to help them improve their
 language skills. For each prompt, return a JSON response with up to 3 keys:

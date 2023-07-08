@@ -12,10 +12,10 @@ import 'package:just_audio/just_audio.dart';
 
 class LanguagePracticePage extends StatefulWidget {
   final GPTMode mode;
-  final Locale locale;
+  final String language;
 
   const LanguagePracticePage(
-      {Key? key, required this.mode, required this.locale})
+      {Key? key, required this.mode, required this.language})
       : super(key: key);
 
   @override
@@ -38,8 +38,8 @@ class _LanguagePracticePageState extends State<LanguagePracticePage> {
   @override
   void initState() {
     super.initState();
-    awsPollyService = AwsPollyService(locale: widget.locale);
-    mission = decideMission(locale: widget.locale, mode: widget.mode);
+    awsPollyService = AwsPollyService(language: widget.language);
+    mission = decideMission(language: widget.language, mode: widget.mode);
   }
 
   @override
@@ -90,7 +90,7 @@ class _LanguagePracticePageState extends State<LanguagePracticePage> {
     }
     // In conversation mode, start listening automatically after speaking
     // is completed (if completed naturally, i.e. not cancelled).
-    if (widget.mode == GPTMode.languagePracticeConversationMode) {
+    if (widget.mode == GPTMode.conversationMode) {
       languageInputWidgetKey.currentState?.startListening();
     }
   }
@@ -99,7 +99,7 @@ class _LanguagePracticePageState extends State<LanguagePracticePage> {
     // In question mode, allow longer output (since conversations will typically
     // be shorter).
     final numTokensToGenerate =
-        (widget.mode == GPTMode.languagePracticeQuestionMode) ? 600 : 300;
+        (widget.mode == GPTMode.deeplinkActionMode) ? 600 : 300;
 
     // Add user message first.
     GPTMessage userMessage = GPTMessage(
@@ -143,7 +143,7 @@ class _LanguagePracticePageState extends State<LanguagePracticePage> {
 
     return Localizations.override(
       context: context,
-      locale: widget.locale,
+      locale: Locale(widget.language),
       child: Builder(
         builder: (context) => Scaffold(
           appBar: AppBar(
@@ -161,10 +161,10 @@ class _LanguagePracticePageState extends State<LanguagePracticePage> {
                 ),
                 LanguageInputWidget(
                   key: languageInputWidgetKey,
-                  locale: widget.locale,
+                  language: widget.language,
                   callbackFunction: getGptResponse,
                   shouldListenAndSendAutomatically:
-                      widget.mode == GPTMode.languagePracticeConversationMode,
+                      widget.mode == GPTMode.conversationMode,
                 ),
                 _buildDoneButton(context),
               ],

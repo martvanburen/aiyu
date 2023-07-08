@@ -21,22 +21,22 @@ class SupportedLanguagesProvider {
 
   static const defaultLanguageCode = "en";
 
-  static throwUnimplementedError(String languageCode) => throw UnimplementedError(
-      "Language code '$languageCode' is not yet implemented. Implemented languages: '${_languageMap.keys}'.");
+  static throwUnimplementedError(String language) => throw UnimplementedError(
+      "Language code '$language' is not yet implemented. Implemented languages: '${_languageMap.keys}'.");
 
   static List<String> getSupportedLanguages() {
     return _languageMap.keys.toList();
   }
 
-  static String getDisplayName(String languageCode) =>
-      _languageMap[languageCode]?["name"] as String? ??
-      throwUnimplementedError(languageCode);
+  static String getDisplayName(String language) =>
+      _languageMap[language]?["name"] as String? ??
+      throwUnimplementedError(language);
 
-  static String getLocalizedDisplayName(String languageCode) =>
-      _languageMap[languageCode]?["localized"] as String? ??
-      throwUnimplementedError(languageCode);
+  static String getLocalizedDisplayName(String language) =>
+      _languageMap[language]?["localized"] as String? ??
+      throwUnimplementedError(language);
 
-  static AWSPolyVoiceId getPollyVoiceId(String languageCode) =>
-      _languageMap[languageCode]?["polly_voice"] as AWSPolyVoiceId? ??
-      throwUnimplementedError(languageCode);
+  static AWSPolyVoiceId getPollyVoiceId(String language) =>
+      _languageMap[language]?["polly_voice"] as AWSPolyVoiceId? ??
+      throwUnimplementedError(language);
 }

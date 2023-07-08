@@ -3,13 +3,13 @@ import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 
 class LanguageInputWidget extends StatefulWidget {
-  final Locale locale;
+  final String language;
   final ValueChanged<String> callbackFunction;
   final bool shouldListenAndSendAutomatically;
 
   const LanguageInputWidget(
       {Key? key,
-      required this.locale,
+      required this.language,
       required this.callbackFunction,
       this.shouldListenAndSendAutomatically = false})
       : super(key: key);
@@ -65,7 +65,7 @@ class LanguageInputWidgetState extends State<LanguageInputWidget> {
         }
       },
       cancelOnError: true,
-      localeId: widget.locale.languageCode,
+      localeId: widget.language,
     );
   }
 
@@ -109,7 +109,7 @@ class LanguageInputWidgetState extends State<LanguageInputWidget> {
 
     return Localizations.override(
       context: context,
-      locale: widget.locale,
+      locale: Locale(widget.language),
       child: Builder(
         builder: (context) {
           return Container(
