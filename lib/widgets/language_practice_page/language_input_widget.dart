@@ -1,6 +1,8 @@
+import "package:ai_yu/data_structures/global_state/preferences_model.dart";
 import "package:flutter/material.dart";
-import 'package:speech_to_text/speech_recognition_result.dart';
-import 'package:speech_to_text/speech_to_text.dart' as stt;
+import "package:provider/provider.dart";
+import "package:speech_to_text/speech_recognition_result.dart";
+import "package:speech_to_text/speech_to_text.dart" as stt;
 
 class LanguageInputWidget extends StatefulWidget {
   final String language;
@@ -73,7 +75,7 @@ class LanguageInputWidgetState extends State<LanguageInputWidget> {
     if (mounted) {
       setState(() {
         isListening = false;
-        _promptInputController.text = '';
+        _promptInputController.text = "";
       });
     }
   }
@@ -88,17 +90,12 @@ class LanguageInputWidgetState extends State<LanguageInputWidget> {
     if (widget.shouldListenAndSendAutomatically &&
         val.finalResult &&
         val.isConfident()) {
-      sendAsStatement();
+      sendPrompt();
     }
   }
 
-  void sendAsStatement() {
-    widget.callbackFunction('${_promptInputController.text}.');
-    clearPrompt();
-  }
-
-  void sendAsQuestion() {
-    widget.callbackFunction('${_promptInputController.text}?');
+  void sendPrompt() {
+    widget.callbackFunction("${_promptInputController.text}.");
     clearPrompt();
   }
 
@@ -117,58 +114,89 @@ class LanguageInputWidgetState extends State<LanguageInputWidget> {
               border: Border(
                 top: BorderSide(
                   color: theme.primaryColor,
-                  width: 2.0,
+                  width: 1.0,
                 ),
                 bottom: BorderSide(
                   color: theme.primaryColor,
-                  width: 2.0,
+                  width: 6.0,
                 ),
               ),
             ),
             child: Row(
               children: [
-                SizedBox(
-                  height: 140.0,
-                  child: FutureBuilder<bool>(
-                      future: speechRecognitionInitialization,
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return const CircularProgressIndicator();
-                        } else if (snapshot.hasError ||
-                            snapshot.data == false) {
-                          return IconButton(
-                            style: ButtonStyle(
-                              padding: MaterialStateProperty.all(
-                                const EdgeInsets.all(20.0),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    FutureBuilder<bool>(
+                        future: speechRecognitionInitialization,
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const CircularProgressIndicator();
+                          } else if (snapshot.hasError ||
+                              snapshot.data == false) {
+                            return IconButton(
+                              style: ButtonStyle(
+                                padding: MaterialStateProperty.all(
+                                  const EdgeInsets.all(20.0),
+                                ),
                               ),
-                            ),
-                            onPressed: null,
-                            icon: const Icon(Icons.mic_off),
-                          );
-                        } else {
-                          return IconButton(
-                            style: ButtonStyle(
-                              padding: MaterialStateProperty.all(
-                                const EdgeInsets.all(20.0),
+                              onPressed: null,
+                              icon: const Icon(Icons.mic_off),
+                            );
+                          } else {
+                            return IconButton(
+                              style: ButtonStyle(
+                                padding: MaterialStateProperty.all(
+                                  const EdgeInsets.all(20.0),
+                                ),
                               ),
+                              onPressed: toggleListening,
+                              icon: Icon(
+                                  isListening ? Icons.cancel : Icons.mic_none,
+                                  color: theme.primaryColor),
+                            );
+                          }
+                        }),
+                    Consumer<PreferencesModel>(
+                        builder: (context, preferences, child) {
+                      return SizedBox(
+                        height: 30,
+                        child: GestureDetector(
+                          onTap: () => preferences.toggleConversationMode(),
+                          child: Center(
+                              child: Text(
+                            "AUTO",
+                            style: TextStyle(
+                              fontSize: 10,
+                              decoration: preferences.isConversationMode
+                                  ? null
+                                  : TextDecoration.lineThrough,
+                              color: preferences.isConversationMode
+                                  ? Theme.of(context).primaryColor
+                                  : Colors.black,
+                              fontWeight: preferences.isConversationMode
+                                  ? FontWeight.bold
+                                  : null,
                             ),
-                            onPressed: toggleListening,
-                            icon: Icon(
-                                isListening ? Icons.cancel : Icons.mic_none,
-                                color: theme.primaryColor),
-                          );
-                        }
-                      }),
+                          )),
+                        ),
+                      );
+                    }),
+                  ],
                 ),
                 Expanded(
                   child: Container(
+                    margin: const EdgeInsets.symmetric(vertical: 10.0),
                     padding: const EdgeInsets.symmetric(horizontal: 10.0),
                     child: TextField(
                       controller: _promptInputController,
-                      maxLines: 4,
+                      maxLines: 3,
                       textCapitalization: TextCapitalization.sentences,
                       onChanged: (value) => setState(() {}),
+                      decoration: const InputDecoration(
+                        hintText: "Enter prompt here.",
+                      ),
                     ),
                   ),
                 ),
@@ -180,19 +208,8 @@ class LanguageInputWidgetState extends State<LanguageInputWidget> {
                           const EdgeInsets.all(20.0),
                         ),
                       ),
-                      onPressed: inputEmpty ? null : sendAsStatement,
-                      icon: Icon(Icons.fiber_manual_record,
-                          color: theme.primaryColor),
-                    ),
-                    IconButton(
-                      style: ButtonStyle(
-                        padding: MaterialStateProperty.all(
-                          const EdgeInsets.all(20.0),
-                        ),
-                      ),
-                      onPressed: inputEmpty ? null : sendAsQuestion,
-                      icon:
-                          Icon(Icons.question_mark, color: theme.primaryColor),
+                      onPressed: inputEmpty ? null : sendPrompt,
+                      icon: Icon(Icons.send, color: theme.primaryColor),
                     ),
                   ],
                 ),

@@ -29,6 +29,12 @@ class PreferencesModel extends ChangeNotifier {
     _prefs?.setStringList("recentLanguages", _recentLanguages);
   }
 
+  void toggleConversationMode() async {
+    _isConversationMode = !_isConversationMode;
+    _saveToSharedPreferences();
+    notifyListeners();
+  }
+
   void setConversationMode(bool value) async {
     _isConversationMode = value;
     _saveToSharedPreferences();

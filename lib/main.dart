@@ -119,6 +119,15 @@ class _AiYuAppState extends State<AiYuApp> {
             ),
           ),
         ),
+        textButtonTheme: TextButtonThemeData(
+          style: ButtonStyle(
+            shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+              const RoundedRectangleBorder(
+                borderRadius: BorderRadius.zero,
+              ),
+            ),
+          ),
+        ),
         iconButtonTheme: IconButtonThemeData(
           style: ButtonStyle(
             shape: MaterialStateProperty.all<RoundedRectangleBorder>(

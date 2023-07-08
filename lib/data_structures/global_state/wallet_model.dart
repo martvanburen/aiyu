@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import "package:flutter/material.dart";
 
 class WalletModel extends ChangeNotifier {
   // Measured in 100ths of a cent.
@@ -11,5 +11,13 @@ class WalletModel extends ChangeNotifier {
   void add50Cent() {
     _microcentBalance += 5000;
     notifyListeners();
+  }
+
+  int _calculateQueryCost() {
+    return 2;
+  }
+
+  double calculateQueryCostInCents() {
+    return _calculateQueryCost() / 100.0;
   }
 }

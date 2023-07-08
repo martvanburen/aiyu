@@ -1,14 +1,14 @@
+import "package:ai_yu/data_structures/global_state/wallet_model.dart";
 import "package:ai_yu/data_structures/gpt_message.dart";
 import "package:ai_yu/data_structures/gpt_mode.dart";
 import "package:ai_yu/utils/aws_polly_service.dart";
 import "package:ai_yu/utils/gpt_api.dart";
 import "package:ai_yu/utils/mission_decider.dart";
-import 'package:ai_yu/widgets/language_practice_page/conversation_display_widget.dart';
-import 'package:ai_yu/widgets/language_practice_page/language_input_widget.dart';
+import "package:ai_yu/widgets/language_practice_page/conversation_display_widget.dart";
+import "package:ai_yu/widgets/language_practice_page/language_input_widget.dart";
 import "package:flutter/material.dart";
-import "package:flutter/services.dart";
-import "package:flutter_gen/gen_l10n/app_localizations.dart";
-import 'package:just_audio/just_audio.dart';
+import "package:just_audio/just_audio.dart";
+import "package:provider/provider.dart";
 
 class LanguagePracticePage extends StatefulWidget {
   final GPTMode mode;
@@ -24,7 +24,10 @@ class LanguagePracticePage extends StatefulWidget {
 
 class _LanguagePracticePageState extends State<LanguagePracticePage> {
   late final String mission;
-  List<GPTMessage> conversation = [];
+  List<GPTMessage> conversation = [
+    GPTMessage(GPTMessageSender.gpt,
+        Future.value(GPTMessageContent("What would you like to discuss?"))),
+  ];
 
   GlobalKey<LanguageInputWidgetState> languageInputWidgetKey =
       GlobalKey<LanguageInputWidgetState>();
@@ -147,8 +150,21 @@ class _LanguagePracticePageState extends State<LanguagePracticePage> {
       child: Builder(
         builder: (context) => Scaffold(
           appBar: AppBar(
-            title: Text(gptModeDisplayName(mode: widget.mode, context: context),
-                style: TextStyle(color: theme.primaryColor)),
+            title: Text(
+              gptModeDisplayName(mode: widget.mode, context: context),
+              style: TextStyle(color: theme.primaryColor),
+            ),
+            actions: <Widget>[
+              Consumer<WalletModel>(
+                builder: (context, wallet, child) {
+                  return TextButton(
+                    style: TextButton.styleFrom(foregroundColor: Colors.grey),
+                    onPressed: () => wallet.add50Cent(),
+                    child: Text("${wallet.centBalance.toStringAsFixed(2)}¢"),
+                  );
+                },
+              ),
+            ],
             centerTitle: true,
           ),
           body: SafeArea(
@@ -163,38 +179,10 @@ class _LanguagePracticePageState extends State<LanguagePracticePage> {
                   key: languageInputWidgetKey,
                   language: widget.language,
                   callbackFunction: getGptResponse,
-                  shouldListenAndSendAutomatically:
-                      widget.mode == GPTMode.conversationMode,
+                  shouldListenAndSendAutomatically: false,
                 ),
-                _buildDoneButton(context),
               ],
             ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  SizedBox _buildDoneButton(BuildContext context) {
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton(
-        style: ButtonStyle(
-          padding: MaterialStateProperty.all(const EdgeInsets.all(20.0)),
-          backgroundColor: MaterialStateProperty.all(Colors.white),
-          foregroundColor: MaterialStateProperty.all(Colors.black),
-        ),
-        onPressed: () {
-          if (Navigator.of(context).canPop()) {
-            Navigator.of(context).pop();
-          } else {
-            SystemNavigator.pop();
-          }
-        },
-        child: Text(
-          AppLocalizations.of(context)!.done,
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
           ),
         ),
       ),
