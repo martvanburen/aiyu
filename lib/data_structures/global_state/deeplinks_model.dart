@@ -5,10 +5,14 @@ import "package:flutter/material.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
 class DeeplinkConfig {
-  final String url;
-  final String description;
+  final String path;
+  final String name;
+  final String prompt;
 
-  const DeeplinkConfig(this.url, this.description);
+  const DeeplinkConfig(
+      {required this.path, required this.name, this.prompt = ""});
+
+  String get url => "aiyu://$path";
 }
 
 class DeeplinksModel extends ChangeNotifier {
@@ -35,8 +39,9 @@ class DeeplinksModel extends ChangeNotifier {
           _deeplinks = List<DeeplinkConfig>.from(
             decodedJson["deeplinks"].map(
               (deeplinkJson) => DeeplinkConfig(
-                deeplinkJson["url"],
-                deeplinkJson["description"],
+                path: deeplinkJson["path"],
+                name: deeplinkJson["name"],
+                prompt: deeplinkJson["prompt"],
               ),
             ),
           );
@@ -55,8 +60,9 @@ class DeeplinksModel extends ChangeNotifier {
       "version": _deeplinksStorageVersion,
       "deeplinks": _deeplinks
           .map((deeplink) => {
-                "url": deeplink.url,
-                "description": deeplink.description,
+                "path": deeplink.path,
+                "name": deeplink.name,
+                "prompt": deeplink.prompt,
               })
           .toList(),
     });

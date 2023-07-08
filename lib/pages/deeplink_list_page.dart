@@ -1,4 +1,5 @@
 import 'package:ai_yu/data_structures/global_state/deeplinks_model.dart';
+import 'package:ai_yu/pages/deeplink_edit_page.dart';
 import "package:flutter/material.dart";
 import 'package:provider/provider.dart';
 
@@ -10,6 +11,49 @@ class DeeplinkListPage extends StatefulWidget {
 }
 
 class _DeeplinkListPageState extends State<DeeplinkListPage> {
+  void addDeeplink() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const DeeplinkEditPage(),
+      ),
+    );
+  }
+
+  void editDeeplink(DeeplinkConfig deeplink) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => DeeplinkEditPage(deeplink: deeplink),
+      ),
+    );
+  }
+
+  void deleteDeeplink(int index, DeeplinksModel deeplinksModel) async {
+    bool? delete = await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Delete Deeplink?"),
+        content:
+            const Text("Are you sure you want to delete this deeplink action?"),
+        actions: [
+          TextButton(
+            child: const Text("Cancel"),
+            onPressed: () => Navigator.of(context).pop(false),
+          ),
+          TextButton(
+            child: const Text("Delete"),
+            onPressed: () => Navigator.of(context).pop(true),
+          ),
+        ],
+      ),
+    );
+
+    if (delete != null && delete) {
+      deeplinksModel.removeDeeplink(index);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     ThemeData theme = Theme.of(context);
@@ -35,49 +79,59 @@ class _DeeplinkListPageState extends State<DeeplinkListPage> {
               child: Consumer<DeeplinksModel>(
                 builder: (context, deeplinksModel, child) {
                   return ListView.builder(
-                    itemCount: deeplinksModel.deeplinks.length,
+                    padding: const EdgeInsets.only(top: 10.0),
+                    itemCount: deeplinksModel.deeplinks.length + 1,
                     itemBuilder: (BuildContext context, int index) {
-                      return Card(
-                        margin:
-                            const EdgeInsets.only(left: 30, right: 30, top: 20),
-                        child: ListTile(
-                          contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 5),
-                          title: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                deeplinksModel.deeplinks[index].url,
-                                style: const TextStyle(
-                                    color: Colors.grey, fontSize: 13),
-                              ),
-                              Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 5),
-                                child: Text(deeplinksModel
-                                    .deeplinks[index].description),
-                              ),
-                            ],
+                      // Use this slight hack to append a manual element to the
+                      // end of the list (without it having to be beyond the
+                      // Expanded element).
+                      if (index == deeplinksModel.deeplinks.length) {
+                        return Center(
+                          child: TextButton(
+                            onPressed: () => addDeeplink(),
+                            child: const Text("+ Add New Deeplink"),
                           ),
-                          trailing: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              IconButton(
-                                icon: const Icon(Icons.edit),
-                                onPressed: () {
-                                  // Handle your edit action
-                                },
-                              ),
-                              IconButton(
-                                icon: const Icon(Icons.more_vert),
-                                onPressed: () {
-                                  // Handle your execute action
-                                },
-                              ),
-                            ],
+                        );
+                      } else {
+                        return Card(
+                          margin: const EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 10),
+                          child: ListTile(
+                            contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 20, vertical: 5),
+                            title: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  deeplinksModel.deeplinks[index].url,
+                                  style: const TextStyle(
+                                      color: Colors.grey, fontSize: 13),
+                                ),
+                                Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 5),
+                                  child: Text(
+                                      deeplinksModel.deeplinks[index].name),
+                                ),
+                              ],
+                            ),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  icon: const Icon(Icons.edit),
+                                  onPressed: () => editDeeplink(
+                                      deeplinksModel.deeplinks[index]),
+                                ),
+                                IconButton(
+                                    icon: const Icon(Icons.delete),
+                                    onPressed: () =>
+                                        deleteDeeplink(index, deeplinksModel)),
+                              ],
+                            ),
                           ),
-                        ),
-                      );
+                        );
+                      }
                     },
                   );
                 },
