@@ -14,24 +14,24 @@ class PreferencesModel extends ChangeNotifier {
       UnmodifiableListView(_recentLanguages);
 
   PreferencesModel() {
-    _loadPreferences();
+    _loadFromSharedPreferences();
   }
 
-  void _loadPreferences() async {
+  void _loadFromSharedPreferences() async {
     _prefs = await SharedPreferences.getInstance();
     _isConversationMode = _prefs?.getBool('isConversationMode') ?? false;
     _recentLanguages = _prefs?.getStringList("recentLanguages") ?? [];
     notifyListeners();
   }
 
-  void _savePreferences() async {
+  void _saveToSharedPreferences() async {
     _prefs?.setBool('isConversationMode', _isConversationMode);
     _prefs?.setStringList("recentLanguages", _recentLanguages);
   }
 
   void setConversationMode(bool value) async {
     _isConversationMode = value;
-    _savePreferences();
+    _saveToSharedPreferences();
     notifyListeners();
   }
 
@@ -43,7 +43,7 @@ class PreferencesModel extends ChangeNotifier {
     while (_recentLanguages.length > 2) {
       _recentLanguages.removeAt(0);
     }
-    _savePreferences();
+    _saveToSharedPreferences();
     notifyListeners();
   }
 }

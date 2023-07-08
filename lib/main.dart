@@ -2,6 +2,7 @@ import "dart:io";
 
 import "package:ai_yu/data_structures/global_state/deeplinks_model.dart";
 import "package:ai_yu/data_structures/global_state/preferences_model.dart";
+import "package:ai_yu/data_structures/global_state/wallet_model.dart";
 import "package:ai_yu/data_structures/gpt_mode.dart";
 import 'package:ai_yu/pages/home_page.dart';
 import 'package:ai_yu/pages/conversation_page.dart';
@@ -17,6 +18,7 @@ Future<void> main() async {
     providers: [
       ChangeNotifierProvider(create: (context) => PreferencesModel()),
       ChangeNotifierProvider(create: (context) => DeeplinksModel()),
+      ChangeNotifierProvider(create: (context) => WalletModel()),
     ],
     child: const AiYuApp(),
   ));

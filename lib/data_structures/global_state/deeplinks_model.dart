@@ -20,16 +20,16 @@ class DeeplinksModel extends ChangeNotifier {
 
   List<DeeplinkConfig> _deeplinks = [];
 
-  UnmodifiableListView<DeeplinkConfig> get deeplinks =>
+  UnmodifiableListView<DeeplinkConfig> get get =>
       UnmodifiableListView(_deeplinks);
 
   DeeplinksModel() {
-    _loadDeeplinks();
+    _loadFromSharedPreferences();
   }
 
   static const _deeplinksStorageVersion = 1;
 
-  Future<void> _loadDeeplinks() async {
+  Future<void> _loadFromSharedPreferences() async {
     _prefs = await SharedPreferences.getInstance();
     final deeplinksJson = _prefs!.getString("deeplinks");
     if (deeplinksJson != null) {
@@ -55,7 +55,7 @@ class DeeplinksModel extends ChangeNotifier {
     }
   }
 
-  Future<void> _saveDeeplinks() async {
+  Future<void> _saveToSharedPreferences() async {
     final encodedJson = jsonEncode({
       "version": _deeplinksStorageVersion,
       "deeplinks": _deeplinks
@@ -69,21 +69,21 @@ class DeeplinksModel extends ChangeNotifier {
     await _prefs!.setString("deeplinks", encodedJson);
   }
 
-  void addDeeplink(DeeplinkConfig deeplink) {
+  void add(DeeplinkConfig deeplink) {
     _deeplinks.add(deeplink);
-    _saveDeeplinks();
+    _saveToSharedPreferences();
     notifyListeners();
   }
 
-  void updateDeeplink(int index, DeeplinkConfig deeplink) {
+  void updateIndex(int index, DeeplinkConfig deeplink) {
     _deeplinks[index] = deeplink;
-    _saveDeeplinks();
+    _saveToSharedPreferences();
     notifyListeners();
   }
 
-  void removeDeeplink(int index) {
+  void removeIndex(int index) {
     _deeplinks.removeAt(index);
-    _saveDeeplinks();
+    _saveToSharedPreferences();
     notifyListeners();
   }
 }

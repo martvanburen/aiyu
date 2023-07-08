@@ -29,7 +29,7 @@ class _DeeplinkListPageState extends State<DeeplinkListPage> {
     );
   }
 
-  void deleteDeeplink(int index, DeeplinksModel deeplinksModel) async {
+  void deleteDeeplink(int index, DeeplinksModel deeplinks) async {
     bool? delete = await showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -50,7 +50,7 @@ class _DeeplinkListPageState extends State<DeeplinkListPage> {
     );
 
     if (delete != null && delete) {
-      deeplinksModel.removeDeeplink(index);
+      deeplinks.removeIndex(index);
     }
   }
 
@@ -77,15 +77,15 @@ class _DeeplinkListPageState extends State<DeeplinkListPage> {
             const Divider(),
             Expanded(
               child: Consumer<DeeplinksModel>(
-                builder: (context, deeplinksModel, child) {
+                builder: (context, deeplinks, child) {
                   return ListView.builder(
                     padding: const EdgeInsets.only(top: 10.0),
-                    itemCount: deeplinksModel.deeplinks.length + 1,
+                    itemCount: deeplinks.get.length + 1,
                     itemBuilder: (BuildContext context, int index) {
                       // Use this slight hack to append a manual element to the
                       // end of the list (without it having to be beyond the
                       // Expanded element).
-                      if (index == deeplinksModel.deeplinks.length) {
+                      if (index == deeplinks.get.length) {
                         return Center(
                           child: TextButton(
                             onPressed: () => addDeeplink(),
@@ -103,15 +103,14 @@ class _DeeplinkListPageState extends State<DeeplinkListPage> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  deeplinksModel.deeplinks[index].url,
+                                  deeplinks.get[index].url,
                                   style: const TextStyle(
                                       color: Colors.grey, fontSize: 13),
                                 ),
                                 Padding(
                                   padding:
                                       const EdgeInsets.symmetric(vertical: 5),
-                                  child: Text(
-                                      deeplinksModel.deeplinks[index].name),
+                                  child: Text(deeplinks.get[index].name),
                                 ),
                               ],
                             ),
@@ -120,13 +119,13 @@ class _DeeplinkListPageState extends State<DeeplinkListPage> {
                               children: [
                                 IconButton(
                                   icon: const Icon(Icons.edit),
-                                  onPressed: () => editDeeplink(
-                                      deeplinksModel.deeplinks[index]),
+                                  onPressed: () =>
+                                      editDeeplink(deeplinks.get[index]),
                                 ),
                                 IconButton(
                                     icon: const Icon(Icons.delete),
                                     onPressed: () =>
-                                        deleteDeeplink(index, deeplinksModel)),
+                                        deleteDeeplink(index, deeplinks)),
                               ],
                             ),
                           ),

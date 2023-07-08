@@ -82,12 +82,12 @@ class _DeeplinkEditPageState extends State<DeeplinkEditPage> {
       prompt: prompt,
     );
 
-    final deeplinksModel = Provider.of<DeeplinksModel>(context, listen: false);
+    final deeplinks = Provider.of<DeeplinksModel>(context, listen: false);
     if (widget.deeplink != null) {
-      int index = deeplinksModel.deeplinks.indexOf(widget.deeplink!);
-      deeplinksModel.updateDeeplink(index, deeplink);
+      int index = deeplinks.get.indexOf(widget.deeplink!);
+      deeplinks.updateIndex(index, deeplink);
     } else {
-      deeplinksModel.addDeeplink(deeplink);
+      deeplinks.add(deeplink);
     }
 
     Navigator.of(context).pop();
