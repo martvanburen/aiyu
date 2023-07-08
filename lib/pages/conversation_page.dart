@@ -139,12 +139,16 @@ class _LanguagePracticePageState extends State<LanguagePracticePage> {
     audioUrlFuture.then((value) => _speak(gptMessage));
   }
 
-  void _messageTapped(GPTMessage message) {
+  void _onMessageAudioButtonTapped(GPTMessage message) {
     if (message == _currentlySpeakingMessage) {
       _stopSpeaking();
     } else {
       _speak(message);
     }
+  }
+
+  void _onMessageArrowButtonTapped(GPTMessage message) {
+    // TODO(mart): Implement.
   }
 
   void _prepareAndSpeakIntroMessage() async {
@@ -192,7 +196,8 @@ class _LanguagePracticePageState extends State<LanguagePracticePage> {
               children: <Widget>[
                 ConversationDisplayWidget(
                   conversation: _conversation,
-                  onMessageTap: _messageTapped,
+                  onMessageAudioButtonTapped: _onMessageAudioButtonTapped,
+                  onMessageArrowButtonTapped: _onMessageArrowButtonTapped,
                   currentlySpeakingMessage: _currentlySpeakingMessage,
                 ),
                 LanguageInputWidget(

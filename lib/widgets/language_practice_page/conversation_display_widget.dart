@@ -3,13 +3,15 @@ import 'package:flutter/material.dart';
 
 class ConversationDisplayWidget extends StatelessWidget {
   final List<GPTMessage> conversation;
-  final Function(GPTMessage) onMessageTap;
+  final Function(GPTMessage) onMessageAudioButtonTapped;
+  final Function(GPTMessage) onMessageArrowButtonTapped;
   final GPTMessage? currentlySpeakingMessage;
 
   const ConversationDisplayWidget({
     Key? key,
     required this.conversation,
-    required this.onMessageTap,
+    required this.onMessageAudioButtonTapped,
+    required this.onMessageArrowButtonTapped,
     this.currentlySpeakingMessage,
   }) : super(key: key);
 
@@ -30,26 +32,38 @@ class ConversationDisplayWidget extends StatelessWidget {
             var msg = conversation[conversation.length - 1 - index];
             var isUser = msg.sender == GPTMessageSender.user;
             var isCurrentlySpeaking = msg == currentlySpeakingMessage;
-            return Container(
-              alignment: isUser ? Alignment.centerLeft : Alignment.centerRight,
-              child: FutureBuilder<GPTMessageContent>(
-                future: msg.content,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Container(
-                      padding: const EdgeInsets.all(5.0),
-                      child: const SizedBox(
-                          height: 15.0,
-                          width: 15.0,
-                          child: Center(
-                              child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                          ))),
+            return FutureBuilder<GPTMessageContent>(
+              future: msg.content,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Container(
+                    alignment:
+                        isUser ? Alignment.centerLeft : Alignment.centerRight,
+                    padding: const EdgeInsets.all(5.0),
+                    child: const SizedBox(
+                        height: 15.0,
+                        width: 15.0,
+                        child: Center(
+                            child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                        ))),
+                  );
+                } else if (snapshot.hasError) {
+                  return Text('Error: ${snapshot.error}.');
+                } else {
+                  var content = snapshot.data!;
+                  if (isUser) {
+                    return Padding(
+                      padding: const EdgeInsets.only(top: 20.0, right: 15.0),
+                      child: Text(content.body,
+                          textAlign: TextAlign.left,
+                          style: TextStyle(
+                            color: theme.primaryColor,
+                            fontSize: 16,
+                            fontWeight: FontWeight.normal,
+                          )),
                     );
-                  } else if (snapshot.hasError) {
-                    return Text('Error: ${snapshot.error}.');
                   } else {
-                    var content = snapshot.data!;
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
@@ -79,32 +93,50 @@ class ConversationDisplayWidget extends StatelessWidget {
                             ),
                           ),
                         ],
-                        Padding(
-                            padding: isUser
-                                ? const EdgeInsets.only(top: 20.0, right: 15.0)
-                                : const EdgeInsets.only(top: 20.0, left: 15.0),
+                        Container(
+                            alignment: Alignment.centerRight,
+                            padding:
+                                const EdgeInsets.only(top: 20.0, left: 15.0),
                             child: GestureDetector(
                               onTap: () {
-                                onMessageTap(msg);
+                                onMessageArrowButtonTapped(msg);
                               },
                               child: Text(content.body,
-                                  textAlign:
-                                      isUser ? TextAlign.left : TextAlign.right,
+                                  textAlign: TextAlign.right,
                                   style: TextStyle(
-                                    color: isUser
-                                        ? theme.primaryColor
-                                        : Colors.black,
+                                    color: Colors.black,
                                     fontSize: 16,
-                                    fontWeight: (isUser || isCurrentlySpeaking)
+                                    fontWeight: isCurrentlySpeaking
                                         ? FontWeight.bold
                                         : FontWeight.normal,
                                   )),
                             )),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            IconButton(
+                              icon: Icon(
+                                isCurrentlySpeaking
+                                    ? Icons.stop
+                                    : Icons.play_arrow,
+                              ),
+                              onPressed: () {
+                                onMessageAudioButtonTapped(msg);
+                              },
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.east),
+                              onPressed: () {
+                                onMessageArrowButtonTapped(msg);
+                              },
+                            ),
+                          ],
+                        ),
                       ],
                     );
                   }
-                },
-              ),
+                }
+              },
             );
           },
         ),
