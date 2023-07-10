@@ -5,8 +5,8 @@ import "package:flutter_dotenv/flutter_dotenv.dart";
 import "package:http/http.dart" as http;
 
 Future<GPTMessageContent> callGptAPI(
-    String mission, List<GPTMessage> conversation,
-    {int numTokensToGenerate = 300}) async {
+    String? mission, List<GPTMessage> conversation,
+    {int numTokensToGenerate = 600}) async {
   // TODO(Mart):
   // . Using dotenv to store the API key is not secure. Eventually
   // . this app should be upgraded to communicate with a backend server,
@@ -23,11 +23,13 @@ Future<GPTMessageContent> callGptAPI(
     };
   }));
 
-  // Add mission statement (as first message).
-  messages.insert(0, {
-    "role": "system",
-    "content": mission,
-  });
+  if (mission != null) {
+    // Add mission statement as first message.
+    messages.insert(0, {
+      "role": "system",
+      "content": mission,
+    });
+  }
 
   // Make API call.
   const String url = "https://api.openai.com/v1/chat/completions";

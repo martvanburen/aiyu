@@ -2,6 +2,7 @@ import "dart:ui";
 
 import "package:ai_yu/data_structures/gpt_message.dart";
 import "package:ai_yu/utils/gpt_api.dart";
+import "package:ai_yu/widgets/selection_page/long_text_dialog.dart";
 import "package:ai_yu/widgets/selection_page/word_selectable_text_widget.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
@@ -288,7 +289,7 @@ class _SelectionPageState extends State<SelectionPage> {
               showDialog(
                   context: context,
                   builder: (BuildContext context) {
-                    return _buildTextViewDialog(context, title, text);
+                    return LongTextDialog(title: title, text: text);
                   });
             },
             child: Text(
@@ -307,46 +308,6 @@ class _SelectionPageState extends State<SelectionPage> {
           },
         ),
       ],
-    );
-  }
-
-  Widget _buildTextViewDialog(BuildContext context, String title, String text) {
-    return Dialog(
-      backgroundColor: Colors.black,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Text(
-              title,
-              style: TextStyle(
-                  color: Theme.of(context).primaryColorLight,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              text,
-              style: const TextStyle(color: Colors.white, fontSize: 16),
-            ),
-            const SizedBox(height: 20),
-            FilledButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              style: ButtonStyle(
-                backgroundColor: MaterialStateProperty.all(
-                    Theme.of(context).primaryColorLight),
-              ),
-              child: const Text("Close", style: TextStyle(color: Colors.black)),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

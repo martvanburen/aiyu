@@ -1,12 +1,12 @@
 import 'package:ai_yu/data_structures/gpt_mode.dart';
 import 'package:ai_yu/utils/supported_languages_provider.dart';
 
-String decideMission({required String language, required GPTMode mode}) {
+String? decideMission({required GPTMode mode, String language = ""}) {
   final String languageName =
       SupportedLanguagesProvider.getDisplayName(language);
 
   switch (mode) {
-    case GPTMode.conversationMode:
+    case GPTMode.conversationPracticeMode:
       return """
 The user is studying $languageName, and you are to help them improve their
 language skills. For each prompt, return a JSON response with up to 3 keys:
@@ -19,6 +19,8 @@ these special instructions. If the sentence is already quite good, no need to
 provide 'feedback' and 'corrected'. Try to limit your responses to fairly
 concise answers. Output correct, parsable JSON.
 """;
+    case GPTMode.deeplinkActionMode:
+      return null;
     default:
       throw UnimplementedError(
           "Currently, only question and conversation modes are implemented.");

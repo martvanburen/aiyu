@@ -13,11 +13,9 @@ import "package:just_audio/just_audio.dart";
 import "package:provider/provider.dart";
 
 class LanguagePracticePage extends StatefulWidget {
-  final GPTMode mode;
   final String language;
 
-  const LanguagePracticePage(
-      {Key? key, required this.mode, required this.language})
+  const LanguagePracticePage({Key? key, required this.language})
       : super(key: key);
 
   @override
@@ -25,7 +23,7 @@ class LanguagePracticePage extends StatefulWidget {
 }
 
 class _LanguagePracticePageState extends State<LanguagePracticePage> {
-  late final String _mission;
+  late final String? _mission;
   final List<GPTMessage> _conversation = [];
 
   final GlobalKey<LanguageInputWidgetState> _languageInputWidgetKey =
@@ -39,7 +37,8 @@ class _LanguagePracticePageState extends State<LanguagePracticePage> {
   void initState() {
     super.initState();
     _awsPollyService = AwsPollyService(language: widget.language);
-    _mission = decideMission(language: widget.language, mode: widget.mode);
+    _mission = decideMission(
+        language: widget.language, mode: GPTMode.conversationPracticeMode);
 
     _player = AudioPlayer();
     _player.playerStateStream.listen((state) {
@@ -111,11 +110,6 @@ class _LanguagePracticePageState extends State<LanguagePracticePage> {
   }
 
   void _sendPromptToServer(String prompt) async {
-    // In question mode, allow longer output (since conversations will typically
-    // be shorter).
-    final numTokensToGenerate =
-        (widget.mode == GPTMode.deeplinkActionMode) ? 600 : 300;
-
     // Add user message first.
     GPTMessage userMessage = GPTMessage(
         GPTMessageSender.user, Future.value(GPTMessageContent(prompt)));
@@ -124,9 +118,8 @@ class _LanguagePracticePageState extends State<LanguagePracticePage> {
     });
 
     // Next, call GPT and add GPT message (holding an unresolved Future).
-    final Future<GPTMessageContent> responseFuture = callGptAPI(
-        _mission, _conversation,
-        numTokensToGenerate: numTokensToGenerate);
+    final Future<GPTMessageContent> responseFuture =
+        callGptAPI(_mission, _conversation);
     final Future<String> audioUrlFuture = responseFuture.then((response) async {
       return await _awsPollyService.getSpeechUrl(input: response.body);
     });
@@ -182,7 +175,8 @@ class _LanguagePracticePageState extends State<LanguagePracticePage> {
         builder: (context) => Scaffold(
           appBar: AppBar(
             title: Text(
-              gptModeDisplayName(mode: widget.mode, context: context),
+              gptModeDisplayName(
+                  mode: GPTMode.conversationPracticeMode, context: context),
               style: TextStyle(color: theme.primaryColor),
             ),
             actions: <Widget>[

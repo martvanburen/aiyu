@@ -3,7 +3,6 @@ import "dart:io";
 import "package:ai_yu/data_structures/global_state/deeplinks_model.dart";
 import "package:ai_yu/data_structures/global_state/preferences_model.dart";
 import "package:ai_yu/data_structures/global_state/wallet_model.dart";
-import "package:ai_yu/data_structures/gpt_mode.dart";
 import 'package:ai_yu/pages/home_page.dart';
 import 'package:ai_yu/pages/conversation_page.dart';
 import "package:flutter/material.dart";
@@ -86,16 +85,13 @@ class _AiYuAppState extends State<AiYuApp> {
     late final Widget home;
     switch (action) {
       case "start_conversation_en":
-        home = const LanguagePracticePage(
-            mode: GPTMode.conversationMode, language: 'en');
+        home = const LanguagePracticePage(language: 'en');
         break;
       case "start_conversation_ko":
-        home = const LanguagePracticePage(
-            mode: GPTMode.conversationMode, language: 'ko');
+        home = const LanguagePracticePage(language: 'ko');
         break;
       case "start_conversation_zh":
-        home = const LanguagePracticePage(
-            mode: GPTMode.conversationMode, language: 'zh');
+        home = const LanguagePracticePage(language: 'zh');
         break;
       default:
         home = const HomePage();
