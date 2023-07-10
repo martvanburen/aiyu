@@ -2,6 +2,7 @@ import "dart:ui";
 
 import "package:ai_yu/data_structures/gpt_message.dart";
 import "package:ai_yu/utils/gpt_api.dart";
+import "package:ai_yu/widgets/selection_page/deeplink_selection_dialog.dart";
 import "package:ai_yu/widgets/selection_page/long_text_dialog.dart";
 import "package:ai_yu/widgets/selection_page/word_selectable_text_widget.dart";
 import "package:flutter/material.dart";
@@ -180,7 +181,13 @@ class _SelectionPageState extends State<SelectionPage> {
                               children: [
                                 FilledButton(
                                   onPressed: () {
-                                    Navigator.of(context).pop();
+                                    showDialog(
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          return DeeplinkSelectionDialog(
+                                              queryString:
+                                                  selection.selectedText);
+                                        });
                                   },
                                   style: ButtonStyle(
                                     backgroundColor: MaterialStateProperty.all(

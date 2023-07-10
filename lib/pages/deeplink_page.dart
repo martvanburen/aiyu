@@ -1,13 +1,12 @@
 import "package:ai_yu/data_structures/global_state/deeplinks_model.dart";
-import "package:ai_yu/data_structures/global_state/wallet_model.dart";
 import "package:ai_yu/data_structures/gpt_message.dart";
 import "package:ai_yu/data_structures/gpt_mode.dart";
 import "package:ai_yu/pages/selection_page.dart";
 import "package:ai_yu/utils/gpt_api.dart";
 import "package:ai_yu/utils/mission_decider.dart";
+import "package:ai_yu/widgets/shared/mini_wallet_widget.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
-import "package:provider/provider.dart";
 
 class DeeplinkPage extends StatefulWidget {
   final DeeplinkConfig deeplinkConfig;
@@ -82,16 +81,8 @@ class _DeeplinkPageState extends State<DeeplinkPage> {
               mode: GPTMode.deeplinkActionMode, context: context),
           style: TextStyle(color: Theme.of(context).primaryColor),
         ),
-        actions: <Widget>[
-          Consumer<WalletModel>(
-            builder: (context, wallet, child) {
-              return TextButton(
-                style: TextButton.styleFrom(foregroundColor: Colors.grey),
-                onPressed: () => wallet.add50Cent(),
-                child: Text("${wallet.centBalance.toStringAsFixed(2)}¢"),
-              );
-            },
-          ),
+        actions: const <Widget>[
+          MiniWalletWidget(),
         ],
         centerTitle: true,
       ),
@@ -99,8 +90,7 @@ class _DeeplinkPageState extends State<DeeplinkPage> {
         child: Column(
           children: <Widget>[
             Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20.0),
+              padding: const EdgeInsets.all(20.0),
               child: Text(_prompt,
                   textAlign: TextAlign.left,
                   style: TextStyle(
@@ -116,8 +106,7 @@ class _DeeplinkPageState extends State<DeeplinkPage> {
             ),
             Expanded(
               child: Container(
-                padding: const EdgeInsets.only(
-                    left: 20.0, right: 20.0, bottom: 25.0),
+                padding: const EdgeInsets.all(20.0),
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.surface,
                 ),
@@ -127,7 +116,8 @@ class _DeeplinkPageState extends State<DeeplinkPage> {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return Container(
                         alignment: Alignment.topRight,
-                        padding: const EdgeInsets.all(5.0),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 20.0, vertical: 10.0),
                         child: const SizedBox(
                             height: 15.0,
                             width: 15.0,
@@ -137,7 +127,7 @@ class _DeeplinkPageState extends State<DeeplinkPage> {
                             ))),
                       );
                     } else if (snapshot.hasError) {
-                      return Text('Error: ${snapshot.error}.');
+                      return Text("Error: ${snapshot.error}.");
                     } else {
                       var content = snapshot.data!;
                       return Column(
@@ -145,13 +135,11 @@ class _DeeplinkPageState extends State<DeeplinkPage> {
                         children: <Widget>[
                           Container(
                             alignment: Alignment.centerRight,
-                            padding:
-                                const EdgeInsets.only(top: 20.0, left: 15.0),
                             child: GestureDetector(
                               onTap: () {
                                 _onMessageCopyButtonTapped(content);
                               },
-                              child: Text(content.body,
+                              child: SelectableText(content.body,
                                   textAlign: TextAlign.right,
                                   style: const TextStyle(
                                     color: Colors.black,
@@ -183,6 +171,11 @@ class _DeeplinkPageState extends State<DeeplinkPage> {
                 ),
               ),
             ),
+            Divider(
+              height: 1,
+              color: Theme.of(context).primaryColor,
+              thickness: 1,
+            ),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
@@ -206,7 +199,12 @@ class _DeeplinkPageState extends State<DeeplinkPage> {
                   ),
                 ),
               ),
-            )
+            ),
+            Divider(
+              height: 6,
+              color: Theme.of(context).primaryColor,
+              thickness: 6,
+            ),
           ],
         ),
       ),

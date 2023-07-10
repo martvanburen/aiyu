@@ -1,5 +1,4 @@
 import "package:ai_yu/data_structures/global_state/preferences_model.dart";
-import "package:ai_yu/data_structures/global_state/wallet_model.dart";
 import "package:ai_yu/data_structures/gpt_message.dart";
 import "package:ai_yu/data_structures/gpt_mode.dart";
 import "package:ai_yu/pages/selection_page.dart";
@@ -8,6 +7,7 @@ import "package:ai_yu/utils/gpt_api.dart";
 import "package:ai_yu/utils/mission_decider.dart";
 import "package:ai_yu/widgets/language_practice_page/conversation_display_widget.dart";
 import "package:ai_yu/widgets/language_practice_page/language_input_widget.dart";
+import "package:ai_yu/widgets/shared/mini_wallet_widget.dart";
 import "package:flutter/material.dart";
 import "package:just_audio/just_audio.dart";
 import "package:provider/provider.dart";
@@ -179,16 +179,8 @@ class _LanguagePracticePageState extends State<LanguagePracticePage> {
                   mode: GPTMode.conversationPracticeMode, context: context),
               style: TextStyle(color: theme.primaryColor),
             ),
-            actions: <Widget>[
-              Consumer<WalletModel>(
-                builder: (context, wallet, child) {
-                  return TextButton(
-                    style: TextButton.styleFrom(foregroundColor: Colors.grey),
-                    onPressed: () => wallet.add50Cent(),
-                    child: Text("${wallet.centBalance.toStringAsFixed(2)}¢"),
-                  );
-                },
-              ),
+            actions: const <Widget>[
+              MiniWalletWidget(),
             ],
             centerTitle: true,
           ),

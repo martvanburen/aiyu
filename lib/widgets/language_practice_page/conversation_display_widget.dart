@@ -1,5 +1,5 @@
-import 'package:ai_yu/data_structures/gpt_message.dart';
-import 'package:flutter/material.dart';
+import "package:ai_yu/data_structures/gpt_message.dart";
+import "package:flutter/material.dart";
 
 class ConversationDisplayWidget extends StatelessWidget {
   final List<GPTMessage> conversation;
@@ -49,7 +49,7 @@ class ConversationDisplayWidget extends StatelessWidget {
                         ))),
                   );
                 } else if (snapshot.hasError) {
-                  return Text('Error: ${snapshot.error}.');
+                  return Text("Error: ${snapshot.error}.");
                 } else {
                   var content = snapshot.data!;
                   if (isUser) {
@@ -75,7 +75,7 @@ class ConversationDisplayWidget extends StatelessWidget {
                             itemCount: content.sentenceFeedback!.length,
                             itemBuilder: (context, i) {
                               return Text(
-                                '⤷ ${content.sentenceFeedback![i]}',
+                                "⤷ ${content.sentenceFeedback![i]}",
                                 style: TextStyle(
                                   fontSize: 11,
                                   color: Colors.grey.shade600,
@@ -86,7 +86,7 @@ class ConversationDisplayWidget extends StatelessWidget {
                         ],
                         if (content.sentenceCorrection != null) ...[
                           Text(
-                            '⤷ ${content.sentenceCorrection!}',
+                            "⤷ ${content.sentenceCorrection!}",
                             style: TextStyle(
                               fontSize: 11,
                               color: theme.primaryColor,
