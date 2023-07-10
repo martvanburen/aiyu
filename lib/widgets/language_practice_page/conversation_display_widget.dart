@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 class ConversationDisplayWidget extends StatelessWidget {
   final List<GPTMessage> conversation;
   final Function(GPTMessage) onMessageAudioButtonTapped;
-  final Function(GPTMessage) onMessageArrowButtonTapped;
+  final Function(GPTMessageContent) onMessageArrowButtonTapped;
   final GPTMessage? currentlySpeakingMessage;
 
   const ConversationDisplayWidget({
@@ -60,7 +60,7 @@ class ConversationDisplayWidget extends StatelessWidget {
                           style: TextStyle(
                             color: theme.primaryColor,
                             fontSize: 16,
-                            fontWeight: FontWeight.normal,
+                            fontWeight: FontWeight.bold,
                           )),
                     );
                   } else {
@@ -99,7 +99,7 @@ class ConversationDisplayWidget extends StatelessWidget {
                                 const EdgeInsets.only(top: 20.0, left: 15.0),
                             child: GestureDetector(
                               onTap: () {
-                                onMessageArrowButtonTapped(msg);
+                                onMessageArrowButtonTapped(content);
                               },
                               child: Text(content.body,
                                   textAlign: TextAlign.right,
@@ -127,7 +127,7 @@ class ConversationDisplayWidget extends StatelessWidget {
                             IconButton(
                               icon: const Icon(Icons.east),
                               onPressed: () {
-                                onMessageArrowButtonTapped(msg);
+                                onMessageArrowButtonTapped(content);
                               },
                             ),
                           ],

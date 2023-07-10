@@ -2,6 +2,7 @@ import "package:ai_yu/data_structures/global_state/preferences_model.dart";
 import "package:ai_yu/data_structures/global_state/wallet_model.dart";
 import "package:ai_yu/data_structures/gpt_message.dart";
 import "package:ai_yu/data_structures/gpt_mode.dart";
+import "package:ai_yu/pages/selection_page.dart";
 import "package:ai_yu/utils/aws_polly_service.dart";
 import "package:ai_yu/utils/gpt_api.dart";
 import "package:ai_yu/utils/mission_decider.dart";
@@ -139,7 +140,7 @@ class _LanguagePracticePageState extends State<LanguagePracticePage> {
     audioUrlFuture.then((value) => _speak(gptMessage));
   }
 
-  void _onMessageAudioButtonTapped(GPTMessage message) {
+  void _onMessageAudioButtonTapped(GPTMessage message) async {
     if (message == _currentlySpeakingMessage) {
       _stopSpeaking();
     } else {
@@ -147,8 +148,14 @@ class _LanguagePracticePageState extends State<LanguagePracticePage> {
     }
   }
 
-  void _onMessageArrowButtonTapped(GPTMessage message) {
-    // TODO(mart): Implement.
+  Future<void> _onMessageArrowButtonTapped(
+      GPTMessageContent messageContent) async {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => SelectionPage(body: messageContent.body),
+    );
   }
 
   void _prepareAndSpeakIntroMessage() async {
