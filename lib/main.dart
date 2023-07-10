@@ -5,6 +5,7 @@ import "package:ai_yu/data_structures/global_state/preferences_model.dart";
 import "package:ai_yu/data_structures/global_state/wallet_model.dart";
 import 'package:ai_yu/pages/home_page.dart';
 import 'package:ai_yu/pages/conversation_page.dart';
+import "package:ai_yu/utils/supported_languages_provider.dart";
 import "package:flutter/material.dart";
 import "package:flutter_dotenv/flutter_dotenv.dart";
 import "package:flutter_gen/gen_l10n/app_localizations.dart";
@@ -39,37 +40,34 @@ class _AiYuAppState extends State<AiYuApp> {
     super.initState();
     if (Platform.isAndroid || Platform.isIOS) {
       flutterShortcuts.initialize();
-      setFlutterShortcutActions();
+      // Handle incoming app shortcuts.
       handleFlutterShortcuts();
+      // Update app shortcuts when recent languages change.
+      Provider.of<PreferencesModel>(context, listen: false)
+          .addListener(setFlutterShortcutActions);
     }
   }
 
   void setFlutterShortcutActions() {
+    List<String> recentLanguages =
+        Provider.of<PreferencesModel>(context, listen: false).recentLanguages;
     flutterShortcuts.setShortcutItems(
-      shortcutItems: <ShortcutItem>[
-        const ShortcutItem(
-          id: "1",
-          action: "start_conversation_en",
-          shortLabel: "Start Conversation",
-          icon: "ic_launcher",
-          shortcutIconAsset: ShortcutIconAsset.androidAsset,
-        ),
-        const ShortcutItem(
-          id: "2",
-          action: "start_conversation_ko",
-          shortLabel: "대화 시작",
-          icon: "ic_launcher",
-          shortcutIconAsset: ShortcutIconAsset.androidAsset,
-        ),
-        const ShortcutItem(
-          id: "3",
-          action: "start_conversation_zh",
-          shortLabel: "开始对话",
-          icon: "ic_launcher",
-          shortcutIconAsset: ShortcutIconAsset.androidAsset,
-        ),
-      ],
-    );
+        shortcutItems: recentLanguages
+            .asMap()
+            .map(
+              (i, l) => MapEntry(
+                  i,
+                  ShortcutItem(
+                    id: i.toString(),
+                    action: "start_conversation_$l",
+                    shortLabel:
+                        "Start ${SupportedLanguagesProvider.getDisplayName(l)} Conversation",
+                    icon: "ic_launcher",
+                    shortcutIconAsset: ShortcutIconAsset.androidAsset,
+                  )),
+            )
+            .values
+            .toList());
   }
 
   void handleFlutterShortcuts() {
@@ -83,19 +81,11 @@ class _AiYuAppState extends State<AiYuApp> {
   @override
   Widget build(BuildContext context) {
     late final Widget home;
-    switch (action) {
-      case "start_conversation_en":
-        home = const LanguagePracticePage(language: 'en');
-        break;
-      case "start_conversation_ko":
-        home = const LanguagePracticePage(language: 'ko');
-        break;
-      case "start_conversation_zh":
-        home = const LanguagePracticePage(language: 'zh');
-        break;
-      default:
-        home = const HomePage();
-        break;
+    if (action.startsWith("start_conversation_")) {
+      final language = action.substring("start_conversation_".length);
+      home = LanguagePracticePage(language: language);
+    } else {
+      home = const HomePage();
     }
     return MaterialApp(
       title: "AI-YU",

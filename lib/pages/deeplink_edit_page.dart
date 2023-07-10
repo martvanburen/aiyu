@@ -76,7 +76,11 @@ class _DeeplinkEditPageState extends State<DeeplinkEditPage> {
       return;
     }
 
-    if (deeplinks.pathExists(path)) {
+    // If adding a new deeplink (widget.deeplink == null), or editing but we
+    // changed the deeplink path (path != widget.deeplink!.path), make sure the
+    // new path doesn't clash with any existing deeplink.
+    if ((widget.deeplink == null || path != widget.deeplink!.path) &&
+        deeplinks.pathExists(path)) {
       _showValidationError("A deeplink with this path already exists.");
       return;
     }
