@@ -1,12 +1,14 @@
+import 'package:ai_yu/pages/selection_page.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class WordSelectableTextWidget extends StatefulWidget {
+  final SelectionSection selectionSection;
   final String body;
-  final Function(String) onSelectionChanged;
 
   const WordSelectableTextWidget(
-      {Key? key, required this.body, required this.onSelectionChanged})
+      {Key? key, required this.body, required this.selectionSection})
       : super(key: key);
 
   @override
@@ -15,20 +17,26 @@ class WordSelectableTextWidget extends StatefulWidget {
 }
 
 class _WordSelectableTextWidgetState extends State<WordSelectableTextWidget> {
-  int startIndex = -1;
-  int endIndex = -1;
-  String selectedText = "";
-
   @override
   void initState() {
     super.initState();
+
+    // Select the entire text by default for the GPT response.
+    if (widget.selectionSection == SelectionSection.gptResponse) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Provider.of<SelectionModel>(context, listen: false).selectEntireText(
+          section: widget.selectionSection,
+          fullText: widget.body,
+        );
+      });
+    }
   }
 
   void _selectSurroundingWord(int index) {
     int left = index;
     int right = index;
 
-    while (left > 0 && widget.body[left] != " ") {
+    while (left > 0 && widget.body[left - 1] != " ") {
       left--;
     }
 
@@ -42,14 +50,16 @@ class _WordSelectableTextWidgetState extends State<WordSelectableTextWidget> {
     final pattern = RegExp(r'[\u4e00-\u9fa5\u3040-\u30ff]');
     if (pattern.hasMatch(widget.body[index])) {
       left = index;
-      right = index + 1;
+      right = index + 2;
     }
 
     setState(() {
-      startIndex = left;
-      endIndex = right;
-      selectedText = widget.body.substring(left, right);
-      widget.onSelectionChanged(selectedText);
+      Provider.of<SelectionModel>(context, listen: false).selectTextWithIndices(
+        section: widget.selectionSection,
+        fullText: widget.body,
+        startIndex: left,
+        endIndex: right,
+      );
     });
   }
 
@@ -60,33 +70,42 @@ class _WordSelectableTextWidgetState extends State<WordSelectableTextWidget> {
       selectionControls: EmptyTextSelectionControls(),
       onSelectionChanged: (value) => setState(() {
         if (value != null) {
-          selectedText = value.plainText;
-          startIndex = widget.body.indexOf(selectedText);
-          endIndex = startIndex + selectedText.length;
-          widget.onSelectionChanged(selectedText);
+          Provider.of<SelectionModel>(context, listen: false)
+              .selectTextWithSubstring(
+            section: widget.selectionSection,
+            fullText: widget.body,
+            substring: value.plainText,
+          );
         }
       }),
-      child: Text.rich(
-        TextSpan(
-            children: widget.body
-                .split("")
-                .asMap()
-                .map((i, t) => MapEntry(
-                      i,
-                      TextSpan(
-                          text: t,
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: startIndex <= i && i < endIndex
-                                ? FontWeight.bold
-                                : null,
-                            fontSize: 30,
-                          ),
-                          recognizer: TapGestureRecognizer()
-                            ..onTap = () => _selectSurroundingWord(i)),
-                    ))
-                .values
-                .toList()),
+      child: Consumer<SelectionModel>(
+        builder: (context, selection, child) {
+          return Text.rich(
+            TextSpan(
+                children: widget.body
+                    .split("")
+                    .asMap()
+                    .map((i, t) => MapEntry(
+                          i,
+                          TextSpan(
+                              text: t,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: (selection.selectedSectionName ==
+                                            widget.selectionSection &&
+                                        selection.startIndex <= i &&
+                                        i < selection.endIndex)
+                                    ? FontWeight.bold
+                                    : null,
+                                fontSize: 25,
+                              ),
+                              recognizer: TapGestureRecognizer()
+                                ..onTap = () => _selectSurroundingWord(i)),
+                        ))
+                    .values
+                    .toList()),
+          );
+        },
       ),
     );
   }

@@ -154,7 +154,7 @@ class _LanguagePracticePageState extends State<LanguagePracticePage> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => SelectionPage(body: messageContent.body),
+      builder: (context) => SelectionPage(messageContent: messageContent),
     );
   }
 

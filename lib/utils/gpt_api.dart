@@ -68,3 +68,40 @@ Future<GPTMessageContent> callGptAPI(
     return GPTMessageContent(data["error"]["message"]);
   }
 }
+
+Future<String> translateToEnglishUsingGPT(String text) async {
+  // TODO(Mart):
+  // . Using dotenv to store the API key is not secure. Eventually
+  // . this app should be upgraded to communicate with a backend server,
+  // . which will then also hold the API key and make the calls for us.
+
+  const String url = "https://api.openai.com/v1/chat/completions";
+  final response = await http.post(
+    Uri.parse(url),
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer ${dotenv.env["OPENAI_KEY"]}",
+    },
+    body: jsonEncode({
+      "model": "gpt-3.5-turbo",
+      "messages": [
+        {
+          "role": "user",
+          "content": """
+Please translate the following text into English. Respond only with the result.
+$text
+""",
+        },
+      ],
+      "max_tokens": 300,
+    }),
+  );
+
+  if (response.statusCode == 200) {
+    var data = jsonDecode(utf8.decode(response.bodyBytes));
+    return data["choices"][0]["message"]["content"].trim();
+  } else {
+    var data = jsonDecode(utf8.decode(response.bodyBytes));
+    return data["error"]["message"];
+  }
+}
