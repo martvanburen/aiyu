@@ -7,20 +7,30 @@ import "package:ai_yu/utils/mission_decider.dart";
 import "package:ai_yu/widgets/shared/mini_wallet_widget.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
+import "package:provider/provider.dart";
 
 class DeeplinkPage extends StatefulWidget {
-  final DeeplinkConfig deeplinkConfig;
-  final String queryString;
+  final Uri? uri;
+  final DeeplinkConfig? deeplinkConfig;
+  final String? queryString;
 
   const DeeplinkPage(
       {Key? key, required this.deeplinkConfig, required this.queryString})
-      : super(key: key);
+      : uri = null,
+        super(key: key);
+
+  DeeplinkPage.fromUri({Key? key, required this.uri})
+      : deeplinkConfig = null,
+        queryString = uri?.query,
+        super(key: key);
 
   @override
   State<DeeplinkPage> createState() => _DeeplinkPageState();
 }
 
 class _DeeplinkPageState extends State<DeeplinkPage> {
+  bool _readyToLoadPage = false;
+
   late final String? _mission;
   late final String _prompt;
 
@@ -31,7 +41,17 @@ class _DeeplinkPageState extends State<DeeplinkPage> {
   void initState() {
     super.initState();
     _mission = decideMission(mode: GPTMode.deeplinkActionMode);
-    _sendPromptToServer();
+    if (widget.deeplinkConfig != null) {
+      // Widget was opened directly with DeeplinkConfigObject.
+      _sendPromptToServer(widget.deeplinkConfig!);
+    } else if (widget.uri != null) {
+      // Widget was opened with Uri.
+      Provider.of<DeeplinksModel>(context, listen: false)
+          .getDeeplinkConfigFromUri(widget.uri!)
+          .then((deeplinkConfig) {
+        _sendPromptToServer(deeplinkConfig);
+      });
+    }
   }
 
   // Always check if mounted before setting state.
@@ -42,10 +62,9 @@ class _DeeplinkPageState extends State<DeeplinkPage> {
     }
   }
 
-  void _sendPromptToServer() async {
+  void _sendPromptToServer(DeeplinkConfig deeplinkConfig) async {
     // Replace $Q in deeplink prompt with query string.
-    _prompt =
-        widget.deeplinkConfig.prompt.replaceAll("\$Q", widget.queryString);
+    _prompt = deeplinkConfig.prompt.replaceAll("\$Q", widget.queryString ?? "");
 
     setState(() {
       _deeplinkQueryMessage = GPTMessage(
@@ -56,6 +75,11 @@ class _DeeplinkPageState extends State<DeeplinkPage> {
         callGptAPI(_mission, [_deeplinkQueryMessage]);
     setState(() {
       _gptResponseMessage = GPTMessage(GPTMessageSender.gpt, responseFuture);
+    });
+
+    // All 'late' variables initialized, ready to load page.
+    setState(() {
+      _readyToLoadPage = true;
     });
   }
 
@@ -86,128 +110,134 @@ class _DeeplinkPageState extends State<DeeplinkPage> {
         ],
         centerTitle: true,
       ),
-      body: SafeArea(
-        child: Column(
-          children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Text(_prompt,
-                  textAlign: TextAlign.left,
-                  style: TextStyle(
-                    color: Theme.of(context).primaryColor,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  )),
-            ),
-            Divider(
-              height: 2,
-              color: Theme.of(context).primaryColor,
-              thickness: 2,
-            ),
-            Expanded(
-              child: Container(
-                padding: const EdgeInsets.all(20.0),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surface,
-                ),
-                child: FutureBuilder<GPTMessageContent>(
-                  future: _gptResponseMessage.content,
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return Container(
-                        alignment: Alignment.topRight,
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 20.0, vertical: 10.0),
-                        child: const SizedBox(
-                            height: 15.0,
-                            width: 15.0,
-                            child: Center(
-                                child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                            ))),
-                      );
-                    } else if (snapshot.hasError) {
-                      return Text("Error: ${snapshot.error}.");
-                    } else {
-                      var content = snapshot.data!;
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Container(
-                            alignment: Alignment.centerRight,
-                            child: GestureDetector(
-                              onTap: () {
-                                _onMessageCopyButtonTapped(content);
-                              },
-                              child: SelectableText(content.body,
-                                  textAlign: TextAlign.right,
-                                  style: const TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 16,
-                                  )),
-                            ),
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              IconButton(
-                                icon: const Icon(Icons.copy),
-                                onPressed: () {
-                                  _onMessageCopyButtonTapped(content);
-                                },
-                              ),
-                              IconButton(
-                                icon: const Icon(Icons.east),
-                                onPressed: () {
-                                  _onMessageArrowButtonTapped(content);
-                                },
-                              ),
-                            ],
-                          ),
-                        ],
-                      );
-                    }
-                  },
-                ),
-              ),
-            ),
-            Divider(
-              height: 1,
-              color: Theme.of(context).primaryColor,
-              thickness: 1,
-            ),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                style: ButtonStyle(
-                  padding:
-                      MaterialStateProperty.all(const EdgeInsets.all(20.0)),
-                  backgroundColor: MaterialStateProperty.all(Colors.white),
-                  foregroundColor: MaterialStateProperty.all(Colors.black),
-                ),
-                onPressed: () {
-                  if (Navigator.of(context).canPop()) {
-                    Navigator.of(context).pop();
-                  } else {
-                    SystemNavigator.pop();
-                  }
-                },
-                child: const Text(
-                  "Close",
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
+      body: _readyToLoadPage
+          ? SafeArea(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Padding(
+                    padding: const EdgeInsets.all(20.0),
+                    child: Text(_prompt,
+                        textAlign: TextAlign.left,
+                        style: TextStyle(
+                          color: Theme.of(context).primaryColor,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        )),
                   ),
-                ),
+                  Divider(
+                    height: 2,
+                    color: Theme.of(context).primaryColor,
+                    thickness: 2,
+                  ),
+                  Expanded(
+                    child: Container(
+                      padding: const EdgeInsets.all(20.0),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.surface,
+                      ),
+                      child: FutureBuilder<GPTMessageContent>(
+                        future: _gptResponseMessage.content,
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return Container(
+                              alignment: Alignment.topRight,
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 20.0, vertical: 10.0),
+                              child: const SizedBox(
+                                  height: 15.0,
+                                  width: 15.0,
+                                  child: Center(
+                                      child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ))),
+                            );
+                          } else if (snapshot.hasError) {
+                            return Text("Error: ${snapshot.error}.");
+                          } else {
+                            var content = snapshot.data!;
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                Container(
+                                  alignment: Alignment.centerRight,
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      _onMessageCopyButtonTapped(content);
+                                    },
+                                    child: SelectableText(content.body,
+                                        textAlign: TextAlign.right,
+                                        style: const TextStyle(
+                                          color: Colors.black,
+                                          fontSize: 16,
+                                        )),
+                                  ),
+                                ),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    IconButton(
+                                      icon: const Icon(Icons.copy),
+                                      onPressed: () {
+                                        _onMessageCopyButtonTapped(content);
+                                      },
+                                    ),
+                                    IconButton(
+                                      icon: const Icon(Icons.east),
+                                      onPressed: () {
+                                        _onMessageArrowButtonTapped(content);
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            );
+                          }
+                        },
+                      ),
+                    ),
+                  ),
+                  Divider(
+                    height: 1,
+                    color: Theme.of(context).primaryColor,
+                    thickness: 1,
+                  ),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      style: ButtonStyle(
+                        padding: MaterialStateProperty.all(
+                            const EdgeInsets.all(20.0)),
+                        backgroundColor:
+                            MaterialStateProperty.all(Colors.white),
+                        foregroundColor:
+                            MaterialStateProperty.all(Colors.black),
+                      ),
+                      onPressed: () {
+                        if (Navigator.of(context).canPop()) {
+                          Navigator.of(context).pop();
+                        } else {
+                          SystemNavigator.pop();
+                        }
+                      },
+                      child: const Text(
+                        "Close",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Divider(
+                    height: 6,
+                    color: Theme.of(context).primaryColor,
+                    thickness: 6,
+                  ),
+                ],
               ),
-            ),
-            Divider(
-              height: 6,
-              color: Theme.of(context).primaryColor,
-              thickness: 6,
-            ),
-          ],
-        ),
-      ),
+            )
+          : Container(),
     );
   }
 }

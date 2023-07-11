@@ -7,6 +7,7 @@ import "package:ai_yu/utils/gpt_api.dart";
 import "package:ai_yu/utils/mission_decider.dart";
 import "package:ai_yu/widgets/language_practice_page/conversation_display_widget.dart";
 import "package:ai_yu/widgets/language_practice_page/language_input_widget.dart";
+import "package:ai_yu/widgets/shared/back_or_close_button.dart";
 import "package:ai_yu/widgets/shared/mini_wallet_widget.dart";
 import "package:flutter/material.dart";
 import "package:just_audio/just_audio.dart";
@@ -183,6 +184,7 @@ class _LanguagePracticePageState extends State<LanguagePracticePage> {
               MiniWalletWidget(),
             ],
             centerTitle: true,
+            leading: const BackOrCloseButton(),
           ),
           body: SafeArea(
             child: Column(

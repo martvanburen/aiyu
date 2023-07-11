@@ -51,5 +51,16 @@
 	<string>To quickly speak messages to GPT.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>To quickly speak messages to GPT.</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>aiyu</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>

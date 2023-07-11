@@ -19,12 +19,14 @@ class DeeplinksModel extends ChangeNotifier {
   SharedPreferences? _prefs;
 
   List<DeeplinkConfig> _deeplinks = [];
-
   UnmodifiableListView<DeeplinkConfig> get get =>
       UnmodifiableListView(_deeplinks);
 
+  // Store Future so that some functions can wait for initialization.
+  late final Future<void> _initializationFuture;
+
   DeeplinksModel() {
-    _loadFromSharedPreferences();
+    _initializationFuture = _loadFromSharedPreferences();
   }
 
   static const _deeplinksStorageVersion = 1;
@@ -89,5 +91,10 @@ class DeeplinksModel extends ChangeNotifier {
 
   bool pathExists(String path) {
     return _deeplinks.any((deeplink) => deeplink.path == path);
+  }
+
+  Future<DeeplinkConfig> getDeeplinkConfigFromUri(Uri uri) async {
+    await _initializationFuture;
+    return _deeplinks.firstWhere((deeplink) => deeplink.path == uri.host);
   }
 }
