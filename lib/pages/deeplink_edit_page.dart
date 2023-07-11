@@ -1,5 +1,6 @@
 import "package:ai_yu/data_structures/global_state/deeplinks_model.dart";
 import "package:flutter/material.dart";
+import "package:flutter/services.dart";
 import "package:provider/provider.dart";
 
 class DeeplinkEditPage extends StatefulWidget {
@@ -67,12 +68,17 @@ class _DeeplinkEditPageState extends State<DeeplinkEditPage> {
     String prompt = _promptController.text.trim();
 
     if (path.isEmpty || name.isEmpty || prompt.isEmpty) {
-      _showValidationError("All fields must be filled.");
+      _showToast("All fields must be filled.");
+      return;
+    }
+
+    if (!RegExp(r"^[a-zA-Z0-9_-]+$").hasMatch(path)) {
+      _showToast("Path may only contain special characters '-', and '_'.");
       return;
     }
 
     if (!prompt.contains("\$Q")) {
-      _showValidationError("GPT prompt must contain the \$Q keyword.");
+      _showToast("GPT prompt must contain the \$Q keyword.");
       return;
     }
 
@@ -81,7 +87,7 @@ class _DeeplinkEditPageState extends State<DeeplinkEditPage> {
     // new path doesn't clash with any existing deeplink.
     if ((widget.deeplink == null || path != widget.deeplink!.path) &&
         deeplinks.pathExists(path)) {
-      _showValidationError("A deeplink with this path already exists.");
+      _showToast("A deeplink with this path already exists.");
       return;
     }
 
@@ -100,7 +106,41 @@ class _DeeplinkEditPageState extends State<DeeplinkEditPage> {
     Navigator.of(context).pop();
   }
 
-  void _showValidationError(String message) {
+  void _copyAnkiHTML() {
+    String path = _pathController.text.trim();
+    String name = _nameController.text.trim();
+
+    Clipboard.setData(ClipboardData(
+      text: """
+<a href="aiyu://$path?{{Front}}" style="
+    display: inline-block;
+    color: white;
+    background-color: #${Theme.of(context).primaryColor.value.toRadixString(16).substring(2)};
+    padding: 10px 20px;
+    margin-bottom: 20px;
+    text-decoration: none;
+    text-align: center;
+    font-size: 16px;
+    border: none;
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+    position: absolute;
+    bottom: 0px;
+    /* If using multiple buttons, subsequent buttons should use:
+     * bottom: 60px;
+     * bottom: 120px;
+     * ...
+     */
+    right: 0px;
+"><b style="padding-right: 8px">→</b> $name</a>
+""",
+    ));
+
+    _showToast("Copied. Replace '{{Front}}' with the desired field!");
+  }
+
+  void _showToast(String message) {
     ScaffoldMessenger.of(context)
         .showSnackBar(SnackBar(content: Text(message)));
   }
@@ -172,9 +212,16 @@ class _DeeplinkEditPageState extends State<DeeplinkEditPage> {
                 const SizedBox(height: 40.0),
                 SizedBox(
                   width: double.infinity,
-                  child: ElevatedButton(
+                  child: FilledButton(
                     child: const Text("Save"),
                     onPressed: () => _saveAndExit(),
+                  ),
+                ),
+                SizedBox(
+                  width: double.infinity,
+                  child: TextButton(
+                    child: const Text("Copy HTML for Anki"),
+                    onPressed: () => _copyAnkiHTML(),
                   ),
                 ),
               ],
