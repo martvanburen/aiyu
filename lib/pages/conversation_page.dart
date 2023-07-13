@@ -154,7 +154,9 @@ class _LanguagePracticePageState extends State<LanguagePracticePage> {
   }
 
   void _prepareAndSpeakIntroMessage() async {
-    String body = AppLocalizations.of(context)!.conversation_page_intro_message;
+    String body =
+        (await AppLocalizations.delegate.load(Locale(widget.language)))
+            .conversation_page_intro_message;
     GPTMessage introMessage = GPTMessage(
         GPTMessageSender.gpt, Future.value(GPTMessageContent(body)),
         audioUrl: _awsPollyService.getSpeechUrl(input: body));
