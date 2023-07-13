@@ -1,4 +1,4 @@
-package xyz.mavb.ai_yu
+package xyz.mavb.aiyu
 
 import io.flutter.embedding.android.FlutterActivity
 
