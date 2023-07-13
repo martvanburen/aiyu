@@ -26,7 +26,6 @@ TODO(Mart): Add wallet information here.
                 onPressed: () {
                   if (auth.isSignedIn) {
                     auth.signOut();
-                    Navigator.of(context).pop();
                   } else {
                     Navigator.of(context).pop();
                     showDialog(

@@ -38,81 +38,85 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
       ),
-      body: Column(
-        children: <Widget>[
-          const WalletDisplayWidget(),
-          Divider(
-            height: 35,
-            thickness: 2,
-            color: Theme.of(context).primaryColor,
-          ),
-          Card(
-            margin: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 20),
-            elevation: 2,
-            child: InkWell(
-              onTap: () {
-                showDialog(
-                  context: context,
-                  builder: (BuildContext context) =>
-                      const ConversationLaunchDialog(),
-                );
-              },
-              child: Padding(
-                padding: const EdgeInsets.all(20.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: <Widget>[
-                    Text(
-                      "Conversation Practice",
-                      style: TextStyle(
-                        color: Theme.of(context).primaryColor,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
+      body: SingleChildScrollView(
+        child: Column(
+          children: <Widget>[
+            const WalletDisplayWidget(),
+            Divider(
+              height: 35,
+              thickness: 2,
+              color: Theme.of(context).primaryColor,
+            ),
+            Card(
+              margin:
+                  const EdgeInsets.symmetric(vertical: 10.0, horizontal: 20),
+              elevation: 2,
+              child: InkWell(
+                onTap: () {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) =>
+                        const ConversationLaunchDialog(),
+                  );
+                },
+                child: Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: <Widget>[
+                      Text(
+                        "Conversation Practice",
+                        style: TextStyle(
+                          color: Theme.of(context).primaryColor,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 10.0),
-                    const Text(
-                      "Practice chatting in your desired language, and easily add new words to Anki.",
-                    ),
-                    const ConversationQuickLaunchWidget(),
-                  ],
+                      const SizedBox(height: 10.0),
+                      const Text(
+                        "Practice chatting in your desired language, and easily add new words to Anki.",
+                      ),
+                      const ConversationQuickLaunchWidget(),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-          Card(
-            margin: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 20),
-            elevation: 2,
-            child: InkWell(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => const DeeplinkListPage()),
-                );
-              },
-              child: Padding(
-                padding: const EdgeInsets.all(20.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: <Widget>[
-                    Text(
-                      "Configure Deeplinks",
-                      style: TextStyle(
-                        color: Theme.of(context).primaryColor,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
+            Card(
+              margin:
+                  const EdgeInsets.symmetric(vertical: 10.0, horizontal: 20),
+              elevation: 2,
+              child: InkWell(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const DeeplinkListPage()),
+                  );
+                },
+                child: Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: <Widget>[
+                      Text(
+                        "Configure Deeplinks",
+                        style: TextStyle(
+                          color: Theme.of(context).primaryColor,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 10.0),
-                    const Text(
-                        "Configure quick actions / deep-links to use in Anki flashcards."),
-                  ],
+                      const SizedBox(height: 10.0),
+                      const Text(
+                          "Configure quick actions / deep-links to use in Anki flashcards."),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
