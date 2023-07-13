@@ -12,10 +12,50 @@ class SupportedLanguagesProvider {
       "localized": "中文",
       "polly_voice": AWSPolyVoiceId.zhiyu,
     },
+    "es": {
+      "name": "Spanish",
+      "localized": "Español",
+      "polly_voice": AWSPolyVoiceId.lucia,
+    },
+    "hi": {
+      "name": "Hindi",
+      "localized": "हिन्दी",
+      "polly_voice": AWSPolyVoiceId.aditi,
+    },
+    "pt": {
+      "name": "Portuguese",
+      "localized": "Português",
+      "polly_voice": AWSPolyVoiceId.vitoria,
+    },
+    "ru": {
+      "name": "Russian",
+      "localized": "Русский",
+      "polly_voice": AWSPolyVoiceId.tatyana,
+    },
+    "ja": {
+      "name": "Japanese",
+      "localized": "日本語",
+      "polly_voice": AWSPolyVoiceId.mizuki,
+    },
+    "tr": {
+      "name": "Turkish",
+      "localized": "Türkçe",
+      "polly_voice": AWSPolyVoiceId.filiz,
+    },
     "ko": {
       "name": "Korean",
       "localized": "한국어",
       "polly_voice": AWSPolyVoiceId.seoyeon,
+    },
+    "fr": {
+      "name": "French",
+      "localized": "Français",
+      "polly_voice": AWSPolyVoiceId.lea,
+    },
+    "de": {
+      "name": "German",
+      "localized": "Deutsch",
+      "polly_voice": AWSPolyVoiceId.marlene,
     },
   };
 

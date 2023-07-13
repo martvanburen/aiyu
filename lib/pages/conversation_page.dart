@@ -5,11 +5,12 @@ import "package:ai_yu/pages/selection_page.dart";
 import "package:ai_yu/utils/aws_polly_service.dart";
 import "package:ai_yu/utils/gpt_api.dart";
 import "package:ai_yu/utils/mission_decider.dart";
-import "package:ai_yu/widgets/language_practice_page/conversation_display_widget.dart";
-import "package:ai_yu/widgets/language_practice_page/language_input_widget.dart";
+import "package:ai_yu/widgets/conversation_page/conversation_display_widget.dart";
+import "package:ai_yu/widgets/conversation_page/language_input_widget.dart";
 import "package:ai_yu/widgets/shared/back_or_close_button.dart";
 import "package:ai_yu/widgets/shared/mini_wallet_widget.dart";
 import "package:flutter/material.dart";
+import "package:flutter_gen/gen_l10n/app_localizations.dart";
 import "package:just_audio/just_audio.dart";
 import "package:provider/provider.dart";
 
@@ -153,7 +154,7 @@ class _LanguagePracticePageState extends State<LanguagePracticePage> {
   }
 
   void _prepareAndSpeakIntroMessage() async {
-    String body = "What would you like to discuss?";
+    String body = AppLocalizations.of(context)!.conversation_page_intro_message;
     GPTMessage introMessage = GPTMessage(
         GPTMessageSender.gpt, Future.value(GPTMessageContent(body)),
         audioUrl: _awsPollyService.getSpeechUrl(input: body));

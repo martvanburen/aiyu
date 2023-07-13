@@ -1,10 +1,5 @@
 {
     "title": "AiYu",
-    "subtitle": "Anki Companion",
-    "tab_english": "English",
-    "tab_korean": "한국어",
-    "tab_chinese": "中文",
-    "questionMode": "질문 모드",
-    "conversationMode": "대화 모드",
-    "done": "완료"
+    "subtitle": "Anki 동반자",
+    "conversation_page_intro_message": "무엇에 대해 논의하고 싶으신가요?"
 }
