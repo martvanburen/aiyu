@@ -6,8 +6,13 @@ import "package:amplify_flutter/amplify_flutter.dart";
 import "package:flutter/material.dart";
 
 class AuthModel extends ChangeNotifier {
-  late final Future<bool> _initialization;
   late final StreamSubscription<AuthHubEvent> _authEventSubscription;
+
+  late final Future<bool> _initialization;
+  Future<bool> get initialization => _initialization;
+
+  bool _isSignedIn = false;
+  bool get isSignedIn => _isSignedIn;
 
   AuthModel() {
     _initialization = _configureAmplify();
@@ -18,6 +23,7 @@ class AuthModel extends ChangeNotifier {
     try {
       await Amplify.addPlugin(AmplifyAuthCognito());
       await Amplify.configure(amplifyconfig);
+      _isSignedIn = (await Amplify.Auth.fetchAuthSession()).isSignedIn;
       notifyListeners();
       return true;
     } on Exception {
@@ -26,14 +32,13 @@ class AuthModel extends ChangeNotifier {
     return false;
   }
 
-  void _onAuthEvent(AuthHubEvent event) {
+  void _onAuthEvent(AuthHubEvent event) async {
+    _isSignedIn = (await Amplify.Auth.fetchAuthSession()).isSignedIn;
     notifyListeners();
   }
 
-  Future<bool> isLoggedIn() async {
-    if (await _initialization == false) return false;
-    final auth = await Amplify.Auth.fetchAuthSession();
-    return auth.isSignedIn;
+  void signOut() async {
+    Amplify.Auth.signOut();
   }
 
   @override

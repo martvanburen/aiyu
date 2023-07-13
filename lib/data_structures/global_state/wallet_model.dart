@@ -17,7 +17,8 @@ class WalletModel extends ChangeNotifier {
   }
 
   void _fetchWalletBalance() async {
-    if (await _auth?.isLoggedIn() ?? false) {
+    await _auth?.initialization;
+    if (_auth?.isSignedIn ?? false) {
       _microcentBalance = 100000;
       notifyListeners();
     }
