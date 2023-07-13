@@ -57,6 +57,11 @@ class SupportedLanguagesProvider {
       "localized": "Deutsch",
       "polly_voice": AWSPolyVoiceId.marlene,
     },
+    "nl": {
+      "name": "Dutch",
+      "localized": "Nederlands",
+      "polly_voice": AWSPolyVoiceId.lotte,
+    },
   };
 
   static const defaultLanguageCode = "en";
