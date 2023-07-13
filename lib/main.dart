@@ -1,7 +1,7 @@
 import "dart:async";
 import "dart:io";
 
-import "package:ai_yu/amplifyconfiguration.dart";
+import "package:ai_yu/data_structures/global_state/auth_model.dart";
 import "package:ai_yu/data_structures/global_state/deeplinks_model.dart";
 import "package:ai_yu/data_structures/global_state/preferences_model.dart";
 import "package:ai_yu/data_structures/global_state/wallet_model.dart";
@@ -9,8 +9,7 @@ import "package:ai_yu/pages/deeplink_page.dart";
 import "package:ai_yu/pages/home_page.dart";
 import "package:ai_yu/pages/conversation_page.dart";
 import "package:ai_yu/utils/supported_languages_provider.dart";
-import "package:amplify_auth_cognito/amplify_auth_cognito.dart";
-import "package:amplify_flutter/amplify_flutter.dart";
+import "package:amplify_authenticator/amplify_authenticator.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 import "package:flutter_dotenv/flutter_dotenv.dart";
@@ -25,7 +24,12 @@ Future<void> main() async {
     providers: [
       ChangeNotifierProvider(create: (context) => PreferencesModel()),
       ChangeNotifierProvider(create: (context) => DeeplinksModel()),
-      ChangeNotifierProvider(create: (context) => WalletModel()),
+      ChangeNotifierProvider(create: (context) => AuthModel(), lazy: false),
+      ChangeNotifierProxyProvider<AuthModel, WalletModel>(
+        create: (context) => WalletModel(null, null),
+        update: (context, auth, previousWallet) =>
+            WalletModel(auth, previousWallet),
+      ),
     ],
     child: const AiYuApp(),
   ));
@@ -48,22 +52,9 @@ class _AiYuAppState extends State<AiYuApp> {
   @override
   void initState() {
     super.initState();
-    _configureAmplify();
     if (Platform.isAndroid || Platform.isIOS) {
       _initializeFlutterAppShortcuts();
       _initializeDeeplinks();
-    }
-  }
-
-  void _configureAmplify() async {
-    try {
-      await Amplify.addPlugin(AmplifyAuthCognito());
-      await Amplify.configure(amplifyconfig);
-    } on Exception {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Failed to initialize AWS Amplify.")));
-      });
     }
   }
 
@@ -133,6 +124,7 @@ class _AiYuAppState extends State<AiYuApp> {
 
   @override
   Widget build(BuildContext context) {
+    // Decide home based on app shortcuts & deeplinks.
     late final Widget home;
     if (_appOpenFlutterShortcutsAction?.startsWith("start_conversation_") ??
         false) {
@@ -144,44 +136,51 @@ class _AiYuAppState extends State<AiYuApp> {
     } else {
       home = const HomePage();
     }
-    return MaterialApp(
-      title: "AI-YU",
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
-      supportedLocales: AppLocalizations.supportedLocales,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
 
-        // Make all buttons square by default.
-        elevatedButtonTheme: ElevatedButtonThemeData(
-          style: ButtonStyle(
-            shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-              const RoundedRectangleBorder(
-                borderRadius: BorderRadius.zero,
-              ),
-            ),
-          ),
-        ),
-        textButtonTheme: TextButtonThemeData(
-          style: ButtonStyle(
-            shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-              const RoundedRectangleBorder(
-                borderRadius: BorderRadius.zero,
-              ),
-            ),
-          ),
-        ),
-        iconButtonTheme: IconButtonThemeData(
-          style: ButtonStyle(
-            shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-              const RoundedRectangleBorder(
-                borderRadius: BorderRadius.zero,
-              ),
+    return Authenticator(
+      child: MaterialApp(
+        title: "AI-YU",
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        theme: _buildAppTheme(),
+        home: home,
+      ),
+    );
+  }
+
+  ThemeData _buildAppTheme() {
+    return ThemeData(
+      colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+      useMaterial3: true,
+
+      // Make all buttons square by default.
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ButtonStyle(
+          shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+            const RoundedRectangleBorder(
+              borderRadius: BorderRadius.zero,
             ),
           ),
         ),
       ),
-      home: home,
+      textButtonTheme: TextButtonThemeData(
+        style: ButtonStyle(
+          shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+            const RoundedRectangleBorder(
+              borderRadius: BorderRadius.zero,
+            ),
+          ),
+        ),
+      ),
+      iconButtonTheme: IconButtonThemeData(
+        style: ButtonStyle(
+          shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+            const RoundedRectangleBorder(
+              borderRadius: BorderRadius.zero,
+            ),
+          ),
+        ),
+      ),
     );
   }
 

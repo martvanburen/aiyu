@@ -1,4 +1,5 @@
 import 'package:ai_yu/data_structures/global_state/wallet_model.dart';
+import 'package:ai_yu/widgets/home_page/wallet_info_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -52,28 +53,7 @@ class _WalletDisplayWidgetState extends State<WalletDisplayWidget> {
   void _showCostBreakdown() {
     showDialog(
       context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text("Cost Breakdown"),
-          content: const Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text("GPT-4 query cost: \$0.03"),
-              Text("AWS Polly cost: \$0.04"),
-              Text("App charge: 50%"),
-            ],
-          ),
-          actions: [
-            TextButton(
-              child: const Text("Close"),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
+      builder: (BuildContext context) => const WalletInfoDialog(),
     );
   }
 }

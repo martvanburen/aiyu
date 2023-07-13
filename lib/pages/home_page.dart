@@ -13,10 +13,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  GlobalKey<ConversationLaunchDialogWidgetState>
-      conversationLaunchDialogWidgetKey =
-      GlobalKey<ConversationLaunchDialogWidgetState>();
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -47,8 +43,6 @@ class _HomePageState extends State<HomePage> {
           const WalletDisplayWidget(),
           Divider(
             height: 35,
-            // indent: 60,
-            // endIndent: 60,
             thickness: 2,
             color: Theme.of(context).primaryColor,
           ),
@@ -59,28 +53,8 @@ class _HomePageState extends State<HomePage> {
               onTap: () {
                 showDialog(
                   context: context,
-                  builder: (BuildContext context) => AlertDialog(
-                    title: const Text("Start Conversation"),
-                    content: ConversationLaunchDialogWidget(
-                      key: conversationLaunchDialogWidgetKey,
-                    ),
-                    actions: <Widget>[
-                      TextButton(
-                        child: const Text("Cancel"),
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                      ),
-                      FilledButton(
-                        child: const Text("Start"),
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                          conversationLaunchDialogWidgetKey.currentState!
-                              .startConversation(context);
-                        },
-                      ),
-                    ],
-                  ),
+                  builder: (BuildContext context) =>
+                      const ConversationLaunchDialog(),
                 );
               },
               child: Padding(
