@@ -54,4 +54,4 @@ app.*.map.json
 .env
 
 # AWS Amplify
-amplifyconfiguration.dart
+/lib/amplifyconfiguration.dart

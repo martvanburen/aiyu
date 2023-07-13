@@ -62,6 +62,11 @@ dependencies:
   # Deeplinks.
   uni_links: ^0.5.1
 
+  # AWS Amplify.
+  amplify_flutter: ^1.2.1
+  amplify_auth_cognito: ^1.2.1
+  amplify_authenticator: ^1.2.1
+
   # Diverse.
   collection: ^1.17.1
 

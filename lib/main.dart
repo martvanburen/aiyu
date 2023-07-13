@@ -1,6 +1,7 @@
 import "dart:async";
 import "dart:io";
 
+import "package:ai_yu/amplifyconfiguration.dart";
 import "package:ai_yu/data_structures/global_state/deeplinks_model.dart";
 import "package:ai_yu/data_structures/global_state/preferences_model.dart";
 import "package:ai_yu/data_structures/global_state/wallet_model.dart";
@@ -8,6 +9,8 @@ import "package:ai_yu/pages/deeplink_page.dart";
 import "package:ai_yu/pages/home_page.dart";
 import "package:ai_yu/pages/conversation_page.dart";
 import "package:ai_yu/utils/supported_languages_provider.dart";
+import "package:amplify_auth_cognito/amplify_auth_cognito.dart";
+import "package:amplify_flutter/amplify_flutter.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 import "package:flutter_dotenv/flutter_dotenv.dart";
@@ -45,9 +48,22 @@ class _AiYuAppState extends State<AiYuApp> {
   @override
   void initState() {
     super.initState();
+    _configureAmplify();
     if (Platform.isAndroid || Platform.isIOS) {
       _initializeFlutterAppShortcuts();
       _initializeDeeplinks();
+    }
+  }
+
+  void _configureAmplify() async {
+    try {
+      await Amplify.addPlugin(AmplifyAuthCognito());
+      await Amplify.configure(amplifyconfig);
+    } on Exception {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Failed to initialize AWS Amplify.")));
+      });
     }
   }
 
