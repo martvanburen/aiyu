@@ -52,3 +52,6 @@ app.*.map.json
 
 # Ignore .env containing API keys, etc.
 .env
+
+# AWS Amplify
+amplifyconfiguration.dart
