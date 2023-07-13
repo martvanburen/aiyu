@@ -1,6 +1,6 @@
-import "dart:collection";
 import "dart:convert";
 
+import "package:collection/collection.dart";
 import "package:flutter/material.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
@@ -93,8 +93,8 @@ class DeeplinksModel extends ChangeNotifier {
     return _deeplinks.any((deeplink) => deeplink.path == path);
   }
 
-  Future<DeeplinkConfig> getDeeplinkConfigFromUri(Uri uri) async {
+  Future<DeeplinkConfig?> getDeeplinkConfigFromUri(Uri uri) async {
     await _initializationFuture;
-    return _deeplinks.firstWhere((deeplink) => deeplink.path == uri.host);
+    return _deeplinks.firstWhereOrNull((deeplink) => deeplink.path == uri.host);
   }
 }

@@ -19,9 +19,9 @@ class DeeplinkPage extends StatefulWidget {
       : uri = null,
         super(key: key);
 
-  DeeplinkPage.fromUri({Key? key, required this.uri})
+  const DeeplinkPage.fromUri({Key? key, required this.uri})
       : deeplinkConfig = null,
-        queryString = uri?.query,
+        queryString = null,
         super(key: key);
 
   @override
@@ -30,6 +30,7 @@ class DeeplinkPage extends StatefulWidget {
 
 class _DeeplinkPageState extends State<DeeplinkPage> {
   bool _readyToLoadPage = false;
+  String _errorMessage = "";
 
   late final String? _mission;
   late final String _prompt;
@@ -43,14 +44,10 @@ class _DeeplinkPageState extends State<DeeplinkPage> {
     _mission = decideMission(mode: GPTMode.deeplinkActionMode);
     if (widget.deeplinkConfig != null) {
       // Widget was opened directly with DeeplinkConfigObject.
-      _sendPromptToServer(widget.deeplinkConfig!);
+      _loadFromDeeplinkConfig(widget.deeplinkConfig!, widget.queryString ?? "");
     } else if (widget.uri != null) {
       // Widget was opened with Uri.
-      Provider.of<DeeplinksModel>(context, listen: false)
-          .getDeeplinkConfigFromUri(widget.uri!)
-          .then((deeplinkConfig) {
-        _sendPromptToServer(deeplinkConfig);
-      });
+      _loadFromUri(widget.uri!);
     }
   }
 
@@ -62,9 +59,43 @@ class _DeeplinkPageState extends State<DeeplinkPage> {
     }
   }
 
-  void _sendPromptToServer(DeeplinkConfig deeplinkConfig) async {
+  void _loadFromUri(Uri uri) async {
+    String? queryString = uri.queryParameters["q"];
+    if (queryString == null) {
+      setState(() {
+        _errorMessage = """
+No query string found.
+
+Be sure to append ?q=MY_QUERY_STRING to end of the link you are using.
+
+Example:
+aiyu://to-chinese?q=hello
+
+Anki Example:
+aiyu://to-chinese?q={{Front}}}
+""";
+      });
+      return;
+    }
+
+    final DeeplinkConfig? deeplinkConfig =
+        await Provider.of<DeeplinksModel>(context, listen: false)
+            .getDeeplinkConfigFromUri(uri);
+    if (deeplinkConfig == null) {
+      setState(() {
+        _errorMessage =
+            "No matching deeplink config found for 'aiyu://${uri.host}'.";
+      });
+      return;
+    }
+
+    _loadFromDeeplinkConfig(deeplinkConfig, queryString);
+  }
+
+  void _loadFromDeeplinkConfig(
+      DeeplinkConfig deeplinkConfig, String queryString) async {
     // Replace $Q in deeplink prompt with query string.
-    _prompt = deeplinkConfig.prompt.replaceAll("\$Q", widget.queryString ?? "");
+    _prompt = deeplinkConfig.prompt.replaceAll("\$Q", queryString);
 
     setState(() {
       _deeplinkQueryMessage = GPTMessage(
@@ -237,7 +268,14 @@ class _DeeplinkPageState extends State<DeeplinkPage> {
                 ],
               ),
             )
-          : Container(),
+          : Padding(
+              padding: const EdgeInsets.all(50.0),
+              child: Center(
+                  child: Text(
+                _errorMessage,
+                textAlign: TextAlign.center,
+              )),
+            ),
     );
   }
 }

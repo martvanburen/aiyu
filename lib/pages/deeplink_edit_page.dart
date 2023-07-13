@@ -110,9 +110,10 @@ class _DeeplinkEditPageState extends State<DeeplinkEditPage> {
     String path = _pathController.text.trim();
     String name = _nameController.text.trim();
 
-    Clipboard.setData(ClipboardData(
+    // Purple style.
+    /* Clipboard.setData(ClipboardData(
       text: """
-<a href="aiyu://$path?{{Front}}" style="
+<a href="aiyu://$path?q={{Front}}" style="
     display: inline-block;
     color: white;
     background-color: #${Theme.of(context).primaryColor.value.toRadixString(16).substring(2)};
@@ -134,6 +135,34 @@ class _DeeplinkEditPageState extends State<DeeplinkEditPage> {
      */
     right: 0px;
 "><b style="padding-right: 8px">→</b> $name</a>
+""",
+    )); */
+
+    // Black-and-white style.
+    Clipboard.setData(ClipboardData(
+      text: """
+<a href="aiyu://$path?q={{Front}}" style="
+    display: inline-block;
+    color: black;
+    background-color: white;
+    padding: 10px 20px;
+    margin-bottom: 20px;
+    text-decoration: none;
+    text-align: center;
+    font-size: 16px;
+    font-weight: bold;
+    border: 1px solid black;
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+    position: absolute;
+    bottom: 0px;
+    /* If using multiple buttons, subsequent buttons should use:
+     * bottom: 60px;
+     * bottom: 120px;
+     * ...
+     */
+    right: 0px;
+"><span style="padding-right: 8px">→</span> $name</a>
 """,
     ));
 
