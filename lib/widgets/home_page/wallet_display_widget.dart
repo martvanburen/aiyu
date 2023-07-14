@@ -26,8 +26,8 @@ class _WalletDisplayWidgetState extends State<WalletDisplayWidget> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      "Wallet Balance:",
+                    SelectableText(
+                      wallet.text,
                       style: TextStyle(fontSize: 12, color: Colors.grey),
                     ),
                     Text("${wallet.centBalance.toStringAsFixed(2)}¢",

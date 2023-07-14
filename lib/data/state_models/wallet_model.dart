@@ -1,13 +1,10 @@
-import 'dart:async';
-
-import 'package:ai_yu/data/aws_models/Wallet.dart';
 import 'package:ai_yu/data/state_models/aws_model.dart';
 import 'package:amplify_flutter/amplify_flutter.dart';
 import "package:flutter/material.dart";
 
 class WalletModel extends ChangeNotifier {
   late final AWSModel? _aws;
-  StreamSubscription<QuerySnapshot<Wallet>>? _walletSubscription;
+  bool _disposed = false;
 
   // Measured in 100ths of a cent.
   late int _microcentBalance;
@@ -16,41 +13,66 @@ class WalletModel extends ChangeNotifier {
   double get centBalance => _microcentBalance / 100.0;
   double get dollarBalance => _microcentBalance / 10000.0;
 
+  String text = "";
+
   WalletModel(this._aws, WalletModel? previousWallet) {
     _microcentBalance = previousWallet?._microcentBalance ?? 0;
-    _configureWalletSubscription();
+    _fetchWalletBalance();
   }
 
-  void _configureWalletSubscription() async {
-    if (_aws == null) return;
+  @override
+  void notifyListeners() {
+    if (!_disposed) {
+      super.notifyListeners();
+    }
+  }
 
-    _walletSubscription = Amplify.DataStore.observeQuery(
+  void _fetchWalletBalance() async {
+    if (_aws == null) return;
+    await _aws?.initialization;
+
+    final userIdentity = await _aws!.getUserIdentity();
+
+    final restOperation = Amplify.API.post(
+      '/wallet',
+      body: HttpPayload.json({'id': userIdentity}),
+    );
+    final response = await restOperation.response;
+    safePrint('POST call succeeded');
+    safePrint(response.decodeBody());
+    text = response.decodeBody();
+    notifyListeners();
+
+    /* final userIdentity = await _aws!.getUserIdentity();
+    final awsWallet = (await Amplify.DataStore.query(
       Wallet.classType,
-      where: Wallet.IDENTITY_ID.eq(await _aws!.getUserSub()),
-    ).listen((QuerySnapshot<Wallet> snapshot) {
-      _microcentBalance = snapshot.items.first.balance_microcents;
+      where: Wallet.IDENTITY_ID.eq(userIdentity),
+    ))
+        .firstOrNull;
+    if (awsWallet != null) {
+      _microcentBalance = awsWallet.balance_microcents;
       notifyListeners();
-    });
+    } */
   }
 
   void add50Cent() async {
-    if (_aws == null) return;
+    /* if (_aws == null) return;
 
-    final userSub = await _aws!.getUserSub();
+    final userIdentity = await _aws!.getUserIdentity();
 
     final oldWallet = (await Amplify.DataStore.query(
           Wallet.classType,
-          where: Wallet.IDENTITY_ID.eq(userSub),
+          where: Wallet.IDENTITY_ID.eq(userIdentity),
         ))
             .firstOrNull ??
-        Wallet(balance_microcents: 0, identity_id: userSub);
+        Wallet(balance_microcents: 0, identity_id: userIdentity);
 
     final newWallet = oldWallet.copyWith(
         balance_microcents: oldWallet.balance_microcents + 5000);
 
     await Amplify.DataStore.save(newWallet);
 
-    notifyListeners();
+    notifyListeners(); */
   }
 
   int _calculateQueryCost() {
@@ -63,7 +85,7 @@ class WalletModel extends ChangeNotifier {
 
   @override
   void dispose() {
-    _walletSubscription?.cancel();
+    _disposed = true;
     super.dispose();
   }
 }

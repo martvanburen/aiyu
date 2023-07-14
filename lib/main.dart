@@ -9,7 +9,6 @@ import "package:ai_yu/pages/deeplink_page.dart";
 import "package:ai_yu/pages/home_page.dart";
 import "package:ai_yu/pages/conversation_page.dart";
 import "package:ai_yu/utils/supported_languages_provider.dart";
-import "package:amplify_authenticator/amplify_authenticator.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 import "package:flutter_dotenv/flutter_dotenv.dart";
@@ -137,14 +136,12 @@ class _AiYuAppState extends State<AiYuApp> {
       home = const HomePage();
     }
 
-    return Authenticator(
-      child: MaterialApp(
-        title: "AI-YU",
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        theme: _buildAppTheme(),
-        home: home,
-      ),
+    return MaterialApp(
+      title: "AI-YU",
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      theme: _buildAppTheme(),
+      home: home,
     );
   }
 
