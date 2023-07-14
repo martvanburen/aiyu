@@ -2,6 +2,7 @@ import "dart:async";
 
 import "package:ai_yu/amplifyconfiguration.dart";
 import "package:ai_yu/data/aws_models/ModelProvider.dart";
+import "package:amplify_api/amplify_api.dart";
 import "package:amplify_auth_cognito/amplify_auth_cognito.dart";
 import "package:amplify_datastore/amplify_datastore.dart";
 import "package:amplify_flutter/amplify_flutter.dart";
@@ -26,6 +27,7 @@ class AWSModel extends ChangeNotifier {
       await Amplify.addPlugin(AmplifyAuthCognito());
       await Amplify.addPlugin(
           AmplifyDataStore(modelProvider: ModelProvider.instance));
+      await Amplify.addPlugin(AmplifyAPI());
       await Amplify.configure(amplifyconfig);
       _isSignedIn = (await Amplify.Auth.fetchAuthSession()).isSignedIn;
       notifyListeners();
@@ -43,6 +45,12 @@ class AWSModel extends ChangeNotifier {
 
   void signOut() async {
     Amplify.Auth.signOut();
+  }
+
+  Future<String> getUserSub() async {
+    await initialization;
+    final cognitoPlugin = Amplify.Auth.getPlugin(AmplifyAuthCognito.pluginKey);
+    return (await cognitoPlugin.fetchAuthSession()).identityIdResult.value;
   }
 
   @override

@@ -27,8 +27,8 @@ import 'package:amplify_core/amplify_core.dart' as amplify_core;
 class Wallet extends amplify_core.Model {
   static const classType = const _WalletModelType();
   final String id;
-  final int? _balance;
   final String? _identity_id;
+  final int? _balance_microcents;
   final amplify_core.TemporalDateTime? _createdAt;
   final amplify_core.TemporalDateTime? _updatedAt;
 
@@ -45,9 +45,9 @@ class Wallet extends amplify_core.Model {
       );
   }
   
-  int get balance {
+  String get identity_id {
     try {
-      return _balance!;
+      return _identity_id!;
     } catch(e) {
       throw amplify_core.AmplifyCodeGenModelException(
           amplify_core.AmplifyExceptionMessages.codeGenRequiredFieldForceCastExceptionMessage,
@@ -58,9 +58,9 @@ class Wallet extends amplify_core.Model {
     }
   }
   
-  String get identity_id {
+  int get balance_microcents {
     try {
-      return _identity_id!;
+      return _balance_microcents!;
     } catch(e) {
       throw amplify_core.AmplifyCodeGenModelException(
           amplify_core.AmplifyExceptionMessages.codeGenRequiredFieldForceCastExceptionMessage,
@@ -79,13 +79,13 @@ class Wallet extends amplify_core.Model {
     return _updatedAt;
   }
   
-  const Wallet._internal({required this.id, required balance, required identity_id, createdAt, updatedAt}): _balance = balance, _identity_id = identity_id, _createdAt = createdAt, _updatedAt = updatedAt;
+  const Wallet._internal({required this.id, required identity_id, required balance_microcents, createdAt, updatedAt}): _identity_id = identity_id, _balance_microcents = balance_microcents, _createdAt = createdAt, _updatedAt = updatedAt;
   
-  factory Wallet({String? id, required int balance, required String identity_id}) {
+  factory Wallet({String? id, required String identity_id, required int balance_microcents}) {
     return Wallet._internal(
       id: id == null ? amplify_core.UUID.getUUID() : id,
-      balance: balance,
-      identity_id: identity_id);
+      identity_id: identity_id,
+      balance_microcents: balance_microcents);
   }
   
   bool equals(Object other) {
@@ -97,8 +97,8 @@ class Wallet extends amplify_core.Model {
     if (identical(other, this)) return true;
     return other is Wallet &&
       id == other.id &&
-      _balance == other._balance &&
-      _identity_id == other._identity_id;
+      _identity_id == other._identity_id &&
+      _balance_microcents == other._balance_microcents;
   }
   
   @override
@@ -110,8 +110,8 @@ class Wallet extends amplify_core.Model {
     
     buffer.write("Wallet {");
     buffer.write("id=" + "$id" + ", ");
-    buffer.write("balance=" + (_balance != null ? _balance!.toString() : "null") + ", ");
     buffer.write("identity_id=" + "$_identity_id" + ", ");
+    buffer.write("balance_microcents=" + (_balance_microcents != null ? _balance_microcents!.toString() : "null") + ", ");
     buffer.write("createdAt=" + (_createdAt != null ? _createdAt!.format() : "null") + ", ");
     buffer.write("updatedAt=" + (_updatedAt != null ? _updatedAt!.format() : "null"));
     buffer.write("}");
@@ -119,47 +119,47 @@ class Wallet extends amplify_core.Model {
     return buffer.toString();
   }
   
-  Wallet copyWith({int? balance, String? identity_id}) {
+  Wallet copyWith({String? identity_id, int? balance_microcents}) {
     return Wallet._internal(
       id: id,
-      balance: balance ?? this.balance,
-      identity_id: identity_id ?? this.identity_id);
+      identity_id: identity_id ?? this.identity_id,
+      balance_microcents: balance_microcents ?? this.balance_microcents);
   }
   
   Wallet copyWithModelFieldValues({
-    ModelFieldValue<int>? balance,
-    ModelFieldValue<String>? identity_id
+    ModelFieldValue<String>? identity_id,
+    ModelFieldValue<int>? balance_microcents
   }) {
     return Wallet._internal(
       id: id,
-      balance: balance == null ? this.balance : balance.value,
-      identity_id: identity_id == null ? this.identity_id : identity_id.value
+      identity_id: identity_id == null ? this.identity_id : identity_id.value,
+      balance_microcents: balance_microcents == null ? this.balance_microcents : balance_microcents.value
     );
   }
   
   Wallet.fromJson(Map<String, dynamic> json)  
     : id = json['id'],
-      _balance = (json['balance'] as num?)?.toInt(),
       _identity_id = json['identity_id'],
+      _balance_microcents = (json['balance_microcents'] as num?)?.toInt(),
       _createdAt = json['createdAt'] != null ? amplify_core.TemporalDateTime.fromString(json['createdAt']) : null,
       _updatedAt = json['updatedAt'] != null ? amplify_core.TemporalDateTime.fromString(json['updatedAt']) : null;
   
   Map<String, dynamic> toJson() => {
-    'id': id, 'balance': _balance, 'identity_id': _identity_id, 'createdAt': _createdAt?.format(), 'updatedAt': _updatedAt?.format()
+    'id': id, 'identity_id': _identity_id, 'balance_microcents': _balance_microcents, 'createdAt': _createdAt?.format(), 'updatedAt': _updatedAt?.format()
   };
   
   Map<String, Object?> toMap() => {
     'id': id,
-    'balance': _balance,
     'identity_id': _identity_id,
+    'balance_microcents': _balance_microcents,
     'createdAt': _createdAt,
     'updatedAt': _updatedAt
   };
 
   static final amplify_core.QueryModelIdentifier<WalletModelIdentifier> MODEL_IDENTIFIER = amplify_core.QueryModelIdentifier<WalletModelIdentifier>();
   static final ID = amplify_core.QueryField(fieldName: "id");
-  static final BALANCE = amplify_core.QueryField(fieldName: "balance");
   static final IDENTITY_ID = amplify_core.QueryField(fieldName: "identity_id");
+  static final BALANCE_MICROCENTS = amplify_core.QueryField(fieldName: "balance_microcents");
   static var schema = amplify_core.Model.defineSchema(define: (amplify_core.ModelSchemaDefinition modelSchemaDefinition) {
     modelSchemaDefinition.name = "Wallet";
     modelSchemaDefinition.pluralName = "Wallets";
@@ -167,36 +167,36 @@ class Wallet extends amplify_core.Model {
     modelSchemaDefinition.authRules = [
       amplify_core.AuthRule(
         authStrategy: amplify_core.AuthStrategy.OWNER,
-        ownerField: "identity_id",
+        ownerField: "owner",
         identityClaim: "cognito:username",
         provider: amplify_core.AuthRuleProvider.USERPOOLS,
         operations: const [
-          amplify_core.ModelOperation.READ
-        ]),
-      amplify_core.AuthRule(
-        authStrategy: amplify_core.AuthStrategy.PRIVATE,
-        operations: const [
+          amplify_core.ModelOperation.CREATE,
+          amplify_core.ModelOperation.UPDATE,
+          amplify_core.ModelOperation.DELETE,
           amplify_core.ModelOperation.READ
         ]),
       amplify_core.AuthRule(
         authStrategy: amplify_core.AuthStrategy.PUBLIC,
+        provider: amplify_core.AuthRuleProvider.IAM,
         operations: const [
-          
+          amplify_core.ModelOperation.READ,
+          amplify_core.ModelOperation.CREATE
         ])
     ];
     
     modelSchemaDefinition.addField(amplify_core.ModelFieldDefinition.id());
     
     modelSchemaDefinition.addField(amplify_core.ModelFieldDefinition.field(
-      key: Wallet.BALANCE,
-      isRequired: true,
-      ofType: amplify_core.ModelFieldType(amplify_core.ModelFieldTypeEnum.int)
-    ));
-    
-    modelSchemaDefinition.addField(amplify_core.ModelFieldDefinition.field(
       key: Wallet.IDENTITY_ID,
       isRequired: true,
       ofType: amplify_core.ModelFieldType(amplify_core.ModelFieldTypeEnum.string)
+    ));
+    
+    modelSchemaDefinition.addField(amplify_core.ModelFieldDefinition.field(
+      key: Wallet.BALANCE_MICROCENTS,
+      isRequired: true,
+      ofType: amplify_core.ModelFieldType(amplify_core.ModelFieldTypeEnum.int)
     ));
     
     modelSchemaDefinition.addField(amplify_core.ModelFieldDefinition.nonQueryField(

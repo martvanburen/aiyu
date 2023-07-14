@@ -26,7 +26,7 @@ export 'Wallet.dart';
 
 class ModelProvider implements amplify_core.ModelProviderInterface {
   @override
-  String version = "1abae813d2cc3788a0225d76aa8d1cb3";
+  String version = "4a4a44996e6ea24276819c60ede5f4f2";
   @override
   List<amplify_core.ModelSchema> modelSchemas = [Wallet.schema];
   @override
