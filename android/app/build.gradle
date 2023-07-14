@@ -33,7 +33,7 @@ if (keystorePropertiesFile.exists()) {
 
 android {
     namespace "xyz.mavb.aiyu"
-    compileSdkVersion flutter.compileSdkVersion
+    compileSdkVersion Math.max(flutter.compileSdkVersion, 31)
     ndkVersion flutter.ndkVersion
 
     compileOptions {
