@@ -1,6 +1,6 @@
 import "package:flutter/material.dart";
 import "package:provider/provider.dart";
-import "package:ai_yu/data_structures/global_state/deeplinks_model.dart";
+import 'package:ai_yu/data/state_models/deeplinks_model.dart';
 import "package:ai_yu/pages/deeplink_page.dart";
 
 class DeeplinkSelectionDialog extends StatelessWidget {

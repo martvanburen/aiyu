@@ -1,6 +1,6 @@
 import "dart:ui";
 
-import "package:ai_yu/data_structures/gpt_message.dart";
+import 'package:ai_yu/data/gpt_message.dart';
 import "package:ai_yu/utils/gpt_api.dart";
 import "package:ai_yu/widgets/selection_page/deeplink_selection_dialog.dart";
 import "package:ai_yu/widgets/selection_page/long_text_dialog.dart";

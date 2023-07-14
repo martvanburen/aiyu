@@ -1,4 +1,4 @@
-import "package:ai_yu/data_structures/global_state/preferences_model.dart";
+import 'package:ai_yu/data/state_models/preferences_model.dart';
 import "package:ai_yu/utils/supported_languages_provider.dart";
 import "package:flutter/material.dart";
 import "package:ai_yu/pages/conversation_page.dart";

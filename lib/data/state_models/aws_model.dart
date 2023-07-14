@@ -1,11 +1,13 @@
 import "dart:async";
 
 import "package:ai_yu/amplifyconfiguration.dart";
+import "package:ai_yu/data/aws_models/ModelProvider.dart";
 import "package:amplify_auth_cognito/amplify_auth_cognito.dart";
+import "package:amplify_datastore/amplify_datastore.dart";
 import "package:amplify_flutter/amplify_flutter.dart";
 import "package:flutter/material.dart";
 
-class AuthModel extends ChangeNotifier {
+class AWSModel extends ChangeNotifier {
   late final StreamSubscription<AuthHubEvent> _authEventSubscription;
 
   late final Future<bool> _initialization;
@@ -14,7 +16,7 @@ class AuthModel extends ChangeNotifier {
   bool _isSignedIn = false;
   bool get isSignedIn => _isSignedIn;
 
-  AuthModel() {
+  AWSModel() {
     _initialization = _configureAmplify();
     _authEventSubscription = Amplify.Hub.listen(HubChannel.Auth, _onAuthEvent);
   }
@@ -22,6 +24,8 @@ class AuthModel extends ChangeNotifier {
   Future<bool> _configureAmplify() async {
     try {
       await Amplify.addPlugin(AmplifyAuthCognito());
+      await Amplify.addPlugin(
+          AmplifyDataStore(modelProvider: ModelProvider.instance));
       await Amplify.configure(amplifyconfig);
       _isSignedIn = (await Amplify.Auth.fetchAuthSession()).isSignedIn;
       notifyListeners();

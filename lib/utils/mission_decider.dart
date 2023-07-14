@@ -1,4 +1,4 @@
-import "package:ai_yu/data_structures/gpt_mode.dart";
+import 'package:ai_yu/data/gpt_mode.dart';
 import "package:ai_yu/utils/supported_languages_provider.dart";
 
 String? decideMission({required GPTMode mode, String? language}) {

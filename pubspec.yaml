@@ -66,6 +66,7 @@ dependencies:
   amplify_flutter: ^1.2.1
   amplify_auth_cognito: ^1.2.1
   amplify_authenticator: ^1.2.1
+  amplify_datastore: ^1.2.0-supports-only-mobile+1
 
   # Diverse.
   collection: ^1.17.1

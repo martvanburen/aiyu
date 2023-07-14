@@ -1,6 +1,6 @@
 import "dart:convert";
 
-import "package:ai_yu/data_structures/gpt_message.dart";
+import 'package:ai_yu/data/gpt_message.dart';
 import "package:flutter_dotenv/flutter_dotenv.dart";
 import "package:http/http.dart" as http;
 

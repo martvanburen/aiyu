@@ -1,4 +1,4 @@
-import "package:ai_yu/data_structures/gpt_message.dart";
+import 'package:ai_yu/data/gpt_message.dart';
 import "package:flutter/material.dart";
 
 class ConversationDisplayWidget extends StatelessWidget {

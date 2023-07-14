@@ -1,8 +1,8 @@
-import "package:ai_yu/data_structures/global_state/auth_model.dart";
+import 'package:ai_yu/data/state_models/aws_model.dart';
 import "package:flutter/material.dart";
 
 class WalletModel extends ChangeNotifier {
-  late final AuthModel? _auth;
+  late final AWSModel? _aws;
 
   // Measured in 100ths of a cent.
   late int _microcentBalance;
@@ -11,14 +11,14 @@ class WalletModel extends ChangeNotifier {
   double get centBalance => _microcentBalance / 100.0;
   double get dollarBalance => _microcentBalance / 10000.0;
 
-  WalletModel(this._auth, WalletModel? previousWallet) {
+  WalletModel(this._aws, WalletModel? previousWallet) {
     _microcentBalance = previousWallet?._microcentBalance ?? 0;
     _fetchWalletBalance();
   }
 
   void _fetchWalletBalance() async {
-    await _auth?.initialization;
-    if (_auth?.isSignedIn ?? false) {
+    await _aws?.initialization;
+    if (_aws?.isSignedIn ?? false) {
       _microcentBalance = 100000;
       notifyListeners();
     }

@@ -1,8 +1,8 @@
-import "package:ai_yu/data_structures/global_state/auth_model.dart";
+import 'package:ai_yu/data/state_models/aws_model.dart';
 import 'package:ai_yu/widgets/shared/authentication_dialog.dart';
 import "package:flutter/material.dart";
 import "package:provider/provider.dart";
-import "package:ai_yu/data_structures/global_state/deeplinks_model.dart";
+import 'package:ai_yu/data/state_models/deeplinks_model.dart';
 
 class WalletInfoDialog extends StatelessWidget {
   const WalletInfoDialog({super.key});
@@ -21,11 +21,11 @@ TODO(Mart): Add wallet information here.
             ),
           ),
           actions: <Widget>[
-            Consumer<AuthModel>(builder: (context, auth, child) {
+            Consumer<AWSModel>(builder: (context, aws, child) {
               return TextButton(
                 onPressed: () {
-                  if (auth.isSignedIn) {
-                    auth.signOut();
+                  if (aws.isSignedIn) {
+                    aws.signOut();
                   } else {
                     Navigator.of(context).pop();
                     showDialog(
@@ -38,7 +38,7 @@ TODO(Mart): Add wallet information here.
                             mode: AuthenticationMode.restoreWallet));
                   }
                 },
-                child: Text(auth.isSignedIn ? "Logout" : "Restore Wallet"),
+                child: Text(aws.isSignedIn ? "Logout" : "Restore Wallet"),
               );
             }),
             FilledButton(

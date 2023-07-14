@@ -1,6 +1,6 @@
-import "package:ai_yu/data_structures/global_state/deeplinks_model.dart";
-import "package:ai_yu/data_structures/gpt_message.dart";
-import "package:ai_yu/data_structures/gpt_mode.dart";
+import 'package:ai_yu/data/state_models/deeplinks_model.dart';
+import 'package:ai_yu/data/gpt_message.dart';
+import 'package:ai_yu/data/gpt_mode.dart';
 import "package:ai_yu/pages/selection_page.dart";
 import "package:ai_yu/utils/gpt_api.dart";
 import "package:ai_yu/utils/mission_decider.dart";
