@@ -17,9 +17,12 @@ class WalletModel extends ChangeNotifier {
 
   WalletModel(this._aws, WalletModel? previousWallet) {
     _microcentBalance = previousWallet?._microcentBalance ?? 0;
-    _fetchWalletBalance();
+    if (_aws?.isSignedIn ?? false) _fetchWalletBalance();
   }
 
+  // Since this model is a proxy provider, it will be recreated whenever the
+  // AWSModel changes, so we need to protect against calling notifyListeners()
+  // on a disposed object.
   @override
   void notifyListeners() {
     if (!_disposed) {
@@ -27,20 +30,20 @@ class WalletModel extends ChangeNotifier {
     }
   }
 
-  void _fetchWalletBalance() async {
+  Future<void> _fetchWalletBalance() async {
     if (_aws == null) return;
     await _aws?.initialization;
 
     final userIdentity = await _aws!.getUserIdentity();
 
-    final restOperation = Amplify.API.post(
+    final restOperation = Amplify.API.get(
       '/wallet',
-      body: HttpPayload.json({'id': userIdentity}),
+      apiName: 'restapi',
     );
     final response = await restOperation.response;
-    safePrint('POST call succeeded');
+    safePrint('GET call succeeded');
     safePrint(response.decodeBody());
-    text = response.decodeBody();
+    text = "${response.decodeBody()} | $userIdentity";
     notifyListeners();
 
     /* final userIdentity = await _aws!.getUserIdentity();
@@ -55,7 +58,14 @@ class WalletModel extends ChangeNotifier {
     } */
   }
 
-  void add50Cent() async {
+  Future<bool> add50Cent() async {
+    final result = await _aws?.initializeTemporaryAccount() ?? false;
+    if (result == true) {
+      safePrint("Signed in as temporary account.");
+    } else {
+      safePrint("Failed to sign in as temporary account.");
+    }
+    return result;
     /* if (_aws == null) return;
 
     final userIdentity = await _aws!.getUserIdentity();

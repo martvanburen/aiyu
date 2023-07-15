@@ -2,7 +2,7 @@ import "package:ai_yu/utils/password_generator.dart";
 import "package:amplify_flutter/amplify_flutter.dart";
 import "package:flutter/material.dart";
 
-enum AuthenticationMode { restoreWallet, newSignup }
+enum AuthenticationMode { restoreWallet, backupWallet }
 
 class AuthenticationDialog extends StatefulWidget {
   final AuthenticationMode mode;

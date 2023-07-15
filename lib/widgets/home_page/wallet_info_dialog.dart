@@ -1,4 +1,5 @@
 import 'package:ai_yu/data/state_models/aws_model.dart';
+import 'package:ai_yu/data/state_models/wallet_model.dart';
 import 'package:ai_yu/widgets/shared/authentication_dialog.dart';
 import "package:flutter/material.dart";
 import "package:provider/provider.dart";
@@ -21,12 +22,21 @@ TODO(Mart): Add wallet information here.
             ),
           ),
           actions: <Widget>[
-            Consumer<AWSModel>(builder: (context, aws, child) {
-              return TextButton(
-                onPressed: () {
-                  if (aws.isSignedIn) {
-                    aws.signOut();
+            Consumer2<AWSModel, WalletModel>(
+              builder: (context, aws, wallet, child) {
+                String text = "";
+                AuthenticationMode? mode;
+                Function action = () {};
+
+                if (!aws.isSignedIn || aws.isTemporaryAccount) {
+                  if (!aws.isSignedIn) {
+                    text = "Restore Wallet";
+                    mode = AuthenticationMode.restoreWallet;
                   } else {
+                    text = "Backup Wallet";
+                    mode = AuthenticationMode.backupWallet;
+                  }
+                  action = () {
                     Navigator.of(context).pop();
                     showDialog(
                         context: context,
@@ -34,13 +44,22 @@ TODO(Mart): Add wallet information here.
                         // their verification code, prevent accidental dismissal
                         // of dialog.
                         barrierDismissible: false,
-                        builder: (context) => const AuthenticationDialog(
-                            mode: AuthenticationMode.restoreWallet));
-                  }
-                },
-                child: Text(aws.isSignedIn ? "Logout" : "Restore Wallet"),
-              );
-            }),
+                        builder: (context) =>
+                            AuthenticationDialog(mode: mode!));
+                  };
+                } else {
+                  text = "Sign Out";
+                  action = () {
+                    aws.signOut();
+                  };
+                }
+
+                return TextButton(
+                  onPressed: () => action(),
+                  child: Text(text),
+                );
+              },
+            ),
             FilledButton(
               child: const Text("Close"),
               onPressed: () {
