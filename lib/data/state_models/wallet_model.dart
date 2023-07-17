@@ -15,9 +15,12 @@ class WalletModel extends ChangeNotifier {
   double get centBalance => _microcentBalance / 100.0;
   double get dollarBalance => _microcentBalance / 10000.0;
 
+  bool _isLoading = false;
+  bool get isLoading => _isLoading;
+
   WalletModel(this._aws, WalletModel? previousWallet) {
     _microcentBalance = previousWallet?._microcentBalance ?? 0;
-    if (_aws?.isSignedIn ?? false) _fetchWalletBalance();
+    _fetchWalletBalance();
   }
 
   // Since this model is a proxy provider, it will be recreated whenever the
@@ -32,22 +35,34 @@ class WalletModel extends ChangeNotifier {
 
   Future<void> _fetchWalletBalance() async {
     if (_aws == null) return;
+
+    _isLoading = true;
+    notifyListeners();
+
     await _aws?.initialization;
 
-    try {
-      final response = await Amplify.API
-          .get(
-            '/wallet',
-            apiName: 'restapi',
-          )
-          .response;
+    if (!_aws!.isSignedIn) {
+      // If not logged in, balance is 0.
+      _microcentBalance = 0;
+    } else {
+      // Otherwise, fetch from API.
+      try {
+        final response = await Amplify.API
+            .get(
+              "/wallet",
+              apiName: "restapi",
+            )
+            .response;
 
-      final jsonResponse = json.decode(response.decodeBody());
-      _microcentBalance = jsonResponse['balance_microcents'];
-      notifyListeners();
-    } catch (e) {
-      safePrint("Wallet fetch failed: '$e'. ");
+        final jsonResponse = json.decode(response.decodeBody());
+        _microcentBalance = jsonResponse["balance_microcents"];
+      } catch (e) {
+        safePrint("Wallet fetch failed: '$e'. ");
+      }
     }
+
+    _isLoading = false;
+    notifyListeners();
   }
 
   Future<bool> add50Cent() async {

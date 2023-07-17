@@ -25,17 +25,10 @@ TODO(Mart): Add wallet information here.
             Consumer2<AWSModel, WalletModel>(
               builder: (context, aws, wallet, child) {
                 String text = "";
-                AuthenticationMode? mode;
                 Function action = () {};
 
-                if (!aws.isSignedIn || aws.isTemporaryAccount) {
-                  if (!aws.isSignedIn) {
-                    text = "Restore Wallet";
-                    mode = AuthenticationMode.restoreWallet;
-                  } else {
-                    text = "Backup Wallet";
-                    mode = AuthenticationMode.backupWallet;
-                  }
+                if (!aws.isSignedIn) {
+                  text = "Restore Account";
                   action = () {
                     Navigator.of(context).pop();
                     showDialog(
@@ -44,8 +37,21 @@ TODO(Mart): Add wallet information here.
                         // their verification code, prevent accidental dismissal
                         // of dialog.
                         barrierDismissible: false,
-                        builder: (context) =>
-                            AuthenticationDialog(mode: mode!));
+                        builder: (context) => const AuthenticationDialog(
+                            mode: AuthenticationMode.restoreAccount));
+                  };
+                } else if (aws.isTemporaryAccount) {
+                  text = "Backup Account";
+                  action = () {
+                    Navigator.of(context).pop();
+                    showDialog(
+                        context: context,
+                        // Since user needs to switch to email and back for
+                        // their verification code, prevent accidental dismissal
+                        // of dialog.
+                        barrierDismissible: false,
+                        builder: (context) => const AuthenticationDialog(
+                            mode: AuthenticationMode.addEmail));
                   };
                 } else {
                   text = "Sign Out";

@@ -22,7 +22,7 @@ class AWSModel extends ChangeNotifier {
 
   AWSModel() {
     _initialization = _configureAmplify();
-    _authEventSubscription = Amplify.Hub.listen(HubChannel.Auth, _onAuthEvent);
+    _authEventSubscription = Amplify.Hub.listen(HubChannel.Auth, onAuthEvent);
   }
 
   Future<bool> _configureAmplify() async {
@@ -32,12 +32,24 @@ class AWSModel extends ChangeNotifier {
         AmplifyAPI(),
       ]);
       await Amplify.configure(amplifyconfig);
-      await _onAuthEvent(null);
+      await onAuthEvent(null);
       return true;
     } on Exception catch (e) {
       safePrint("ERROR: Failed to initialize Amplify. $e.");
     }
     return false;
+  }
+
+  Future<void> onAuthEvent(AuthHubEvent? event) async {
+    _isSignedIn = (await Amplify.Auth.fetchAuthSession()).isSignedIn;
+    if (_isSignedIn) {
+      _isTemporaryAccount = (await Amplify.Auth.fetchUserAttributes())
+              .firstWhereOrNull((a) =>
+                  a.userAttributeKey == AuthUserAttributeKey.emailVerified)
+              ?.value ==
+          null;
+    }
+    notifyListeners();
   }
 
   Future<bool> initializeTemporaryAccount() async {
@@ -67,22 +79,6 @@ class AWSModel extends ChangeNotifier {
     return false;
   }
 
-  Future<void> _onAuthEvent(AuthHubEvent? event) async {
-    _isSignedIn = (await Amplify.Auth.fetchAuthSession()).isSignedIn;
-    if (_isSignedIn) {
-      _isTemporaryAccount = (await Amplify.Auth.fetchUserAttributes())
-              .firstWhereOrNull((a) =>
-                  a.userAttributeKey == AuthUserAttributeKey.emailVerified)
-              ?.value ==
-          null;
-      safePrint(
-          "VALIDATED: ${(await Amplify.Auth.fetchUserAttributes()).firstWhereOrNull((a) => a.userAttributeKey == AuthUserAttributeKey.emailVerified)?.value}");
-    } else {
-      _isTemporaryAccount = false;
-    }
-    notifyListeners();
-  }
-
   void signOut() async {
     final result = await Amplify.Auth.signOut();
     if (result is CognitoCompleteSignOut) {
@@ -92,11 +88,17 @@ class AWSModel extends ChangeNotifier {
     }
   }
 
-  Future<String> getUserIdentity() async {
+  /* Future<String> getUserIdentity() async {
     await initialization;
     final cognitoPlugin = Amplify.Auth.getPlugin(AmplifyAuthCognito.pluginKey);
     return (await cognitoPlugin.fetchAuthSession()).identityIdResult.value;
-  }
+  } */
+
+  /* Future<String> getUserSub() async {
+    await initialization;
+    final cognitoPlugin = Amplify.Auth.getPlugin(AmplifyAuthCognito.pluginKey);
+    return (await cognitoPlugin.fetchAuthSession()).userSubResult.value;
+  } */
 
   @override
   void dispose() {

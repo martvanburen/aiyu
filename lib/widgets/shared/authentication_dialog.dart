@@ -1,8 +1,12 @@
+import "dart:convert";
+
+import "package:ai_yu/data/state_models/aws_model.dart";
 import "package:ai_yu/utils/password_generator.dart";
 import "package:amplify_flutter/amplify_flutter.dart";
 import "package:flutter/material.dart";
+import "package:provider/provider.dart";
 
-enum AuthenticationMode { restoreWallet, backupWallet }
+enum AuthenticationMode { restoreAccount, addEmail }
 
 class AuthenticationDialog extends StatefulWidget {
   final AuthenticationMode mode;
@@ -18,7 +22,8 @@ class _AuthenticationDialogState extends State<AuthenticationDialog> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController codeController = TextEditingController();
 
-  String _submissionEmail = "";
+  // Fetched from server using email.
+  String? _username;
 
   bool _isLoading = false;
   String _emailError = "";
@@ -32,40 +37,85 @@ class _AuthenticationDialogState extends State<AuthenticationDialog> {
     }
   }
 
-  void _startResetPasswordFlow() async {
+  Future<(bool, String)> _getUsernameFromEmail(String email) async {
+    try {
+      final response = await Amplify.API
+          .post(
+            "/auth/recoverUsername",
+            body: HttpPayload.json({"email": email}),
+            apiName: "restapi",
+          )
+          .response;
+      final jsonResponse = json.decode(response.decodeBody());
+      if (jsonResponse.containsKey("error")) {
+        return (false, jsonResponse["error"] as String);
+      } else if (jsonResponse.containsKey("username")) {
+        return (true, jsonResponse["username"] as String);
+      } else {
+        return (false, "Error fetching user.");
+      }
+    } on ApiException catch (e) {
+      return (false, e.message);
+    }
+  }
+
+  void _startFlow() async {
     setState(() {
       _isLoading = true;
     });
-
-    _submissionEmail = emailController.text;
-    try {
-      await Amplify.Auth.resetPassword(
-        username: _submissionEmail,
-      );
-      setState(() {
-        _pageIndex = 1;
-      });
-    } on AuthException catch (e) {
-      setState(() {
-        _emailError = e.message;
-      });
-    }
-
+    final (success, errorMessage) =
+        (widget.mode == AuthenticationMode.restoreAccount)
+            ? await _startResetPassword()
+            : await _startAddEmail();
     setState(() {
+      if (success) _pageIndex = 1;
+      _emailError = errorMessage;
       _isLoading = false;
     });
   }
 
-  Future<bool> _completeResetPasswordFlowAndLogin() async {
+  Future<bool> _completeFlow() async {
     setState(() {
       _isLoading = true;
     });
+    final (success, errorMessage) =
+        (widget.mode == AuthenticationMode.restoreAccount)
+            ? await _completeResetPasswordAndLogin()
+            : await _completeAddEmail();
+    setState(() {
+      _codeError = errorMessage;
+      _isLoading = false;
+    });
+    return success;
+  }
 
+  Future<(bool, String)> _startResetPassword() async {
+    // Fetch username from email.
+    _username = null;
+    final (success, result) = await _getUsernameFromEmail(emailController.text);
+    if (success) {
+      _username = result;
+    } else {
+      return (false, result);
+    }
+
+    // Start reset password flow.
+    try {
+      await Amplify.Auth.resetPassword(
+        username: _username!,
+      );
+      return (true, "");
+    } on AuthException catch (e) {
+      return (false, e.message);
+    }
+  }
+
+  Future<(bool, String)> _completeResetPasswordAndLogin() async {
     final String randomPassword = generateCryptographicallySecurePassword();
     try {
       ResetPasswordResult resetPasswordResult =
           await Amplify.Auth.confirmResetPassword(
-        username: _submissionEmail,
+        username: _username!,
         newPassword: randomPassword,
         confirmationCode: codeController.text,
       );
@@ -73,38 +123,63 @@ class _AuthenticationDialogState extends State<AuthenticationDialog> {
       if (resetPasswordResult.nextStep.updateStep ==
           AuthResetPasswordStep.done) {
         SignInResult signInResult = await Amplify.Auth.signIn(
-          username: _submissionEmail,
+          username: _username!,
           password: randomPassword,
         );
         if (signInResult.isSignedIn) {
-          return true;
+          return (true, "");
         } else {
-          setState(() {
-            _codeError = "Unable to sign in.";
-          });
+          return (false, "Unable to sign in.");
         }
       } else {
-        setState(() {
-          _codeError = "Something went wrong. Please try again.";
-        });
+        return (false, "Something went wrong. Please try again.");
       }
     } on AuthException catch (e) {
-      setState(() {
-        _codeError = e.message;
-      });
+      return (false, e.message);
+    }
+  }
+
+  Future<(bool, String)> _startAddEmail() async {
+    // Check email is not already registered.
+    final (emailAlreadyRegistered, _) =
+        await _getUsernameFromEmail(emailController.text);
+    if (emailAlreadyRegistered) {
+      return (false, "Email is already registered to another account.");
     }
 
-    setState(() {
-      _isLoading = false;
-    });
-    return false;
+    try {
+      await Amplify.Auth.updateUserAttribute(
+        userAttributeKey: AuthUserAttributeKey.email,
+        value: emailController.text,
+      );
+      return (true, "");
+    } on AuthException catch (e) {
+      return (false, e.message);
+    }
+  }
+
+  Future<(bool, String)> _completeAddEmail() async {
+    try {
+      await Amplify.Auth.confirmUserAttribute(
+        userAttributeKey: AuthUserAttributeKey.email,
+        confirmationCode: codeController.text,
+      );
+      // Need to manually trigger onAuthEvent to recalculate isTemporaryAccount,
+      // since adding email does not cause a sign-in event.
+      //
+      // ignore: use_build_context_synchronously
+      Provider.of<AWSModel>(context, listen: false).onAuthEvent(null);
+      return (true, "");
+    } on AuthException catch (e) {
+      return (false, e.message);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
       title: Text(
-        "Restore Wallet",
+        _getTitle(),
         style: TextStyle(color: Theme.of(context).primaryColor),
       ),
       content: IndexedStack(
@@ -114,8 +189,7 @@ class _AuthenticationDialogState extends State<AuthenticationDialog> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              const Text(
-                  "To restore a previous wallet, enter your email address:"),
+              Text(_getWelcomeMessage()),
               TextField(
                 controller: emailController,
                 decoration: const InputDecoration(
@@ -182,14 +256,12 @@ class _AuthenticationDialogState extends State<AuthenticationDialog> {
                 child: Text(_pageIndex == 0 ? "Next" : "Complete"),
                 onPressed: () {
                   if (_pageIndex == 0) {
-                    _startResetPasswordFlow();
+                    _startFlow();
                   } else {
-                    _completeResetPasswordFlowAndLogin().then((successful) {
+                    _completeFlow().then((successful) {
                       if (successful) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                                content:
-                                    Text("Wallet successfully restored!")));
+                            SnackBar(content: Text(_getCompletionMessage())));
                         Navigator.of(context).pop();
                       }
                     });
@@ -198,5 +270,29 @@ class _AuthenticationDialogState extends State<AuthenticationDialog> {
               ),
       ],
     );
+  }
+
+  String _getTitle() {
+    if (widget.mode == AuthenticationMode.restoreAccount) {
+      return "Restore Account";
+    } else {
+      return "Backup Account";
+    }
+  }
+
+  String _getWelcomeMessage() {
+    if (widget.mode == AuthenticationMode.restoreAccount) {
+      return "To restore a previous account, enter your email address:";
+    } else {
+      return "Add your email address to easily restore your wallet in the future:";
+    }
+  }
+
+  String _getCompletionMessage() {
+    if (widget.mode == AuthenticationMode.restoreAccount) {
+      return "Account restored!";
+    } else {
+      return "Email verified!";
+    }
   }
 }
