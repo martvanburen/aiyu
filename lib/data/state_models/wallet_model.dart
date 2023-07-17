@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:ai_yu/data/state_models/aws_model.dart';
 import 'package:amplify_flutter/amplify_flutter.dart';
 import "package:flutter/material.dart";
@@ -12,8 +14,6 @@ class WalletModel extends ChangeNotifier {
   int get microcentBalance => _microcentBalance;
   double get centBalance => _microcentBalance / 100.0;
   double get dollarBalance => _microcentBalance / 10000.0;
-
-  String text = "";
 
   WalletModel(this._aws, WalletModel? previousWallet) {
     _microcentBalance = previousWallet?._microcentBalance ?? 0;
@@ -34,28 +34,20 @@ class WalletModel extends ChangeNotifier {
     if (_aws == null) return;
     await _aws?.initialization;
 
-    final userIdentity = await _aws!.getUserIdentity();
+    try {
+      final response = await Amplify.API
+          .get(
+            '/wallet',
+            apiName: 'restapi',
+          )
+          .response;
 
-    final restOperation = Amplify.API.get(
-      '/wallet',
-      apiName: 'restapi',
-    );
-    final response = await restOperation.response;
-    safePrint('GET call succeeded');
-    safePrint(response.decodeBody());
-    text = "${response.decodeBody()} | $userIdentity";
-    notifyListeners();
-
-    /* final userIdentity = await _aws!.getUserIdentity();
-    final awsWallet = (await Amplify.DataStore.query(
-      Wallet.classType,
-      where: Wallet.IDENTITY_ID.eq(userIdentity),
-    ))
-        .firstOrNull;
-    if (awsWallet != null) {
-      _microcentBalance = awsWallet.balance_microcents;
+      final jsonResponse = json.decode(response.decodeBody());
+      _microcentBalance = jsonResponse['balance_microcents'];
       notifyListeners();
-    } */
+    } catch (e) {
+      safePrint("Wallet fetch failed: '$e'. ");
+    }
   }
 
   Future<bool> add50Cent() async {
@@ -66,23 +58,6 @@ class WalletModel extends ChangeNotifier {
       safePrint("Failed to sign in as temporary account.");
     }
     return result;
-    /* if (_aws == null) return;
-
-    final userIdentity = await _aws!.getUserIdentity();
-
-    final oldWallet = (await Amplify.DataStore.query(
-          Wallet.classType,
-          where: Wallet.IDENTITY_ID.eq(userIdentity),
-        ))
-            .firstOrNull ??
-        Wallet(balance_microcents: 0, identity_id: userIdentity);
-
-    final newWallet = oldWallet.copyWith(
-        balance_microcents: oldWallet.balance_microcents + 5000);
-
-    await Amplify.DataStore.save(newWallet);
-
-    notifyListeners(); */
   }
 
   int _calculateQueryCost() {
