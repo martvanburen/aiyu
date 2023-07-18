@@ -1,17 +1,11 @@
 import "dart:convert";
 
 import 'package:ai_yu/data/gpt_message.dart';
-import "package:flutter_dotenv/flutter_dotenv.dart";
-import "package:http/http.dart" as http;
+import 'package:amplify_flutter/amplify_flutter.dart';
 
 Future<GPTMessageContent> callGptAPI(
     String? mission, List<GPTMessage> conversation,
     {int numTokensToGenerate = 600}) async {
-  // TODO(Mart):
-  // . Using dotenv to store the API key is not secure. Eventually
-  // . this app should be upgraded to communicate with a backend server,
-  // . which will then also hold the API key and make the calls for us.
-
   // Convert the conversation into the format the API expects.
   List<Map<String, String>> messages =
       await Future.wait(conversation.map((message) async {
@@ -23,8 +17,8 @@ Future<GPTMessageContent> callGptAPI(
     };
   }));
 
+  // Add mission statement as first message.
   if (mission != null) {
-    // Add mission statement as first message.
     messages.insert(0, {
       "role": "system",
       "content": mission,
@@ -32,24 +26,26 @@ Future<GPTMessageContent> callGptAPI(
   }
 
   // Make API call.
-  const String url = "https://api.openai.com/v1/chat/completions";
-  final response = await http.post(
-    Uri.parse(url),
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": "Bearer ${dotenv.env["OPENAI_KEY"]}",
-    },
-    body: jsonEncode({
-      "model": "gpt-3.5-turbo",
-      "messages": messages,
-      "max_tokens": numTokensToGenerate,
-    }),
-  );
+  dynamic data;
+  try {
+    final response = await Amplify.API
+        .post(
+          "/gpt/sendPrompt",
+          body: HttpPayload.json({
+            "messages": messages,
+            "max_tokens": numTokensToGenerate,
+          }),
+          apiName: "restapi",
+        )
+        .response;
+    data = json.decode(response.decodeBody());
+  } on ApiException catch (e) {
+    return GPTMessageContent(e.message);
+  }
 
-  // Parse response.
-  if (response.statusCode == 200) {
-    var data = jsonDecode(utf8.decode(response.bodyBytes));
-    var messageContentRaw = data["choices"][0]["message"]["content"].trim();
+  // Try parsing result.
+  if (data["status"] == 200) {
+    var messageContentRaw = (data["content"] ?? "").toString().trim();
     try {
       var messageContentParsed = jsonDecode(messageContentRaw);
       var responseField = messageContentParsed["response"];
@@ -66,44 +62,43 @@ Future<GPTMessageContent> callGptAPI(
       return GPTMessageContent(messageContentRaw);
     }
   } else {
-    var data = jsonDecode(utf8.decode(response.bodyBytes));
-    return GPTMessageContent(data["error"]["message"]);
+    return GPTMessageContent(data["error"] ??
+        "Unknown error occured (${data["status"]}). Please try again later.");
   }
 }
 
 Future<String> translateToEnglishUsingGPT(String text) async {
-  // TODO(Mart):
-  // . Using dotenv to store the API key is not secure. Eventually
-  // . this app should be upgraded to communicate with a backend server,
-  // . which will then also hold the API key and make the calls for us.
-
-  const String url = "https://api.openai.com/v1/chat/completions";
-  final response = await http.post(
-    Uri.parse(url),
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": "Bearer ${dotenv.env["OPENAI_KEY"]}",
-    },
-    body: jsonEncode({
-      "model": "gpt-3.5-turbo",
-      "messages": [
-        {
-          "role": "user",
-          "content": """
+  // Make API call.
+  dynamic data;
+  try {
+    final response = await Amplify.API
+        .post(
+          "/gpt/sendPrompt",
+          body: HttpPayload.json({
+            "messages": [
+              {
+                "role": "user",
+                "content": """
 Please translate the following text into English. Respond only with the result.
 $text
 """,
-        },
-      ],
-      "max_tokens": 300,
-    }),
-  );
+              },
+            ],
+            "max_tokens": 300,
+          }),
+          apiName: "restapi",
+        )
+        .response;
+    data = json.decode(response.decodeBody());
+  } on ApiException catch (e) {
+    return e.message;
+  }
 
-  if (response.statusCode == 200) {
-    var data = jsonDecode(utf8.decode(response.bodyBytes));
-    return data["choices"][0]["message"]["content"].trim();
+  // Try parsing result.
+  if (data["status"] == 200) {
+    return (data["content"] ?? "").trim();
   } else {
-    var data = jsonDecode(utf8.decode(response.bodyBytes));
-    return data["error"]["message"];
+    return data["error"] ??
+        "Unknown error occured (${data["status"]}). Please try again later.";
   }
 }

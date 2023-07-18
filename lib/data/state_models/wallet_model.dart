@@ -49,7 +49,7 @@ class WalletModel extends ChangeNotifier {
       try {
         final response = await Amplify.API
             .get(
-              "/wallet",
+              "/wallet/getBalance",
               apiName: "restapi",
             )
             .response;

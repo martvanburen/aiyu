@@ -11,14 +11,12 @@ import "package:ai_yu/pages/conversation_page.dart";
 import "package:ai_yu/utils/supported_languages_provider.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
-import "package:flutter_dotenv/flutter_dotenv.dart";
 import "package:flutter_gen/gen_l10n/app_localizations.dart";
 import "package:flutter_shortcuts/flutter_shortcuts.dart";
 import "package:provider/provider.dart";
 import "package:uni_links/uni_links.dart";
 
 Future<void> main() async {
-  await dotenv.load();
   runApp(MultiProvider(
     providers: [
       ChangeNotifierProvider(create: (context) => PreferencesModel()),
