@@ -6,7 +6,7 @@ String? decideMission({required GPTMode mode, String? language}) {
     case GPTMode.conversationPracticeMode:
       final String languageName =
           SupportedLanguagesProvider.getDisplayName(language!);
-      return """
+      /* return """
 The user is studying $languageName, and you are to help them improve their
 language skills. For each prompt, return a JSON response with up to 3 keys:
 'feedback', 'corrected', and 'response'. 'feedback' should be a list of brief
@@ -17,6 +17,10 @@ should be your normal response that you would have provided if you didn't get
 these special instructions. If the sentence is already quite good, no need to
 provide 'feedback' and 'corrected'. Try to limit your responses to fairly
 concise answers. Output correct, parsable JSON.
+"""; */
+      return """
+The user is studying $languageName, and you are to help them improve their
+language skills. Return helpful, short, and fairly easy to understand answers.
 """;
     case GPTMode.deeplinkActionMode:
       return null;

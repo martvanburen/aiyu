@@ -6,8 +6,12 @@ import 'package:amplify_flutter/amplify_flutter.dart';
 import '../data/state_models/wallet_model.dart';
 
 Future<GPTMessageContent> callGptAPI(
-    String? mission, List<GPTMessage> conversation,
-    {int numTokensToGenerate = 600, WalletModel? wallet}) async {
+  String? mission,
+  List<GPTMessage> conversation, {
+  int numTokensToGenerate = 600,
+  WalletModel? wallet,
+  bool getFeedback = false,
+}) async {
   if ((wallet?.microcentBalance ?? 0) < 100) {
     return GPTMessageContent(
         "A minimum balance of 1 cent is required to send GPT requests.");
@@ -20,7 +24,7 @@ Future<GPTMessageContent> callGptAPI(
 
     return {
       "role": message.sender == GPTMessageSender.user ? "user" : "assistant",
-      "content": content.unparsedContent ?? content.body,
+      "content": content.body,
     };
   }));
 
@@ -37,7 +41,7 @@ Future<GPTMessageContent> callGptAPI(
   try {
     final response = await Amplify.API
         .post(
-          "/gpt/3.5-turbo",
+          getFeedback ? "/gpt/3.5-turbo/withFeedback" : "/gpt/3.5-turbo",
           body: HttpPayload.json({
             "messages": messages,
             "max_tokens": numTokensToGenerate,
@@ -56,22 +60,11 @@ Future<GPTMessageContent> callGptAPI(
       wallet?.setBalance(microcents: data["new_balance_microcents"]);
     }
 
-    var messageContentRaw = (data["content"] ?? "").toString().trim();
-    try {
-      var messageContentParsed = jsonDecode(messageContentRaw);
-      var responseField = messageContentParsed["response"];
-      String? sentenceCorrection = messageContentParsed["corrected"];
-      List<String>? sentenceFeedback;
-      if (messageContentParsed["feedback"] is List<dynamic>) {
-        sentenceFeedback = List<String>.from(messageContentParsed["feedback"]);
-      }
-      return GPTMessageContent(responseField,
-          unparsedContent: messageContentRaw,
-          sentenceFeedback: sentenceFeedback,
-          sentenceCorrection: sentenceCorrection);
-    } catch (e) {
-      return GPTMessageContent(messageContentRaw);
-    }
+    return GPTMessageContent(
+      data["content"] ?? "",
+      sentenceFeedback: data["feedback"],
+      sentenceCorrection: data["corrected"],
+    );
   } else {
     return GPTMessageContent(data["error"] ??
         "Unknown error occured (${data["status"]}). Please try again later.");

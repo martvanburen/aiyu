@@ -12,12 +12,10 @@ class GPTMessage {
 }
 
 class GPTMessageContent {
-  final String? unparsedContent;
-
   final String body;
-  final List<String>? sentenceFeedback;
+  final String? sentenceFeedback;
   final String? sentenceCorrection;
 
   GPTMessageContent(this.body,
-      {this.unparsedContent, this.sentenceFeedback, this.sentenceCorrection});
+      {this.sentenceFeedback, this.sentenceCorrection});
 }

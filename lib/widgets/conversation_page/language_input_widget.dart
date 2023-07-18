@@ -98,7 +98,12 @@ class LanguageInputWidgetState extends State<LanguageInputWidget> {
   }
 
   void _sendPrompt() {
-    widget.callbackFunction("${_promptInputController.text}.");
+    // If last character is not punctuation, add a period.
+    RegExp exp = RegExp(r"[\.\?!\,;:。？]$");
+    final prompt = exp.hasMatch(_promptInputController.text)
+        ? _promptInputController.text
+        : "${_promptInputController.text}.";
+    widget.callbackFunction(prompt);
     _clearPrompt();
   }
 

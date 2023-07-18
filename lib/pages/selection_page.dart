@@ -100,6 +100,21 @@ class SelectionPage extends StatefulWidget {
 }
 
 class _SelectionPageState extends State<SelectionPage> {
+  bool _disposed = false;
+
+  @override
+  void setState(fn) {
+    if (!_disposed && mounted) {
+      super.setState(fn);
+    }
+  }
+
+  @override
+  void dispose() {
+    _disposed = true;
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
@@ -140,7 +155,7 @@ class _SelectionPageState extends State<SelectionPage> {
                               ? _buildTextSelectionSection(
                                   SelectionSection.feedback,
                                   "Feedback",
-                                  "- ${widget.messageContent.sentenceFeedback!.join("\n- ")}",
+                                  widget.messageContent.sentenceFeedback!,
                                 )
                               : Container(),
                         ],

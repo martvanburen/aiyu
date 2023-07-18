@@ -67,21 +67,13 @@ class ConversationDisplayWidget extends StatelessWidget {
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
-                        if (content.sentenceFeedback != null &&
-                            content.sentenceFeedback!.isNotEmpty) ...[
-                          ListView.builder(
-                            physics: const NeverScrollableScrollPhysics(),
-                            shrinkWrap: true,
-                            itemCount: content.sentenceFeedback!.length,
-                            itemBuilder: (context, i) {
-                              return Text(
-                                "⤷ ${content.sentenceFeedback![i]}",
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  color: Colors.grey.shade600,
-                                ),
-                              );
-                            },
+                        if (content.sentenceFeedback != null) ...[
+                          Text(
+                            "⤷ ${content.sentenceFeedback!}",
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: Colors.grey.shade600,
+                            ),
                           ),
                         ],
                         if (content.sentenceCorrection != null) ...[

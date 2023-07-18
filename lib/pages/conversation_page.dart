@@ -125,6 +125,7 @@ class _LanguagePracticePageState extends State<LanguagePracticePage> {
       _mission,
       _conversation,
       wallet: Provider.of<WalletModel>(context, listen: false),
+      getFeedback: true,
     );
     final Future<String> audioUrlFuture = responseFuture.then((response) async {
       return await _awsPollyService.getSpeechUrl(input: response.body);
