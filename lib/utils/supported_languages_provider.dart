@@ -1,66 +1,64 @@
-import 'package:aws_polly/aws_polly.dart';
-
 class SupportedLanguagesProvider {
   static final _languageMap = {
     "en": {
       "name": "English",
       "localized": "English",
-      "polly_voice": AWSPolyVoiceId.emma,
+      "polly_voice": "Emma",
     },
     "zh": {
       "name": "Chinese",
       "localized": "中文",
-      "polly_voice": AWSPolyVoiceId.zhiyu,
+      "polly_voice": "Zhiyu",
     },
     "es": {
       "name": "Spanish",
       "localized": "Español",
-      "polly_voice": AWSPolyVoiceId.lucia,
+      "polly_voice": "Lucia",
     },
     "hi": {
       "name": "Hindi",
       "localized": "हिन्दी",
-      "polly_voice": AWSPolyVoiceId.aditi,
+      "polly_voice": "Aditi",
     },
     "pt": {
       "name": "Portuguese",
       "localized": "Português",
-      "polly_voice": AWSPolyVoiceId.vitoria,
+      "polly_voice": "Vitoria",
     },
     "ru": {
       "name": "Russian",
       "localized": "Русский",
-      "polly_voice": AWSPolyVoiceId.tatyana,
+      "polly_voice": "Tatyana",
     },
     "ja": {
       "name": "Japanese",
       "localized": "日本語",
-      "polly_voice": AWSPolyVoiceId.mizuki,
+      "polly_voice": "Mizuki",
     },
     "tr": {
       "name": "Turkish",
       "localized": "Türkçe",
-      "polly_voice": AWSPolyVoiceId.filiz,
+      "polly_voice": "Filiz",
     },
     "ko": {
       "name": "Korean",
       "localized": "한국어",
-      "polly_voice": AWSPolyVoiceId.seoyeon,
+      "polly_voice": "Seoyeon",
     },
     "fr": {
       "name": "French",
       "localized": "Français",
-      "polly_voice": AWSPolyVoiceId.lea,
+      "polly_voice": "Lea",
     },
     "de": {
       "name": "German",
       "localized": "Deutsch",
-      "polly_voice": AWSPolyVoiceId.marlene,
+      "polly_voice": "Marlene",
     },
     "nl": {
       "name": "Dutch",
       "localized": "Nederlands",
-      "polly_voice": AWSPolyVoiceId.lotte,
+      "polly_voice": "Lotte",
     },
   };
 
@@ -74,14 +72,12 @@ class SupportedLanguagesProvider {
   }
 
   static String getDisplayName(String language) =>
-      _languageMap[language]?["name"] as String? ??
-      throwUnimplementedError(language);
+      _languageMap[language]?["name"] ?? throwUnimplementedError(language);
 
   static String getLocalizedDisplayName(String language) =>
-      _languageMap[language]?["localized"] as String? ??
-      throwUnimplementedError(language);
+      _languageMap[language]?["localized"] ?? throwUnimplementedError(language);
 
-  static AWSPolyVoiceId getPollyVoiceId(String language) =>
-      _languageMap[language]?["polly_voice"] as AWSPolyVoiceId? ??
+  static String getPollyVoiceId(String language) =>
+      _languageMap[language]?["polly_voice"] ??
       throwUnimplementedError(language);
 }

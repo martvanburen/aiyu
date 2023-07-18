@@ -1,15 +1,18 @@
+import "dart:convert";
+
 import 'package:ai_yu/data/state_models/preferences_model.dart';
 import 'package:ai_yu/data/gpt_message.dart';
 import 'package:ai_yu/data/gpt_mode.dart';
 import "package:ai_yu/data/state_models/wallet_model.dart";
 import "package:ai_yu/pages/selection_page.dart";
-import "package:ai_yu/utils/aws_polly_service.dart";
 import "package:ai_yu/utils/gpt_api.dart";
 import "package:ai_yu/utils/mission_decider.dart";
+import "package:ai_yu/utils/supported_languages_provider.dart";
 import "package:ai_yu/widgets/conversation_page/conversation_display_widget.dart";
 import "package:ai_yu/widgets/conversation_page/language_input_widget.dart";
 import "package:ai_yu/widgets/shared/back_or_close_button.dart";
 import "package:ai_yu/widgets/shared/mini_wallet_widget.dart";
+import "package:amplify_flutter/amplify_flutter.dart";
 import "package:flutter/material.dart";
 import "package:flutter_gen/gen_l10n/app_localizations.dart";
 import "package:just_audio/just_audio.dart";
@@ -32,14 +35,12 @@ class _LanguagePracticePageState extends State<LanguagePracticePage> {
   final GlobalKey<LanguageInputWidgetState> _languageInputWidgetKey =
       GlobalKey<LanguageInputWidgetState>();
 
-  late final AwsPollyService _awsPollyService;
   late final AudioPlayer _player;
   GPTMessage? _currentlySpeakingMessage;
 
   @override
   void initState() {
     super.initState();
-    _awsPollyService = AwsPollyService(language: widget.language);
     _mission = decideMission(
         language: widget.language, mode: GPTMode.conversationPracticeMode);
 
@@ -74,8 +75,11 @@ class _LanguagePracticePageState extends State<LanguagePracticePage> {
   }
 
   Future<void> _speak(GPTMessage message) async {
-    final url = await message.audioUrl;
+    final url = (await message.content).pollyUrl;
     if (url == null || url == "") return;
+
+    // TODO(mart): Remove debug line.
+    safePrint(url);
 
     if (_currentlySpeakingMessage != null) {
       await _player.stop();
@@ -125,19 +129,16 @@ class _LanguagePracticePageState extends State<LanguagePracticePage> {
       _mission,
       _conversation,
       wallet: Provider.of<WalletModel>(context, listen: false),
+      pollyVoiceId: SupportedLanguagesProvider.getPollyVoiceId(widget.language),
       getFeedback: true,
     );
-    final Future<String> audioUrlFuture = responseFuture.then((response) async {
-      return await _awsPollyService.getSpeechUrl(input: response.body);
-    });
-    GPTMessage gptMessage = GPTMessage(GPTMessageSender.gpt, responseFuture,
-        audioUrl: audioUrlFuture);
+    GPTMessage gptMessage = GPTMessage(GPTMessageSender.gpt, responseFuture);
     setState(() {
       _conversation.add(gptMessage);
     });
 
     // On Future resolution, automatically speak audio.
-    audioUrlFuture.then((value) => _speak(gptMessage));
+    responseFuture.then((value) => _speak(gptMessage));
   }
 
   void _onMessageAudioButtonTapped(GPTMessage message) async {
@@ -159,18 +160,39 @@ class _LanguagePracticePageState extends State<LanguagePracticePage> {
   }
 
   void _prepareAndSpeakIntroMessage() async {
+    // First add a temporary intro message (without Polly URL).
     String body =
         (await AppLocalizations.delegate.load(Locale(widget.language)))
             .conversation_page_intro_message;
-    GPTMessage introMessage = GPTMessage(
-        GPTMessageSender.gpt, Future.value(GPTMessageContent(body)),
-        audioUrl: _awsPollyService.getSpeechUrl(input: body));
-    _conversation.add(introMessage);
-
-    // After page has loaded, start speaking.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _speak(_conversation.first);
+    GPTMessage introMessage =
+        GPTMessage(GPTMessageSender.gpt, Future.value(GPTMessageContent(body)));
+    setState(() {
+      _conversation.add(introMessage);
     });
+
+    // Only Polly URL is fetched, replace original intro message & start
+    // speaking.
+    try {
+      final response = await Amplify.API
+          .post(
+            "/gpt/polly",
+            body: HttpPayload.json({
+              "text": body,
+              "polly_voice_id":
+                  SupportedLanguagesProvider.getPollyVoiceId(widget.language),
+            }),
+            apiName: "restapi",
+          )
+          .response;
+      final data = json.decode(response.decodeBody());
+      setState(() {
+        _conversation[0] = GPTMessage(GPTMessageSender.gpt,
+            Future.value(GPTMessageContent(body, pollyUrl: data["url"])));
+      });
+      _speak(_conversation.first);
+    } on ApiException catch (e) {
+      safePrint(e.message);
+    }
   }
 
   @override

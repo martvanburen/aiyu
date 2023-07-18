@@ -10,6 +10,7 @@ Future<GPTMessageContent> callGptAPI(
   List<GPTMessage> conversation, {
   int numTokensToGenerate = 600,
   WalletModel? wallet,
+  String? pollyVoiceId,
   bool getFeedback = false,
 }) async {
   if ((wallet?.microcentBalance ?? 0) < 100) {
@@ -45,6 +46,7 @@ Future<GPTMessageContent> callGptAPI(
           body: HttpPayload.json({
             "messages": messages,
             "max_tokens": numTokensToGenerate,
+            "polly_voice_id": pollyVoiceId,
           }),
           apiName: "restapi",
         )
@@ -64,6 +66,7 @@ Future<GPTMessageContent> callGptAPI(
       data["content"] ?? "",
       sentenceFeedback: data["feedback"],
       sentenceCorrection: data["corrected"],
+      pollyUrl: data["polly"],
     );
   } else {
     return GPTMessageContent(data["error"] ??
