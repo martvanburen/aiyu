@@ -1,6 +1,7 @@
 import 'package:ai_yu/data/state_models/preferences_model.dart';
 import 'package:ai_yu/data/gpt_message.dart';
 import 'package:ai_yu/data/gpt_mode.dart';
+import "package:ai_yu/data/state_models/wallet_model.dart";
 import "package:ai_yu/pages/selection_page.dart";
 import "package:ai_yu/utils/aws_polly_service.dart";
 import "package:ai_yu/utils/gpt_api.dart";
@@ -120,8 +121,11 @@ class _LanguagePracticePageState extends State<LanguagePracticePage> {
     });
 
     // Next, call GPT and add GPT message (holding an unresolved Future).
-    final Future<GPTMessageContent> responseFuture =
-        callGptAPI(_mission, _conversation);
+    final Future<GPTMessageContent> responseFuture = callGptAPI(
+      _mission,
+      _conversation,
+      wallet: Provider.of<WalletModel>(context, listen: false),
+    );
     final Future<String> audioUrlFuture = responseFuture.then((response) async {
       return await _awsPollyService.getSpeechUrl(input: response.body);
     });

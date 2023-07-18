@@ -3,9 +3,16 @@ import "dart:convert";
 import 'package:ai_yu/data/gpt_message.dart';
 import 'package:amplify_flutter/amplify_flutter.dart';
 
+import '../data/state_models/wallet_model.dart';
+
 Future<GPTMessageContent> callGptAPI(
     String? mission, List<GPTMessage> conversation,
-    {int numTokensToGenerate = 600}) async {
+    {int numTokensToGenerate = 600, WalletModel? wallet}) async {
+  if ((wallet?.microcentBalance ?? 0) < 100) {
+    return GPTMessageContent(
+        "A minimum balance of 1 cent is required to send GPT requests.");
+  }
+
   // Convert the conversation into the format the API expects.
   List<Map<String, String>> messages =
       await Future.wait(conversation.map((message) async {
@@ -30,7 +37,7 @@ Future<GPTMessageContent> callGptAPI(
   try {
     final response = await Amplify.API
         .post(
-          "/gpt/sendPrompt",
+          "/gpt/3.5-turbo",
           body: HttpPayload.json({
             "messages": messages,
             "max_tokens": numTokensToGenerate,
@@ -45,6 +52,10 @@ Future<GPTMessageContent> callGptAPI(
 
   // Try parsing result.
   if (data["status"] == 200) {
+    if (data.containsKey("new_balance_microcents")) {
+      wallet?.setBalance(microcents: data["new_balance_microcents"]);
+    }
+
     var messageContentRaw = (data["content"] ?? "").toString().trim();
     try {
       var messageContentParsed = jsonDecode(messageContentRaw);
@@ -73,7 +84,7 @@ Future<String> translateToEnglishUsingGPT(String text) async {
   try {
     final response = await Amplify.API
         .post(
-          "/gpt/sendPrompt",
+          "/gpt/3.5-turbo",
           body: HttpPayload.json({
             "messages": [
               {

@@ -1,6 +1,7 @@
 import 'package:ai_yu/data/state_models/deeplinks_model.dart';
 import 'package:ai_yu/data/gpt_message.dart';
 import 'package:ai_yu/data/gpt_mode.dart';
+import "package:ai_yu/data/state_models/wallet_model.dart";
 import "package:ai_yu/pages/selection_page.dart";
 import "package:ai_yu/utils/gpt_api.dart";
 import "package:ai_yu/utils/mission_decider.dart";
@@ -102,8 +103,11 @@ aiyu://to-chinese?q={{Front}}}
           GPTMessageSender.user, Future.value(GPTMessageContent(_prompt)));
     });
 
-    final Future<GPTMessageContent> responseFuture =
-        callGptAPI(_mission, [_deeplinkQueryMessage]);
+    final Future<GPTMessageContent> responseFuture = callGptAPI(
+      _mission,
+      [_deeplinkQueryMessage],
+      wallet: Provider.of<WalletModel>(context, listen: false),
+    );
     setState(() {
       _gptResponseMessage = GPTMessage(GPTMessageSender.gpt, responseFuture);
     });

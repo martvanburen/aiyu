@@ -75,6 +75,11 @@ class WalletModel extends ChangeNotifier {
     return result;
   }
 
+  void setBalance({required int microcents}) {
+    _microcentBalance = microcents;
+    notifyListeners();
+  }
+
   int _calculateQueryCost() {
     return 2;
   }
