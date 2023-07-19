@@ -108,7 +108,7 @@ class _LanguagePracticePageState extends State<LanguagePracticePage> {
     });
     final isConversationMode =
         Provider.of<PreferencesModel>(context, listen: false)
-            .isConversationMode;
+            .isAutoConversationMode;
     if (isConversationMode) {
       _languageInputWidgetKey.currentState?.startListening();
     }

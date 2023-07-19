@@ -6,8 +6,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 class PreferencesModel extends ChangeNotifier {
   SharedPreferences? _prefs;
 
-  bool _isConversationMode = false;
-  bool get isConversationMode => _isConversationMode;
+  bool _isAutoConversationMode = false;
+  bool get isAutoConversationMode => _isAutoConversationMode;
 
   List<String> _recentLanguages = [];
   UnmodifiableListView<String> get recentLanguages =>
@@ -19,24 +19,25 @@ class PreferencesModel extends ChangeNotifier {
 
   void _loadFromSharedPreferences() async {
     _prefs = await SharedPreferences.getInstance();
-    _isConversationMode = _prefs?.getBool('isConversationMode') ?? false;
+    _isAutoConversationMode =
+        _prefs?.getBool('isAutoConversationMode') ?? false;
     _recentLanguages = _prefs?.getStringList("recentLanguages") ?? [];
     notifyListeners();
   }
 
   void _saveToSharedPreferences() async {
-    _prefs?.setBool('isConversationMode', _isConversationMode);
+    _prefs?.setBool('isAutoConversationMode', _isAutoConversationMode);
     _prefs?.setStringList("recentLanguages", _recentLanguages);
   }
 
-  void toggleConversationMode() async {
-    _isConversationMode = !_isConversationMode;
+  void toggleAutoConversationMode() async {
+    _isAutoConversationMode = !_isAutoConversationMode;
     _saveToSharedPreferences();
     notifyListeners();
   }
 
-  void setConversationMode(bool value) async {
-    _isConversationMode = value;
+  void setAutoConversationMode(bool value) async {
+    _isAutoConversationMode = value;
     _saveToSharedPreferences();
     notifyListeners();
   }

@@ -87,12 +87,12 @@ class ConversationLaunchDialogState extends State<ConversationLaunchDialog> {
                         child: CheckboxListTile(
                           contentPadding: const EdgeInsets.all(0.0),
                           title: const Text(
-                            "Conversation mode.",
+                            "Automatic mode.",
                             style: TextStyle(fontSize: 14),
                           ),
-                          value: preferences.isConversationMode,
+                          value: preferences.isAutoConversationMode,
                           onChanged: (newValue) {
-                            preferences.setConversationMode(newValue!);
+                            preferences.setAutoConversationMode(newValue!);
                           },
                           controlAffinity: ListTileControlAffinity.leading,
                         ),
@@ -104,7 +104,7 @@ class ConversationLaunchDialogState extends State<ConversationLaunchDialog> {
                             context: context,
                             builder: (BuildContext context) {
                               return AlertDialog(
-                                title: const Text("Conversation mode."),
+                                title: const Text("Automatic mode."),
                                 content: const Text("""
 If enabled, the app will automatically:
 - Start listening when it's your turn to speak.

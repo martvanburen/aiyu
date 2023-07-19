@@ -89,10 +89,10 @@ class LanguageInputWidgetState extends State<LanguageInputWidget> {
     setState(() {
       isListening = false;
     });
-    final isConversationMode =
+    final isAutoConversationMode =
         Provider.of<PreferencesModel>(context, listen: false)
-            .isConversationMode;
-    if (isConversationMode && val.finalResult && val.isConfident()) {
+            .isAutoConversationMode;
+    if (isAutoConversationMode && val.finalResult && val.isConfident()) {
       _sendPrompt();
     }
   }
@@ -171,19 +171,19 @@ class LanguageInputWidgetState extends State<LanguageInputWidget> {
                       return SizedBox(
                         height: 30,
                         child: GestureDetector(
-                          onTap: () => preferences.toggleConversationMode(),
+                          onTap: () => preferences.toggleAutoConversationMode(),
                           child: Center(
                               child: Text(
                             "AUTO",
                             style: TextStyle(
                               fontSize: 10,
-                              decoration: preferences.isConversationMode
+                              decoration: preferences.isAutoConversationMode
                                   ? null
                                   : TextDecoration.lineThrough,
-                              color: preferences.isConversationMode
+                              color: preferences.isAutoConversationMode
                                   ? Theme.of(context).primaryColor
                                   : Colors.black,
-                              fontWeight: preferences.isConversationMode
+                              fontWeight: preferences.isAutoConversationMode
                                   ? FontWeight.bold
                                   : null,
                             ),
