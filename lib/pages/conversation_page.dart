@@ -98,7 +98,7 @@ class _LanguagePracticePageState extends State<LanguagePracticePage> {
   }
 
   void _playerStartedHandler() async {
-    _languageInputWidgetKey.currentState?.stopListening();
+    _languageInputWidgetKey.currentState?.stopListening(clearPrompt: false);
   }
 
   void _playerCompletedHandler() async {

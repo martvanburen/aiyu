@@ -90,9 +90,9 @@ class LanguageInputWidgetState extends State<LanguageInputWidget> {
     });
   }
 
-  void stopListening() async {
+  void stopListening({clearPrompt = true}) async {
     speechRecognition.cancel();
-    _clearPrompt();
+    if (clearPrompt) _clearPrompt();
   }
 
   void _listeningCompletedHandler(SpeechRecognitionResult val) async {
