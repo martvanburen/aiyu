@@ -83,7 +83,7 @@ Future<String> translateToEnglishUsingGPT(String text) async {
               {
                 "role": "user",
                 "content": """
-Please translate the following text into English. Respond only with the result.
+Please translate the following text into English (if not already). Respond only with the result.
 $text
 """,
               },

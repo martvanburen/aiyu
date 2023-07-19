@@ -10,7 +10,6 @@ import "package:ai_yu/widgets/conversation_page/conversation_display_widget.dart
 import "package:ai_yu/widgets/conversation_page/language_input_widget.dart";
 import "package:ai_yu/widgets/shared/back_or_close_button.dart";
 import "package:ai_yu/widgets/shared/mini_wallet_widget.dart";
-import "package:amplify_flutter/amplify_flutter.dart";
 import "package:flutter/material.dart";
 import "package:flutter_gen/gen_l10n/app_localizations.dart";
 import "package:just_audio/just_audio.dart";
@@ -27,6 +26,8 @@ class LanguagePracticePage extends StatefulWidget {
 }
 
 class _LanguagePracticePageState extends State<LanguagePracticePage> {
+  bool _disposed = false;
+
   late final String? _mission;
   final List<GPTMessage> _conversation = [];
 
@@ -60,13 +61,14 @@ class _LanguagePracticePageState extends State<LanguagePracticePage> {
   // Always check if mounted before setting state.
   @override
   void setState(fn) {
-    if (mounted) {
+    if (!_disposed && mounted) {
       super.setState(fn);
     }
   }
 
   @override
   void dispose() {
+    _disposed = true;
     super.dispose();
     _player.stop();
     _player.dispose();
@@ -75,9 +77,6 @@ class _LanguagePracticePageState extends State<LanguagePracticePage> {
   Future<void> _speak(GPTMessage message) async {
     final audioPath = await message.audioFuture;
     if (audioPath == null || audioPath == "") return;
-
-    // TODO(mart): Remove debug line.
-    safePrint(audioPath);
 
     if (_currentlySpeakingMessage != null) {
       await _player.stop();
@@ -92,7 +91,7 @@ class _LanguagePracticePageState extends State<LanguagePracticePage> {
   }
 
   void _stopSpeaking() async {
-    _player.stop();
+    await _player.stop();
     setState(() {
       _currentlySpeakingMessage = null;
     });
@@ -212,6 +211,7 @@ class _LanguagePracticePageState extends State<LanguagePracticePage> {
                 LanguageInputWidget(
                   key: _languageInputWidgetKey,
                   language: widget.language,
+                  stopSpeaking: _stopSpeaking,
                   callbackFunction: _sendPromptToServer,
                 ),
               ],

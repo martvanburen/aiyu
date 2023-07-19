@@ -6,11 +6,15 @@ import "package:speech_to_text/speech_to_text.dart" as stt;
 
 class LanguageInputWidget extends StatefulWidget {
   final String language;
+  final Function stopSpeaking;
   final ValueChanged<String> callbackFunction;
 
-  const LanguageInputWidget(
-      {Key? key, required this.language, required this.callbackFunction})
-      : super(key: key);
+  const LanguageInputWidget({
+    Key? key,
+    required this.language,
+    required this.stopSpeaking,
+    required this.callbackFunction,
+  }) : super(key: key);
 
   @override
   State<LanguageInputWidget> createState() => LanguageInputWidgetState();
@@ -51,6 +55,8 @@ class LanguageInputWidgetState extends State<LanguageInputWidget> {
     if (!isInitialized || !mounted || isListening) {
       return;
     }
+
+    await widget.stopSpeaking();
 
     setState(() {
       isListening = true;

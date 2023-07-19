@@ -30,6 +30,8 @@ class DeeplinkPage extends StatefulWidget {
 }
 
 class _DeeplinkPageState extends State<DeeplinkPage> {
+  bool _disposed = false;
+
   bool _readyToLoadPage = false;
   String _errorMessage = "";
 
@@ -55,9 +57,15 @@ class _DeeplinkPageState extends State<DeeplinkPage> {
   // Always check if mounted before setting state.
   @override
   void setState(fn) {
-    if (mounted) {
+    if (!_disposed && mounted) {
       super.setState(fn);
     }
+  }
+
+  @override
+  void dispose() {
+    _disposed = true;
+    super.dispose();
   }
 
   void _loadFromUri(Uri uri) async {
@@ -154,6 +162,8 @@ aiyu://to-chinese?q={{Front}}}
                     padding: const EdgeInsets.all(20.0),
                     child: Text(_prompt,
                         textAlign: TextAlign.left,
+                        maxLines: 4,
+                        overflow: TextOverflow.fade,
                         style: TextStyle(
                           color: Theme.of(context).primaryColor,
                           fontSize: 16,
@@ -166,7 +176,8 @@ aiyu://to-chinese?q={{Front}}}
                     thickness: 2,
                   ),
                   Expanded(
-                    child: Container(
+                    child: SingleChildScrollView(
+                        child: Container(
                       padding: const EdgeInsets.all(20.0),
                       decoration: BoxDecoration(
                         color: Theme.of(context).colorScheme.surface,
@@ -231,7 +242,7 @@ aiyu://to-chinese?q={{Front}}}
                           }
                         },
                       ),
-                    ),
+                    )),
                   ),
                   Divider(
                     height: 1,
