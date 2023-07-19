@@ -5,6 +5,45 @@ import 'package:amplify_flutter/amplify_flutter.dart';
 
 import '../data/state_models/wallet_model.dart';
 
+bool _isCJKLanguage(String text) {
+  int firstChar = text.codeUnitAt(0);
+  // Unicode range for CJK Unified Ideographs (Chinese, Japanese, Korean).
+  if (firstChar >= 0x4E00 && firstChar <= 0x9FFF) {
+    return true;
+  }
+  return false;
+}
+
+int _estimateGptTokens(String text) {
+  if (_isCJKLanguage(text)) {
+    // For CJK languages, assume each character is a token.
+    return text.length;
+  } else {
+    var words = text.split(' ').length;
+    var characters = text.length;
+    return words + (characters / 2).round();
+  }
+}
+
+List<Map<String, String>> _limitMessagesToTokenCount(
+    List<Map<String, String>> messages, int tokenLimit) {
+  List<Map<String, String>> limitedMessages = [];
+
+  int tokenCount = 0;
+  for (var message in messages.reversed) {
+    int messageTokens = _estimateGptTokens(message["content"]!);
+
+    if (tokenCount + messageTokens > tokenLimit) {
+      break;
+    }
+
+    limitedMessages.add(message);
+    tokenCount += messageTokens;
+  }
+
+  return limitedMessages.reversed.toList();
+}
+
 Future<GPTMessageContent> callGptAPI(
   String? mission,
   List<GPTMessage> conversation, {
@@ -27,6 +66,9 @@ Future<GPTMessageContent> callGptAPI(
       "content": content.body,
     };
   }));
+
+  // Restrict messages to ~2K tokens.
+  messages = _limitMessagesToTokenCount(messages, 2000);
 
   // Add mission statement as first message.
   if (mission != null) {
