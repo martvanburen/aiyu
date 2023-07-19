@@ -51,9 +51,13 @@ Future<GPTMessageContent> callGptAPI(
   WalletModel? wallet,
   bool getFeedback = false,
 }) async {
+  // TODO(mart): Clean this up.
   if ((wallet?.microcentBalance ?? 0) < 100) {
-    return GPTMessageContent(
-        "A minimum balance of 1 cent is required to send GPT requests.");
+    await wallet?.initialization;
+    if ((wallet?.microcentBalance ?? 0) < 100) {
+      return GPTMessageContent(
+          "A minimum balance of 1 cent is required to send GPT requests.");
+    }
   }
 
   // Convert the conversation into the format the API expects.

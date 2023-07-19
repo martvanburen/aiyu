@@ -8,6 +8,9 @@ class WalletModel extends ChangeNotifier {
   late final AWSModel? _aws;
   bool _disposed = false;
 
+  late final Future<void> _initialization;
+  Future<void> get initialization => _initialization;
+
   // Measured in 100ths of a cent.
   late int _microcentBalance;
 
@@ -20,7 +23,7 @@ class WalletModel extends ChangeNotifier {
 
   WalletModel(this._aws, WalletModel? previousWallet) {
     _microcentBalance = previousWallet?._microcentBalance ?? 0;
-    _fetchWalletBalance();
+    _initialization = _fetchWalletBalance();
   }
 
   // Since this model is a proxy provider, it will be recreated whenever the
