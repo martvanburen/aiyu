@@ -210,6 +210,14 @@ class _DeeplinkEditPageState extends State<DeeplinkEditPage> {
                         TextStyle(color: Theme.of(context).primaryColor),
                     prefixText: "aiyu://",
                   ),
+                  onTap: () {
+                    if (_pathController.text.isEmpty &&
+                        _nameController.text.isNotEmpty) {
+                      _pathController.text = _nameController.text
+                          .toLowerCase()
+                          .replaceAll(' ', '-');
+                    }
+                  },
                   onChanged: (value) {
                     _setEditFlag();
                     if (value.startsWith("aiyu://")) {
