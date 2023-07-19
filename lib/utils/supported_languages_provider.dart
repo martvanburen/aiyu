@@ -72,6 +72,12 @@ class SupportedLanguagesProvider {
       "polly_voice": "Lotte",
       "polly_voice_neural": "Laura",
     },
+    "it": {
+      "name": "Italian",
+      "localized": "Italiano",
+      "polly_voice": "Carla",
+      "polly_voice_neural": "Bianca",
+    },
   };
 
   static const defaultLanguageCode = "en";
