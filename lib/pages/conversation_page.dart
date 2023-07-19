@@ -13,6 +13,7 @@ import "package:ai_yu/widgets/conversation_page/language_input_widget.dart";
 import "package:ai_yu/widgets/shared/back_or_close_button.dart";
 import "package:ai_yu/widgets/shared/mini_wallet_widget.dart";
 import "package:amplify_flutter/amplify_flutter.dart";
+import "package:amplify_storage_s3/amplify_storage_s3.dart";
 import "package:flutter/material.dart";
 import "package:flutter_gen/gen_l10n/app_localizations.dart";
 import "package:just_audio/just_audio.dart";
@@ -81,6 +82,33 @@ class _LanguagePracticePageState extends State<LanguagePracticePage> {
     // TODO(mart): Remove debug line.
     safePrint(url);
 
+    // Parse S3 key from URL.
+    String? authorizedUrl;
+    try {
+      final key = url.split("public/")[1];
+
+      // TODO(mart): Remove debug line.
+      safePrint(key);
+
+      final result = await Amplify.Storage.getUrl(
+        key: key,
+        options: const StorageGetUrlOptions(
+          accessLevel: StorageAccessLevel.guest,
+          pluginOptions: S3GetUrlPluginOptions(
+            validateObjectExistence: true,
+            expiresIn: Duration(hours: 1),
+          ),
+        ),
+      ).result;
+      authorizedUrl = result.url.toString();
+    } on StorageException catch (e) {
+      safePrint('Could not get a downloadable URL: ${e.message}.');
+      rethrow;
+    }
+
+    // TODO(mart): Remove debug line.
+    safePrint(authorizedUrl);
+
     if (_currentlySpeakingMessage != null) {
       await _player.stop();
     }
@@ -89,7 +117,7 @@ class _LanguagePracticePageState extends State<LanguagePracticePage> {
       _currentlySpeakingMessage = message;
     });
 
-    await _player.setUrl(url);
+    await _player.setUrl(authorizedUrl);
     _player.play();
   }
 
