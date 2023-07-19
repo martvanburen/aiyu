@@ -12,7 +12,7 @@ class MiniWalletWidget extends StatelessWidget {
         return TextButton(
           style: TextButton.styleFrom(foregroundColor: Colors.grey),
           onPressed: () => wallet.add50Cent(),
-          child: Text("${wallet.centBalance.toStringAsFixed(2)}¢"),
+          child: Text("${wallet.centBalance.toStringAsFixed(0)}¢"),
         );
       },
     );
