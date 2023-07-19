@@ -1,6 +1,7 @@
 import 'package:ai_yu/data/state_models/preferences_model.dart';
 import "package:flutter/material.dart";
 import "package:provider/provider.dart";
+import "package:speech_to_text/speech_recognition_error.dart";
 import "package:speech_to_text/speech_recognition_result.dart";
 import "package:speech_to_text/speech_to_text.dart" as stt;
 
@@ -31,7 +32,9 @@ class LanguageInputWidgetState extends State<LanguageInputWidget> {
   @override
   void initState() {
     super.initState();
-    speechRecognitionInitialization = speechRecognition.initialize();
+    speechRecognitionInitialization = speechRecognition.initialize(
+      onError: (error) => _listeningErrorHandler(error),
+    );
   }
 
   // Always check if mounted before setting state.
@@ -74,7 +77,8 @@ class LanguageInputWidgetState extends State<LanguageInputWidget> {
           _listeningCompletedHandler(val);
         }
       },
-      cancelOnError: true,
+      partialResults: true,
+      cancelOnError: false, // Errors -> _listeningErrorHandler.
       localeId: widget.language,
     );
   }
@@ -100,6 +104,18 @@ class LanguageInputWidgetState extends State<LanguageInputWidget> {
             .isAutoConversationMode;
     if (isAutoConversationMode && val.finalResult && val.isConfident()) {
       _sendPrompt();
+    }
+  }
+
+  void _listeningErrorHandler(SpeechRecognitionError error) {
+    if (["error_no_match", "error_speech_timeout"].contains(error.errorMsg)) {
+      // Very normal. Happens for example when no speech was detected.
+      stopListening();
+    } else {
+      // Not normal. Show error message in prompt box.
+      setState(() {
+        _promptInputController.text = error.errorMsg;
+      });
     }
   }
 

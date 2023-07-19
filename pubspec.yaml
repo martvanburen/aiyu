@@ -45,7 +45,7 @@ dependencies:
   intl: any
 
   # Speach-to-text and text-to-speech.
-  speech_to_text: ^6.0.0
+  speech_to_text: ^6.2.0
   just_audio: ^0.9.34
 
   # For storing key-value persistent data.
