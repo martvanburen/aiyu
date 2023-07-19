@@ -208,16 +208,13 @@ aiyu://to-chinese?q={{Front}}}
                               children: <Widget>[
                                 Container(
                                   alignment: Alignment.centerRight,
-                                  child: GestureDetector(
-                                    onTap: () {
-                                      _onMessageCopyButtonTapped(content);
-                                    },
-                                    child: SelectableText(content.body,
-                                        textAlign: TextAlign.right,
-                                        style: const TextStyle(
-                                          color: Colors.black,
-                                          fontSize: 16,
-                                        )),
+                                  child: SelectableText(
+                                    content.body,
+                                    textAlign: TextAlign.right,
+                                    style: const TextStyle(
+                                      color: Colors.black,
+                                      fontSize: 16,
+                                    ),
                                   ),
                                 ),
                                 Row(

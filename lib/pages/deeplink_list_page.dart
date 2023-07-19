@@ -102,7 +102,7 @@ class _DeeplinkListPageState extends State<DeeplinkListPage> {
                             title: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
+                                SelectableText(
                                   deeplinks.get[index].url,
                                   style: const TextStyle(
                                       color: Colors.grey, fontSize: 13),

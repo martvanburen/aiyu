@@ -23,7 +23,7 @@ class LongTextDialog extends StatelessWidget {
         textAlign: TextAlign.center,
       ),
       content: SingleChildScrollView(
-        child: Text(
+        child: SelectableText(
           text,
           style: const TextStyle(color: Colors.white, fontSize: 16),
         ),

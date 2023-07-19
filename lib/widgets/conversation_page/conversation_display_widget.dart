@@ -55,7 +55,7 @@ class ConversationDisplayWidget extends StatelessWidget {
                   if (isUser) {
                     return Padding(
                       padding: const EdgeInsets.only(top: 20.0, right: 15.0),
-                      child: Text(content.body,
+                      child: SelectableText(content.body,
                           textAlign: TextAlign.left,
                           style: TextStyle(
                             color: theme.primaryColor,
@@ -68,7 +68,7 @@ class ConversationDisplayWidget extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
                         if (content.sentenceFeedback != null) ...[
-                          Text(
+                          SelectableText(
                             "⤷ ${content.sentenceFeedback!}",
                             style: TextStyle(
                               fontSize: 11,
@@ -77,7 +77,7 @@ class ConversationDisplayWidget extends StatelessWidget {
                           ),
                         ],
                         if (content.sentenceCorrection != null) ...[
-                          Text(
+                          SelectableText(
                             "⤷ ${content.sentenceCorrection!}",
                             style: TextStyle(
                               fontSize: 11,
@@ -93,7 +93,7 @@ class ConversationDisplayWidget extends StatelessWidget {
                               onTap: () {
                                 onMessageArrowButtonTapped(content);
                               },
-                              child: Text(content.body,
+                              child: SelectableText(content.body,
                                   textAlign: TextAlign.right,
                                   style: TextStyle(
                                     color: Colors.black,
