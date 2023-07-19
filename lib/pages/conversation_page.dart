@@ -1,6 +1,3 @@
-import "dart:convert";
-import "dart:io";
-
 import 'package:ai_yu/data/state_models/preferences_model.dart';
 import 'package:ai_yu/data/gpt_message.dart';
 import 'package:ai_yu/data/gpt_mode.dart';
@@ -8,7 +5,7 @@ import "package:ai_yu/data/state_models/wallet_model.dart";
 import "package:ai_yu/pages/selection_page.dart";
 import "package:ai_yu/utils/gpt_api.dart";
 import "package:ai_yu/utils/mission_decider.dart";
-import "package:ai_yu/utils/supported_languages_provider.dart";
+import "package:ai_yu/utils/polly_api.dart";
 import "package:ai_yu/widgets/conversation_page/conversation_display_widget.dart";
 import "package:ai_yu/widgets/conversation_page/language_input_widget.dart";
 import "package:ai_yu/widgets/shared/back_or_close_button.dart";
@@ -17,7 +14,6 @@ import "package:amplify_flutter/amplify_flutter.dart";
 import "package:flutter/material.dart";
 import "package:flutter_gen/gen_l10n/app_localizations.dart";
 import "package:just_audio/just_audio.dart";
-import "package:path_provider/path_provider.dart";
 import "package:provider/provider.dart";
 
 class LanguagePracticePage extends StatefulWidget {
@@ -77,37 +73,11 @@ class _LanguagePracticePageState extends State<LanguagePracticePage> {
   }
 
   Future<void> _speak(GPTMessage message) async {
-    final path = (await message.content).audioPath;
-    if (path == null || path == "") return;
+    final audioPath = await message.audioFuture;
+    if (audioPath == null || audioPath == "") return;
 
     // TODO(mart): Remove debug line.
-    safePrint(path);
-
-    // Parse S3 key from URL.
-    /* String? authorizedUrl = url;
-    try {
-      final key = url.split("public/")[1];
-
-      // TODO(mart): Remove debug line.
-      safePrint(key);
-
-      final result = await Amplify.Storage.getUrl(
-        key: key,
-        options: const StorageGetUrlOptions(
-          accessLevel: StorageAccessLevel.guest,
-          pluginOptions: S3GetUrlPluginOptions(
-            validateObjectExistence: true,
-            expiresIn: Duration(hours: 1),
-          ),
-        ),
-      ).result;
-      authorizedUrl = result.url.toString();
-    } on StorageException catch (e) {
-      safePrint('Could not get a downloadable URL: ${e.message}.');
-      rethrow;
-    }
-    // TODO(mart): Remove debug line.
-    safePrint(authorizedUrl); */
+    safePrint(audioPath);
 
     if (_currentlySpeakingMessage != null) {
       await _player.stop();
@@ -117,7 +87,7 @@ class _LanguagePracticePageState extends State<LanguagePracticePage> {
       _currentlySpeakingMessage = message;
     });
 
-    await _player.setFilePath(path);
+    await _player.setFilePath(audioPath);
     _player.play();
   }
 
@@ -157,10 +127,13 @@ class _LanguagePracticePageState extends State<LanguagePracticePage> {
       _mission,
       _conversation,
       wallet: Provider.of<WalletModel>(context, listen: false),
-      pollyVoiceId: SupportedLanguagesProvider.getPollyVoiceId(widget.language),
       getFeedback: true,
     );
-    GPTMessage gptMessage = GPTMessage(GPTMessageSender.gpt, responseFuture);
+    final Future<String?> audioFuture = responseFuture.then((response) async {
+      return await callPollyApi(response.body, widget.language);
+    });
+    GPTMessage gptMessage = GPTMessage(GPTMessageSender.gpt, responseFuture,
+        audioFuture: audioFuture);
     setState(() {
       _conversation.add(gptMessage);
     });
@@ -188,52 +161,22 @@ class _LanguagePracticePageState extends State<LanguagePracticePage> {
   }
 
   void _prepareAndSpeakIntroMessage() async {
-    // First add a temporary intro message (without Polly URL).
+    // Set up intro message.
     String body =
         (await AppLocalizations.delegate.load(Locale(widget.language)))
             .conversation_page_intro_message;
-    GPTMessage introMessage =
-        GPTMessage(GPTMessageSender.gpt, Future.value(GPTMessageContent(body)));
+    GPTMessage introMessage = GPTMessage(
+        GPTMessageSender.gpt, Future.value(GPTMessageContent(body)),
+        audioFuture: callPollyApi(body, widget.language));
     setState(() {
       _conversation.add(introMessage);
     });
 
-    // Only Polly URL is fetched, replace original intro message & start
-    // speaking.
-    try {
-      final response = await Amplify.API
-          .post(
-            "/gpt/polly",
-            body: HttpPayload.json({
-              "text": body,
-              "polly_voice_id":
-                  SupportedLanguagesProvider.getPollyVoiceId(widget.language),
-            }),
-            apiName: "restapi",
-          )
-          .response;
-
-      final data = json.decode(response.decodeBody());
-      if (data["status"] != 200) {
-        safePrint("POLLY ERROR: ${data['error']}.");
-      } else {
-        String audioBase64 = data['audio'];
-        List<int> audioBytes = base64Decode(audioBase64);
-        Directory tempDir = await getTemporaryDirectory();
-        String tempPath = tempDir.path;
-        String tempFilename = DateTime.now().millisecondsSinceEpoch.toString();
-        File file = File('$tempPath/$tempFilename.mp3');
-        await file.writeAsBytes(audioBytes);
-
-        setState(() {
-          _conversation[0] = GPTMessage(GPTMessageSender.gpt,
-              Future.value(GPTMessageContent(body, audioPath: file.path)));
-        });
-      }
-      _speak(_conversation.first);
-    } on ApiException catch (e) {
-      safePrint(e.message);
-    }
+    // Once page has loaded, speak message (which will automatically wait for
+    // the audioFuture to resolve).
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _speak(introMessage);
+    });
   }
 
   @override

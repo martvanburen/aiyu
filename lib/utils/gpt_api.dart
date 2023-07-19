@@ -1,9 +1,7 @@
 import "dart:convert";
-import 'dart:io';
 
 import 'package:ai_yu/data/gpt_message.dart';
 import 'package:amplify_flutter/amplify_flutter.dart';
-import 'package:path_provider/path_provider.dart';
 
 import '../data/state_models/wallet_model.dart';
 
@@ -12,7 +10,6 @@ Future<GPTMessageContent> callGptAPI(
   List<GPTMessage> conversation, {
   int numTokensToGenerate = 600,
   WalletModel? wallet,
-  String? pollyVoiceId,
   bool getFeedback = false,
 }) async {
   if ((wallet?.microcentBalance ?? 0) < 100) {
@@ -48,7 +45,6 @@ Future<GPTMessageContent> callGptAPI(
           body: HttpPayload.json({
             "messages": messages,
             "max_tokens": numTokensToGenerate,
-            "polly_voice_id": pollyVoiceId,
           }),
           apiName: "restapi",
         )
@@ -64,28 +60,10 @@ Future<GPTMessageContent> callGptAPI(
       wallet?.setBalance(microcents: data["new_balance_microcents"]);
     }
 
-    String? audioPath;
-    if (data.containsKey("polly")) {
-      try {
-        String audioBase64 = data['polly'];
-        List<int> audioBytes = base64Decode(audioBase64);
-        Directory tempDir = await getTemporaryDirectory();
-        String tempPath = tempDir.path;
-        String tempFilename = DateTime.now().millisecondsSinceEpoch.toString();
-        File file = File('$tempPath/$tempFilename.mp3');
-        await file.writeAsBytes(audioBytes);
-        audioPath = file.path;
-      } catch (e) {
-        safePrint(e);
-        rethrow;
-      }
-    }
-
     return GPTMessageContent(
       data["content"] ?? "",
       sentenceFeedback: data["feedback"],
       sentenceCorrection: data["corrected"],
-      audioPath: audioPath,
     );
   } else {
     return GPTMessageContent(data["error"] ??
