@@ -65,7 +65,7 @@ dependencies:
 
   # Diverse.
   collection: ^1.17.1
-  amplify_storage_s3: ^1.2.1
+  path_provider: ^2.0.15
 
 dev_dependencies:
   flutter_test:

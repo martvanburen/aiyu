@@ -11,8 +11,8 @@ class GPTMessageContent {
   final String body;
   final String? sentenceFeedback;
   final String? sentenceCorrection;
-  final String? pollyUrl;
+  final String? audioPath;
 
   GPTMessageContent(this.body,
-      {this.sentenceFeedback, this.sentenceCorrection, this.pollyUrl});
+      {this.sentenceFeedback, this.sentenceCorrection, this.audioPath});
 }

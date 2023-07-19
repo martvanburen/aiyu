@@ -1,4 +1,5 @@
 import "dart:convert";
+import "dart:io";
 
 import 'package:ai_yu/data/state_models/preferences_model.dart';
 import 'package:ai_yu/data/gpt_message.dart';
@@ -13,10 +14,10 @@ import "package:ai_yu/widgets/conversation_page/language_input_widget.dart";
 import "package:ai_yu/widgets/shared/back_or_close_button.dart";
 import "package:ai_yu/widgets/shared/mini_wallet_widget.dart";
 import "package:amplify_flutter/amplify_flutter.dart";
-import "package:amplify_storage_s3/amplify_storage_s3.dart";
 import "package:flutter/material.dart";
 import "package:flutter_gen/gen_l10n/app_localizations.dart";
 import "package:just_audio/just_audio.dart";
+import "package:path_provider/path_provider.dart";
 import "package:provider/provider.dart";
 
 class LanguagePracticePage extends StatefulWidget {
@@ -76,14 +77,14 @@ class _LanguagePracticePageState extends State<LanguagePracticePage> {
   }
 
   Future<void> _speak(GPTMessage message) async {
-    final url = (await message.content).pollyUrl;
-    if (url == null || url == "") return;
+    final path = (await message.content).audioPath;
+    if (path == null || path == "") return;
 
     // TODO(mart): Remove debug line.
-    safePrint(url);
+    safePrint(path);
 
     // Parse S3 key from URL.
-    String? authorizedUrl;
+    /* String? authorizedUrl = url;
     try {
       final key = url.split("public/")[1];
 
@@ -105,9 +106,8 @@ class _LanguagePracticePageState extends State<LanguagePracticePage> {
       safePrint('Could not get a downloadable URL: ${e.message}.');
       rethrow;
     }
-
     // TODO(mart): Remove debug line.
-    safePrint(authorizedUrl);
+    safePrint(authorizedUrl); */
 
     if (_currentlySpeakingMessage != null) {
       await _player.stop();
@@ -117,7 +117,7 @@ class _LanguagePracticePageState extends State<LanguagePracticePage> {
       _currentlySpeakingMessage = message;
     });
 
-    await _player.setUrl(authorizedUrl);
+    await _player.setFilePath(path);
     _player.play();
   }
 
@@ -212,11 +212,24 @@ class _LanguagePracticePageState extends State<LanguagePracticePage> {
             apiName: "restapi",
           )
           .response;
+
       final data = json.decode(response.decodeBody());
-      setState(() {
-        _conversation[0] = GPTMessage(GPTMessageSender.gpt,
-            Future.value(GPTMessageContent(body, pollyUrl: data["url"])));
-      });
+      if (data["status"] != 200) {
+        safePrint("POLLY ERROR: ${data['error']}.");
+      } else {
+        String audioBase64 = data['audio'];
+        List<int> audioBytes = base64Decode(audioBase64);
+        Directory tempDir = await getTemporaryDirectory();
+        String tempPath = tempDir.path;
+        String tempFilename = DateTime.now().millisecondsSinceEpoch.toString();
+        File file = File('$tempPath/$tempFilename.mp3');
+        await file.writeAsBytes(audioBytes);
+
+        setState(() {
+          _conversation[0] = GPTMessage(GPTMessageSender.gpt,
+              Future.value(GPTMessageContent(body, audioPath: file.path)));
+        });
+      }
       _speak(_conversation.first);
     } on ApiException catch (e) {
       safePrint(e.message);
