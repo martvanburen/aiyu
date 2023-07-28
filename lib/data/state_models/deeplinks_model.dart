@@ -18,7 +18,19 @@ class DeeplinkConfig {
 class DeeplinksModel extends ChangeNotifier {
   SharedPreferences? _prefs;
 
-  List<DeeplinkConfig> _deeplinks = [];
+  List<DeeplinkConfig> _deeplinks = [
+    const DeeplinkConfig(
+      path: "to-pinyin",
+      name: "To Pinyin",
+      prompt:
+          "Can you write \"\$Q\" in pinyin with accent marks? Don't add spaces in between characters that are considered dictionary words.",
+    ),
+    const DeeplinkConfig(
+      path: "to-hanja",
+      name: "To Hanja",
+      prompt: "Can you write \"\$Q\" in Hanja? Output only the answer.",
+    ),
+  ];
   UnmodifiableListView<DeeplinkConfig> get get =>
       UnmodifiableListView(_deeplinks);
 
