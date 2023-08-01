@@ -1,9 +1,7 @@
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:ai_yu/utils/supported_languages_provider.dart';
 import 'package:amplify_flutter/amplify_flutter.dart';
-import 'package:path_provider/path_provider.dart';
 
 Future<String?> callPollyApi(String text, String language,
     {bool neural = true}) async {
@@ -34,17 +32,18 @@ Future<String?> callPollyApi(String text, String language,
     return null;
   }
 
-  if (data["status"] != 200) {
+  if (data["status_code"] != 200) {
     safePrint("POLLY ERROR: ${data['error']}.");
     return null;
   }
+  return data["audio_url"];
 
-  String audioBase64 = data['audio'];
+  /* String audioBase64 = data['audio'];
   List<int> audioBytes = base64Decode(audioBase64);
   Directory tempDir = await getTemporaryDirectory();
   String tempPath = tempDir.path;
   String tempFilename = DateTime.now().millisecondsSinceEpoch.toString();
   File file = File('$tempPath/$tempFilename.mp3');
   await file.writeAsBytes(audioBytes);
-  return file.path;
+  return file.path; */
 }

@@ -75,8 +75,8 @@ class _LanguagePracticePageState extends State<LanguagePracticePage> {
   }
 
   Future<void> _speak(GPTMessage message) async {
-    final audioPath = await message.audioFuture;
-    if (audioPath == null || audioPath == "") return;
+    final audioURL = await message.audioFuture;
+    if (audioURL == null || audioURL == "") return;
 
     if (_currentlySpeakingMessage != null) {
       await _player.stop();
@@ -86,7 +86,8 @@ class _LanguagePracticePageState extends State<LanguagePracticePage> {
       _currentlySpeakingMessage = message;
     });
 
-    await _player.setFilePath(audioPath);
+    // await _player.setFilePath(audioPath);
+    await _player.setUrl(audioURL);
     _player.play();
   }
 
