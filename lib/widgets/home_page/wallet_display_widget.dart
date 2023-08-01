@@ -36,7 +36,7 @@ class _WalletDisplayWidgetState extends State<WalletDisplayWidget> {
                             margin: const EdgeInsets.symmetric(vertical: 24.0),
                             child: const LinearProgressIndicator(),
                           )
-                        : Text("${wallet.centBalance.toStringAsFixed(2)}¢",
+                        : Text("${wallet.centBalance.toStringAsFixed(1)}¢",
                             style: const TextStyle(fontSize: 36)),
                   ],
                 ),

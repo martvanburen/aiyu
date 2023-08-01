@@ -41,15 +41,15 @@ class _AuthenticationDialogState extends State<AuthenticationDialog> {
     try {
       final response = await Amplify.API
           .post(
-            "/auth/recoverUsername",
+            "/auth/recover-username",
             body: HttpPayload.json({"email": email}),
-            apiName: "restapi",
+            apiName: "aiyu-backend",
           )
           .response;
       final jsonResponse = json.decode(response.decodeBody());
-      if (jsonResponse.containsKey("error")) {
+      if ((jsonResponse["error"] as String?) != null) {
         return (false, jsonResponse["error"] as String);
-      } else if (jsonResponse.containsKey("username")) {
+      } else if ((jsonResponse["username"] as String?) != null) {
         return (true, jsonResponse["username"] as String);
       } else {
         return (false, "Error fetching user.");

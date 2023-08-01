@@ -20,12 +20,12 @@ Future<String?> callPollyApi(String text, String language,
   try {
     final response = await Amplify.API
         .post(
-          neural ? "/polly/neural" : "/polly/standard",
+          "/callout/polly",
           body: HttpPayload.json({
             "text": text,
             "polly_voice_id": voiceId,
           }),
-          apiName: "restapi",
+          apiName: "aiyu-backend",
         )
         .response;
     data = json.decode(response.decodeBody());

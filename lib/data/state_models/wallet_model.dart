@@ -52,13 +52,13 @@ class WalletModel extends ChangeNotifier {
       try {
         final response = await Amplify.API
             .get(
-              "/wallet/getBalance",
-              apiName: "restapi",
+              "/wallet/get-balance",
+              apiName: "aiyu-backend",
             )
             .response;
 
         final jsonResponse = json.decode(response.decodeBody());
-        _microcentBalance = jsonResponse["balance_microcents"];
+        _microcentBalance = jsonResponse["balance_hundredthcent"];
       } catch (e) {
         safePrint("Wallet fetch failed: '$e'. ");
       }

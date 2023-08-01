@@ -87,12 +87,13 @@ Future<GPTMessageContent> callGptAPI(
   try {
     final response = await Amplify.API
         .post(
-          getFeedback ? "/gpt/3.5-turbo/withFeedback" : "/gpt/3.5-turbo",
+          "/callout/gpt",
           body: HttpPayload.json({
-            "messages": messages,
+            "conversation": messages,
             "max_tokens": numTokensToGenerate,
+            "with_prompt_feedback": getFeedback,
           }),
-          apiName: "restapi",
+          apiName: "aiyu-backend",
         )
         .response;
     data = json.decode(response.decodeBody());
@@ -101,19 +102,19 @@ Future<GPTMessageContent> callGptAPI(
   }
 
   // Try parsing result.
-  if (data["status"] == 200) {
-    if (data.containsKey("new_balance_microcents")) {
-      wallet?.setBalance(microcents: data["new_balance_microcents"]);
+  if (data["status_code"] == 200) {
+    if ((data["new_balance_hundredthcent"] as int?) != null) {
+      wallet?.setBalance(microcents: data["new_balance_hundredthcent"]);
     }
 
     return GPTMessageContent(
       data["content"] ?? "",
       sentenceFeedback: data["feedback"],
-      sentenceCorrection: data["corrected"],
+      sentenceCorrection: data["correction"],
     );
   } else {
     return GPTMessageContent(data["error"] ??
-        "Unknown error occured (${data["status"]}). Please try again later.");
+        "Unknown error occured (${data["status_code"]}). Please try again later.");
   }
 }
 
@@ -123,9 +124,9 @@ Future<String> translateToEnglishUsingGPT(String text) async {
   try {
     final response = await Amplify.API
         .post(
-          "/gpt/3.5-turbo",
+          "/callout/gpt",
           body: HttpPayload.json({
-            "messages": [
+            "conversation": [
               {
                 "role": "user",
                 "content": """
@@ -136,7 +137,7 @@ $text
             ],
             "max_tokens": 300,
           }),
-          apiName: "restapi",
+          apiName: "aiyu-backend",
         )
         .response;
     data = json.decode(response.decodeBody());
@@ -145,7 +146,7 @@ $text
   }
 
   // Try parsing result.
-  if (data["status"] == 200) {
+  if (data["status_code"] == 200) {
     return (data["content"] ?? "").trim();
   } else {
     return data["error"] ??
