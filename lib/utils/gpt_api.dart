@@ -1,6 +1,7 @@
 import "dart:convert";
 
 import 'package:ai_yu/data/gpt_message.dart';
+import 'package:amplify_auth_cognito/amplify_auth_cognito.dart';
 import 'package:amplify_flutter/amplify_flutter.dart';
 
 import '../data/state_models/wallet_model.dart';
@@ -85,17 +86,20 @@ Future<GPTMessageContent> callGptAPI(
   // Make API call.
   dynamic data;
   try {
-    final response = await Amplify.API
-        .post(
-          "/callout/gpt",
-          body: HttpPayload.json({
-            "conversation": messages,
-            "max_tokens": numTokensToGenerate,
-            "with_prompt_feedback": getFeedback,
-          }),
-          apiName: "aiyu-backend",
-        )
-        .response;
+    final cognitoPlugin = Amplify.Auth.getPlugin(AmplifyAuthCognito.pluginKey);
+    final result = await cognitoPlugin.fetchAuthSession();
+    final identityId = result.userPoolTokensResult.value.idToken.raw;
+
+    final response = await Amplify.API.post(
+      "/callout/gpt",
+      body: HttpPayload.json({
+        "conversation": messages,
+        "max_tokens": numTokensToGenerate,
+        "with_prompt_feedback": getFeedback,
+      }),
+      apiName: "aiyu-backend",
+      headers: {"Authorization": identityId},
+    ).response;
     data = json.decode(response.decodeBody());
   } on ApiException catch (e) {
     return GPTMessageContent(e.message);
@@ -122,24 +126,27 @@ Future<String> translateToEnglishUsingGPT(String text) async {
   // Make API call.
   dynamic data;
   try {
-    final response = await Amplify.API
-        .post(
-          "/callout/gpt",
-          body: HttpPayload.json({
-            "conversation": [
-              {
-                "role": "user",
-                "content": """
+    final cognitoPlugin = Amplify.Auth.getPlugin(AmplifyAuthCognito.pluginKey);
+    final result = await cognitoPlugin.fetchAuthSession();
+    final identityId = result.userPoolTokensResult.value.idToken.raw;
+
+    final response = await Amplify.API.post(
+      "/callout/gpt",
+      body: HttpPayload.json({
+        "conversation": [
+          {
+            "role": "user",
+            "content": """
 Please translate the following text into English (if not already). Respond only with the result.
 $text
 """,
-              },
-            ],
-            "max_tokens": 300,
-          }),
-          apiName: "aiyu-backend",
-        )
-        .response;
+          },
+        ],
+        "max_tokens": 300,
+      }),
+      apiName: "aiyu-backend",
+      headers: {"Authorization": identityId},
+    ).response;
     data = json.decode(response.decodeBody());
   } on ApiException catch (e) {
     return e.message;

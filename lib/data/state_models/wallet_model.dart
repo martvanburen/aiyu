@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:ai_yu/data/state_models/aws_model.dart';
+import 'package:amplify_auth_cognito/amplify_auth_cognito.dart';
 import 'package:amplify_flutter/amplify_flutter.dart';
 import "package:flutter/material.dart";
 
@@ -50,12 +51,16 @@ class WalletModel extends ChangeNotifier {
     } else {
       // Otherwise, fetch from API.
       try {
-        final response = await Amplify.API
-            .get(
-              "/wallet/get-balance",
-              apiName: "aiyu-backend",
-            )
-            .response;
+        final cognitoPlugin =
+            Amplify.Auth.getPlugin(AmplifyAuthCognito.pluginKey);
+        final result = await cognitoPlugin.fetchAuthSession();
+        final identityId = result.userPoolTokensResult.value.idToken.raw;
+
+        final response = await Amplify.API.get(
+          "/wallet/get-balance",
+          apiName: "aiyu-backend",
+          headers: {"Authorization": identityId},
+        ).response;
 
         final jsonResponse = json.decode(response.decodeBody());
         _microcentBalance = jsonResponse["balance_hundredthcent"];
