@@ -22,6 +22,7 @@ Future<String?> callPollyApi(String text, String language,
           body: HttpPayload.json({
             "text": text,
             "polly_voice_id": voiceId,
+            "neural": neural,
           }),
           apiName: "aiyu-backend",
         )
