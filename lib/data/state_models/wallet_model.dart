@@ -27,6 +27,9 @@ class WalletModel extends ChangeNotifier {
     _initialization = _fetchWalletBalance();
   }
 
+  // TMP: For testing.
+  String regionText = "";
+
   // Since this model is a proxy provider, it will be recreated whenever the
   // AWSModel changes, so we need to protect against calling notifyListeners()
   // on a disposed object.
@@ -64,6 +67,15 @@ class WalletModel extends ChangeNotifier {
 
         final jsonResponse = json.decode(response.decodeBody());
         _microcentBalance = jsonResponse["balance_hundredthcent"];
+
+        // Also fetch region.
+        final region = await Amplify.API
+            .get(
+              "/health",
+              apiName: "aiyu-backend",
+            )
+            .response;
+        regionText = region.decodeBody();
       } catch (e) {
         safePrint("Wallet fetch failed: '$e'. ");
       }
