@@ -54,13 +54,17 @@ Future<GPTMessageContent> callGptAPI(
   WalletModel? wallet,
   bool getFeedback = false,
 }) async {
-  // TODO(mart): Clean this up.
-  if ((wallet?.microcentBalance ?? 0) < 100) {
-    await wallet?.initialization;
-    if ((wallet?.microcentBalance ?? 0) < 100) {
-      return GPTMessageContent(
-          "A minimum balance of 1 cent is required to send GPT requests.");
-    }
+  if (!(await Amplify.Auth.fetchAuthSession()).isSignedIn) {
+    // We could check wallet balance here, but this causes trouble if the user
+    // makes a request while the wallet is still loading. Since we want to be
+    // able to send GPT requests immediately after app start (for deeplinks),
+    // just let any authenticated user send GPT requests and let the lambda
+    // handle rejection because of balance.
+    return GPTMessageContent(
+      // Since the app doesn't really have a concept of 'logging in', this
+      // message makes more sense to show to new (unauthenticated) users.
+      "A minimum balance of 1 cent is required to send GPT requests.",
+    );
   }
 
   // Convert the conversation into the format the API expects.

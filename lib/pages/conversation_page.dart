@@ -125,7 +125,9 @@ class _LanguagePracticePageState extends State<LanguagePracticePage> {
     // Next, call GPT and add GPT message (holding an unresolved Future).
     final Future<GPTMessageContent> responseFuture = callGptAPI(
       _mission,
-      _conversation,
+      // Since this is an async callout, clone the conversation list to avoid
+      // race conditions or safety issues.
+      List<GPTMessage>.from(_conversation),
       wallet: Provider.of<WalletModel>(context, listen: false),
       getFeedback: true,
     );
