@@ -58,6 +58,11 @@ class EventRecorder {
     await Amplify.Analytics.recordEvent(event: event);
   }
 
+  static deeplinkDelete() async {
+    final event = AnalyticsEvent("DeeplinkDelete");
+    await Amplify.Analytics.recordEvent(event: event);
+  }
+
   static deeplinkOpenInternal() async {
     final event = AnalyticsEvent("DeeplinkOpenInternal");
     await Amplify.Analytics.recordEvent(event: event);

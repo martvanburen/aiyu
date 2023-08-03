@@ -1,5 +1,6 @@
 import 'package:ai_yu/data/state_models/deeplinks_model.dart';
 import 'package:ai_yu/pages/deeplink_edit_page.dart';
+import 'package:ai_yu/utils/event_recorder.dart';
 import "package:flutter/material.dart";
 import 'package:provider/provider.dart';
 
@@ -51,6 +52,7 @@ class _DeeplinkListPageState extends State<DeeplinkListPage> {
 
     if (delete != null && delete) {
       deeplinks.removeIndex(index);
+      EventRecorder.deeplinkDelete();
     }
   }
 
