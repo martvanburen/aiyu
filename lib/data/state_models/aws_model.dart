@@ -1,8 +1,6 @@
 import "dart:async";
 
-import "package:ai_yu/amplifyconfiguration.dart";
 import "package:ai_yu/utils/password_generator.dart";
-import "package:amplify_api/amplify_api.dart";
 import "package:amplify_auth_cognito/amplify_auth_cognito.dart";
 import "package:amplify_flutter/amplify_flutter.dart";
 import "package:collection/collection.dart";
@@ -11,9 +9,6 @@ import "package:flutter/material.dart";
 class AWSModel extends ChangeNotifier {
   late final StreamSubscription<AuthHubEvent> _authEventSubscription;
 
-  late final Future<bool> _initialization;
-  Future<bool> get initialization => _initialization;
-
   bool _isSignedIn = false;
   bool get isSignedIn => _isSignedIn;
 
@@ -21,23 +16,8 @@ class AWSModel extends ChangeNotifier {
   bool get isTemporaryAccount => _isTemporaryAccount;
 
   AWSModel() {
-    _initialization = _configureAmplify();
+    onAuthEvent(null);
     _authEventSubscription = Amplify.Hub.listen(HubChannel.Auth, onAuthEvent);
-  }
-
-  Future<bool> _configureAmplify() async {
-    try {
-      await Amplify.addPlugins([
-        AmplifyAuthCognito(),
-        AmplifyAPI(),
-      ]);
-      await Amplify.configure(amplifyconfig);
-      await onAuthEvent(null);
-      return true;
-    } on Exception catch (e) {
-      safePrint("ERROR: Failed to initialize Amplify. $e.");
-    }
-    return false;
   }
 
   Future<void> onAuthEvent(AuthHubEvent? event) async {

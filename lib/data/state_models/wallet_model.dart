@@ -47,8 +47,6 @@ class WalletModel extends ChangeNotifier {
     _isLoading = true;
     notifyListeners();
 
-    await _aws?.initialization;
-
     if (!_aws!.isSignedIn) {
       // If not logged in, balance is 0.
       _microcentBalance = 0;

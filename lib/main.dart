@@ -9,6 +9,10 @@ import "package:ai_yu/pages/deeplink_page.dart";
 import "package:ai_yu/pages/home_page.dart";
 import "package:ai_yu/pages/conversation_page.dart";
 import "package:ai_yu/utils/supported_languages_provider.dart";
+import "package:amplify_analytics_pinpoint/amplify_analytics_pinpoint.dart";
+import "package:amplify_api/amplify_api.dart";
+import "package:amplify_auth_cognito/amplify_auth_cognito.dart";
+import "package:amplify_flutter/amplify_flutter.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 import "package:flutter_gen/gen_l10n/app_localizations.dart";
@@ -16,7 +20,24 @@ import "package:flutter_shortcuts/flutter_shortcuts.dart";
 import "package:provider/provider.dart";
 import "package:uni_links/uni_links.dart";
 
+import "amplifyconfiguration.dart";
+
+Future<void> _configureAmplify() async {
+  try {
+    await Amplify.addPlugins([
+      AmplifyAuthCognito(),
+      AmplifyAPI(),
+      AmplifyAnalyticsPinpoint(),
+    ]);
+    await Amplify.configure(amplifyconfig);
+  } on Exception catch (e) {
+    safePrint("ERROR: Failed to initialize Amplify. $e.");
+  }
+}
+
 Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await _configureAmplify();
   runApp(MultiProvider(
     providers: [
       ChangeNotifierProvider(create: (context) => PreferencesModel()),
