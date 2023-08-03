@@ -74,7 +74,7 @@ class _HomePageState extends State<HomePage> {
                       ),
                       const SizedBox(height: 10.0),
                       const Text(
-                        "Practice chatting in your desired language, and easily add new words to Anki.",
+                        "Practice chatting in your desired language, get feedback, and add new words to Anki.",
                       ),
                       const ConversationQuickLaunchWidget(),
                     ],
