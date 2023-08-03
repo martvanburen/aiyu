@@ -1,7 +1,8 @@
 import 'dart:convert';
 
-import 'package:ai_yu/amplifyconfiguration.dart';
+import 'package:ai_yu/awsconfiguration.dart';
 import 'package:ai_yu/data/state_models/aws_model.dart';
+import 'package:ai_yu/utils/event_recorder.dart';
 import 'package:amplify_auth_cognito/amplify_auth_cognito.dart';
 import 'package:amplify_flutter/amplify_flutter.dart';
 import "package:flutter/material.dart";
@@ -80,6 +81,7 @@ class WalletModel extends ChangeNotifier {
         regionText = region.decodeBody();
       } catch (e) {
         safePrint("Wallet fetch failed: '$e'. ");
+        EventRecorder.errorWalletFetch();
       }
     }
 

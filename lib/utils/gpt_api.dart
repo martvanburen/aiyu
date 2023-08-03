@@ -1,7 +1,8 @@
 import "dart:convert";
 
-import 'package:ai_yu/amplifyconfiguration.dart';
+import 'package:ai_yu/awsconfiguration.dart';
 import 'package:ai_yu/data/gpt_message.dart';
+import 'package:ai_yu/utils/event_recorder.dart';
 import 'package:amplify_auth_cognito/amplify_auth_cognito.dart';
 import 'package:amplify_flutter/amplify_flutter.dart';
 
@@ -106,6 +107,7 @@ Future<GPTMessageContent> callGptAPI(
     ).response;
     data = json.decode(response.decodeBody());
   } on ApiException catch (e) {
+    EventRecorder.errorGPTCalloutException();
     return GPTMessageContent(e.message);
   }
 
@@ -121,6 +123,7 @@ Future<GPTMessageContent> callGptAPI(
       sentenceCorrection: data["correction"],
     );
   } else {
+    EventRecorder.errorGPTResponseNon200(data["status_code"] as int?);
     return GPTMessageContent(data["error"] ??
         "Unknown error occured (${data["status_code"]}). Please try again later.");
   }
@@ -156,6 +159,7 @@ $text
     ).response;
     data = json.decode(response.decodeBody());
   } on ApiException catch (e) {
+    EventRecorder.errorGPTCalloutException();
     return e.message;
   }
 
@@ -163,6 +167,7 @@ $text
   if (data["status_code"] == 200) {
     return (data["content"] ?? "").trim();
   } else {
+    EventRecorder.errorGPTResponseNon200(data["status_code"] as int?);
     return data["error"] ??
         "Unknown error occured (${data["status"]}). Please try again later.";
   }

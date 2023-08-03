@@ -1,6 +1,6 @@
 import "dart:convert";
 
-import "package:ai_yu/amplifyconfiguration.dart";
+import 'package:ai_yu/awsconfiguration.dart';
 import "package:ai_yu/data/state_models/aws_model.dart";
 import "package:ai_yu/utils/event_recorder.dart";
 import "package:ai_yu/utils/password_generator.dart";

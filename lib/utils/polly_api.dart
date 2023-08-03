@@ -1,6 +1,7 @@
 import 'dart:convert';
 
-import 'package:ai_yu/amplifyconfiguration.dart';
+import 'package:ai_yu/awsconfiguration.dart';
+import 'package:ai_yu/utils/event_recorder.dart';
 import 'package:ai_yu/utils/supported_languages_provider.dart';
 import 'package:amplify_flutter/amplify_flutter.dart';
 
@@ -29,11 +30,13 @@ Future<String?> callPollyApi(String text, String language,
     ).response;
     data = json.decode(response.decodeBody());
   } on ApiException catch (e) {
-    safePrint(e.message);
+    EventRecorder.errorPollyCalloutException();
+    safePrint("POLLY ERROR: ${e.message}.");
     return null;
   }
 
   if (data["status_code"] != 200) {
+    EventRecorder.errorPollyResponseNon200(data["status_code"] as int?);
     safePrint("POLLY ERROR: ${data['error']}.");
     return null;
   }

@@ -20,7 +20,7 @@ import "package:flutter_shortcuts/flutter_shortcuts.dart";
 import "package:provider/provider.dart";
 import "package:uni_links/uni_links.dart";
 
-import "amplifyconfiguration.dart";
+import 'awsconfiguration.dart';
 
 Future<void> _configureAmplify() async {
   try {

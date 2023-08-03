@@ -67,4 +67,45 @@ class EventRecorder {
     final event = AnalyticsEvent("DeeplinkOpenExternal");
     await Amplify.Analytics.recordEvent(event: event);
   }
+
+  // Errors.
+  // ---------------------------------------------------------------------------
+
+  static errorCreateTemporaryAccount(String stage) async {
+    final event = AnalyticsEvent("ErrorCreateTemporaryAccount");
+    event.customProperties.addStringProperty("Stage", stage);
+    await Amplify.Analytics.recordEvent(event: event);
+  }
+
+  static errorSignOut() async {
+    final event = AnalyticsEvent("ErrorSignOut");
+    await Amplify.Analytics.recordEvent(event: event);
+  }
+
+  static errorWalletFetch() async {
+    final event = AnalyticsEvent("ErrorWalletFetch");
+    await Amplify.Analytics.recordEvent(event: event);
+  }
+
+  static errorGPTCalloutException() async {
+    final event = AnalyticsEvent("ErrorGPTCalloutException");
+    await Amplify.Analytics.recordEvent(event: event);
+  }
+
+  static errorGPTResponseNon200(int? code) async {
+    final event = AnalyticsEvent("ErrorGPTResponseNon200");
+    event.customProperties.addIntProperty("StatusCode", code ?? -1);
+    await Amplify.Analytics.recordEvent(event: event);
+  }
+
+  static errorPollyCalloutException() async {
+    final event = AnalyticsEvent("ErrorPollyCalloutException");
+    await Amplify.Analytics.recordEvent(event: event);
+  }
+
+  static errorPollyResponseNon200(int? code) async {
+    final event = AnalyticsEvent("ErrorPollyResponseNon200");
+    event.customProperties.addIntProperty("StatusCode", code ?? -1);
+    await Amplify.Analytics.recordEvent(event: event);
+  }
 }

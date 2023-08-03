@@ -53,10 +53,10 @@ class AWSModel extends ChangeNotifier {
         EventRecorder.authCreateTemporaryAccount();
         return true;
       } else {
-        safePrint("ERROR: Failed to sign in.");
+        EventRecorder.errorCreateTemporaryAccount("sign-in");
       }
     } else {
-      safePrint("ERROR: Failed to sign up.");
+      EventRecorder.errorCreateTemporaryAccount("sign-up");
     }
     return false;
   }
@@ -66,7 +66,7 @@ class AWSModel extends ChangeNotifier {
     if (result is CognitoCompleteSignOut) {
       EventRecorder.authSignOut();
     } else if (result is CognitoFailedSignOut) {
-      safePrint('Error signing user out: ${result.exception.message}');
+      EventRecorder.errorSignOut();
     }
   }
 
