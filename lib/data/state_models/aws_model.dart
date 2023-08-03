@@ -1,5 +1,6 @@
 import "dart:async";
 
+import "package:ai_yu/utils/event_recorder.dart";
 import "package:ai_yu/utils/password_generator.dart";
 import "package:amplify_auth_cognito/amplify_auth_cognito.dart";
 import "package:amplify_flutter/amplify_flutter.dart";
@@ -49,6 +50,7 @@ class AWSModel extends ChangeNotifier {
         password: password,
       );
       if (signInResult.isSignedIn) {
+        EventRecorder.authCreateTemporaryAccount();
         return true;
       } else {
         safePrint("ERROR: Failed to sign in.");
@@ -62,7 +64,7 @@ class AWSModel extends ChangeNotifier {
   void signOut() async {
     final result = await Amplify.Auth.signOut();
     if (result is CognitoCompleteSignOut) {
-      safePrint('Sign out completed successfully');
+      EventRecorder.authSignOut();
     } else if (result is CognitoFailedSignOut) {
       safePrint('Error signing user out: ${result.exception.message}');
     }

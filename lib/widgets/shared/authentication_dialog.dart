@@ -2,6 +2,7 @@ import "dart:convert";
 
 import "package:ai_yu/amplifyconfiguration.dart";
 import "package:ai_yu/data/state_models/aws_model.dart";
+import "package:ai_yu/utils/event_recorder.dart";
 import "package:ai_yu/utils/password_generator.dart";
 import "package:amplify_flutter/amplify_flutter.dart";
 import "package:flutter/material.dart";
@@ -90,6 +91,8 @@ class _AuthenticationDialogState extends State<AuthenticationDialog> {
   }
 
   Future<(bool, String)> _startResetPassword() async {
+    EventRecorder.authRecoverUsernameStart();
+
     // Fetch username from email.
     _username = null;
     final (success, result) = await _getUsernameFromEmail(emailController.text);
@@ -127,6 +130,7 @@ class _AuthenticationDialogState extends State<AuthenticationDialog> {
           password: randomPassword,
         );
         if (signInResult.isSignedIn) {
+          EventRecorder.authRecoverUsernameComplete();
           return (true, "");
         } else {
           return (false, "Unable to sign in.");
@@ -140,6 +144,8 @@ class _AuthenticationDialogState extends State<AuthenticationDialog> {
   }
 
   Future<(bool, String)> _startAddEmail() async {
+    EventRecorder.authAddEmailStart();
+
     // Check email is not already registered.
     final (emailAlreadyRegistered, _) =
         await _getUsernameFromEmail(emailController.text);
@@ -169,6 +175,7 @@ class _AuthenticationDialogState extends State<AuthenticationDialog> {
       //
       // ignore: use_build_context_synchronously
       Provider.of<AWSModel>(context, listen: false).onAuthEvent(null);
+      EventRecorder.authAddEmailComplete();
       return (true, "");
     } on AuthException catch (e) {
       return (false, e.message);

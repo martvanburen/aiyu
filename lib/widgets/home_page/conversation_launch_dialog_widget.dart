@@ -1,4 +1,5 @@
 import 'package:ai_yu/data/state_models/preferences_model.dart';
+import "package:ai_yu/utils/event_recorder.dart";
 import "package:ai_yu/utils/supported_languages_provider.dart";
 import "package:flutter/material.dart";
 import "package:ai_yu/pages/conversation_page.dart";
@@ -21,8 +22,10 @@ class ConversationLaunchDialogState extends State<ConversationLaunchDialog> {
   }
 
   Future _startConversation(BuildContext context) {
-    Provider.of<PreferencesModel>(context, listen: false)
-        .addRecentLanguage(_selectedLanguage);
+    final preferences = Provider.of<PreferencesModel>(context, listen: false);
+    preferences.addRecentLanguage(_selectedLanguage);
+    EventRecorder.conversationStart(
+        _selectedLanguage, preferences.isAutoConversationMode);
     return Navigator.push(
         context,
         MaterialPageRoute(

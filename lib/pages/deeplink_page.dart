@@ -3,6 +3,7 @@ import 'package:ai_yu/data/gpt_message.dart';
 import 'package:ai_yu/data/gpt_mode.dart';
 import "package:ai_yu/data/state_models/wallet_model.dart";
 import "package:ai_yu/pages/selection_page.dart";
+import "package:ai_yu/utils/event_recorder.dart";
 import "package:ai_yu/utils/gpt_api.dart";
 import "package:ai_yu/utils/mission_decider.dart";
 import "package:ai_yu/widgets/shared/mini_wallet_widget.dart";
@@ -48,9 +49,11 @@ class _DeeplinkPageState extends State<DeeplinkPage> {
     if (widget.deeplinkConfig != null) {
       // Widget was opened directly with DeeplinkConfigObject.
       _loadFromDeeplinkConfig(widget.deeplinkConfig!, widget.queryString ?? "");
+      EventRecorder.deeplinkOpenInternal();
     } else if (widget.uri != null) {
       // Widget was opened with Uri.
       _loadFromUri(widget.uri!);
+      EventRecorder.deeplinkOpenExternal();
     }
   }
 

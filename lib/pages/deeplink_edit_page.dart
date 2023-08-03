@@ -1,4 +1,5 @@
 import 'package:ai_yu/data/state_models/deeplinks_model.dart';
+import "package:ai_yu/utils/event_recorder.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 import "package:provider/provider.dart";
@@ -99,8 +100,10 @@ class _DeeplinkEditPageState extends State<DeeplinkEditPage> {
     if (widget.deeplink != null) {
       int index = deeplinks.get.indexOf(widget.deeplink!);
       deeplinks.updateIndex(index, deeplink);
+      EventRecorder.deeplinkEdit();
     } else {
       deeplinks.add(deeplink);
+      EventRecorder.deeplinkAdd();
     }
 
     Navigator.of(context).pop();
