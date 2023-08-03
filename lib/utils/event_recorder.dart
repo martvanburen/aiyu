@@ -75,6 +75,14 @@ class EventRecorder {
     await Amplify.Analytics.recordEvent(event: event);
   }
 
+  // Miscellaneous.
+  // ---------------------------------------------------------------------------
+
+  static feedbackSubmit() async {
+    final event = AnalyticsEvent("FeedbackSubmit");
+    await Amplify.Analytics.recordEvent(event: event);
+  }
+
   // Errors.
   // ---------------------------------------------------------------------------
 
@@ -112,6 +120,12 @@ class EventRecorder {
 
   static errorPollyResponseNon200(int? code) async {
     final event = AnalyticsEvent("ErrorPollyResponseNon200");
+    event.customProperties.addIntProperty("StatusCode", code ?? -1);
+    await Amplify.Analytics.recordEvent(event: event);
+  }
+
+  static errorSendingFeedback({int? code}) async {
+    final event = AnalyticsEvent("ErrorSendingFeedback");
     event.customProperties.addIntProperty("StatusCode", code ?? -1);
     await Amplify.Analytics.recordEvent(event: event);
   }
