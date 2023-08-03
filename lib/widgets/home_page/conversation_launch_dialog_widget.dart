@@ -24,8 +24,8 @@ class ConversationLaunchDialogState extends State<ConversationLaunchDialog> {
   Future _startConversation(BuildContext context) {
     final preferences = Provider.of<PreferencesModel>(context, listen: false);
     preferences.addRecentLanguage(_selectedLanguage);
-    EventRecorder.conversationStart(
-        _selectedLanguage, preferences.isAutoConversationMode);
+    EventRecorder.conversationStart(_selectedLanguage,
+        automaticMode: preferences.isAutoConversationMode, quickLaunch: false);
     return Navigator.push(
         context,
         MaterialPageRoute(

@@ -37,11 +37,13 @@ class EventRecorder {
   // Conversation.
   // ---------------------------------------------------------------------------
 
-  static conversationStart(String language, bool isAutomaticMode) async {
+  static conversationStart(String language,
+      {required bool automaticMode, required bool quickLaunch}) async {
     final event = AnalyticsEvent("ConversationStart");
     event.customProperties
       ..addStringProperty("Language", language)
-      ..addBoolProperty("AutomaticMode", isAutomaticMode);
+      ..addBoolProperty("AutomaticMode", automaticMode)
+      ..addBoolProperty("QuickLaunch", quickLaunch);
     await Amplify.Analytics.recordEvent(event: event);
   }
 
