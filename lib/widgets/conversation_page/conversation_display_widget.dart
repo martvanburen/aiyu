@@ -93,7 +93,7 @@ class ConversationDisplayWidget extends StatelessWidget {
                               onTap: () {
                                 onMessageArrowButtonTapped(content);
                               },
-                              child: SelectableText(content.body,
+                              child: Text(content.body,
                                   textAlign: TextAlign.right,
                                   style: TextStyle(
                                     color: Colors.black,
