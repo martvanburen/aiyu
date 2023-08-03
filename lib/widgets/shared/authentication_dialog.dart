@@ -1,5 +1,6 @@
 import "dart:convert";
 
+import "package:ai_yu/amplifyconfiguration.dart";
 import "package:ai_yu/data/state_models/aws_model.dart";
 import "package:ai_yu/utils/password_generator.dart";
 import "package:amplify_flutter/amplify_flutter.dart";
@@ -39,13 +40,12 @@ class _AuthenticationDialogState extends State<AuthenticationDialog> {
 
   Future<(bool, String)> _getUsernameFromEmail(String email) async {
     try {
-      final response = await Amplify.API
-          .post(
-            "/auth/recover-username",
-            body: HttpPayload.json({"email": email}),
-            apiName: "aiyu-backend",
-          )
-          .response;
+      final response = await Amplify.API.post(
+        "/auth/recover-username",
+        body: HttpPayload.json({"email": email}),
+        apiName: "aiyu-backend",
+        headers: {"x-api-key": apikey},
+      ).response;
       final jsonResponse = json.decode(response.decodeBody());
       if ((jsonResponse["error"] as String?) != null) {
         return (false, jsonResponse["error"] as String);

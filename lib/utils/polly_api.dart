@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:ai_yu/amplifyconfiguration.dart';
 import 'package:ai_yu/utils/supported_languages_provider.dart';
 import 'package:amplify_flutter/amplify_flutter.dart';
 
@@ -16,17 +17,16 @@ Future<String?> callPollyApi(String text, String language,
 
   dynamic data;
   try {
-    final response = await Amplify.API
-        .post(
-          "/callout/polly",
-          body: HttpPayload.json({
-            "text": text,
-            "polly_voice_id": voiceId,
-            "neural": neural,
-          }),
-          apiName: "aiyu-backend",
-        )
-        .response;
+    final response = await Amplify.API.post(
+      "/callout/polly",
+      body: HttpPayload.json({
+        "text": text,
+        "polly_voice_id": voiceId,
+        "neural": neural,
+      }),
+      apiName: "aiyu-backend",
+      headers: {"x-api-key": apikey},
+    ).response;
     data = json.decode(response.decodeBody());
   } on ApiException catch (e) {
     safePrint(e.message);

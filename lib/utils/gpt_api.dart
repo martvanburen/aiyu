@@ -1,5 +1,6 @@
 import "dart:convert";
 
+import 'package:ai_yu/amplifyconfiguration.dart';
 import 'package:ai_yu/data/gpt_message.dart';
 import 'package:amplify_auth_cognito/amplify_auth_cognito.dart';
 import 'package:amplify_flutter/amplify_flutter.dart';
@@ -98,7 +99,10 @@ Future<GPTMessageContent> callGptAPI(
         "with_prompt_feedback": getFeedback,
       }),
       apiName: "aiyu-backend",
-      headers: {"Authorization": identityId},
+      headers: {
+        "Authorization": identityId,
+        "x-api-key": apikey,
+      },
     ).response;
     data = json.decode(response.decodeBody());
   } on ApiException catch (e) {
@@ -145,7 +149,10 @@ $text
         "max_tokens": 300,
       }),
       apiName: "aiyu-backend",
-      headers: {"Authorization": identityId},
+      headers: {
+        "Authorization": identityId,
+        "x-api-key": apikey,
+      },
     ).response;
     data = json.decode(response.decodeBody());
   } on ApiException catch (e) {

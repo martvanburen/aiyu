@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:ai_yu/amplifyconfiguration.dart';
 import 'package:ai_yu/data/state_models/aws_model.dart';
 import 'package:amplify_auth_cognito/amplify_auth_cognito.dart';
 import 'package:amplify_flutter/amplify_flutter.dart';
@@ -62,7 +63,10 @@ class WalletModel extends ChangeNotifier {
         final response = await Amplify.API.get(
           "/wallet/get-balance",
           apiName: "aiyu-backend",
-          headers: {"Authorization": identityId},
+          headers: {
+            "Authorization": identityId,
+            "x-api-key": apikey,
+          },
         ).response;
 
         final jsonResponse = json.decode(response.decodeBody());
