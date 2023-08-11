@@ -136,10 +136,10 @@ class _HomePageState extends State<HomePage> {
                   builder: (BuildContext context) => const FeedbackDialog(),
                 );
               },
-              child: const Text(
+              child: Text(
                 "Give Feedback / Report a Bug",
                 style: TextStyle(
-                  color: Colors.grey,
+                  color: Theme.of(context).primaryColor,
                   fontSize: 10,
                 ),
               ),
