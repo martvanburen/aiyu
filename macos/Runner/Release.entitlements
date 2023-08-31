@@ -12,7 +12,7 @@
 	<true/>
 	<key>keychain-access-groups</key>
 	<array>
-		<string>$(AppIdentifierPrefix)xyz.mavb.aiyu</string>
+		<string>$(AppIdentifierPrefix)tools.eigenvalue.aiyu</string>
 	</array>
 </dict>
 </plist>

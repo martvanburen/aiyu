@@ -1,4 +1,4 @@
-package xyz.mavb.aiyu
+package tools.eigenvalue.aiyu
 
 import io.flutter.embedding.android.FlutterActivity
 

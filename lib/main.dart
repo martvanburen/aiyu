@@ -13,6 +13,7 @@ import "package:amplify_analytics_pinpoint/amplify_analytics_pinpoint.dart";
 import "package:amplify_api/amplify_api.dart";
 import "package:amplify_auth_cognito/amplify_auth_cognito.dart";
 import "package:amplify_flutter/amplify_flutter.dart";
+import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 import "package:flutter_gen/gen_l10n/app_localizations.dart";
@@ -70,7 +71,7 @@ class _AiYuAppState extends State<AiYuApp> {
   @override
   void initState() {
     super.initState();
-    if (Platform.isAndroid || Platform.isIOS) {
+    if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
       _initializeFlutterAppShortcuts();
       _initializeDeeplinks();
     }
