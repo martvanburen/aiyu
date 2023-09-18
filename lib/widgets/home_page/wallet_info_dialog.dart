@@ -15,8 +15,11 @@ class WalletInfoDialog extends StatelessWidget {
           title: const Text("Wallet Information"),
           content: const SingleChildScrollView(
             child: Text(
-              "TODO(Mart): Add wallet information here.",
-            ),
+                "Since this app is based on GPT, it costs some small amount in "
+                "server fees per request. I'm not trying to make money with this "
+                "app, so the wallet balance is just required to cover those "
+                "server costs + a small margin. Costs are really low, so \$1 "
+                "should probably last for a month of average usage or so."),
           ),
           actions: <Widget>[
             Consumer<AWSModel>(
