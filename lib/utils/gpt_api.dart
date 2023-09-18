@@ -134,6 +134,9 @@ Future<GPTMessageContent> callGptAPI(
 }
 
 Future<String> translateToEnglishUsingGPT(String text) async {
+  if (!(await Amplify.Auth.fetchAuthSession()).isSignedIn) {
+    return "N/A (must have wallet balance)";
+  }
   // Make API call.
   dynamic data;
   try {
