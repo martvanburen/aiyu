@@ -11,6 +11,8 @@ import "package:provider/provider.dart";
 
 enum SelectionSection { gptResponse, correction, feedback }
 
+enum SelectionAction { openAsDeeplink, sendToAnki }
+
 class SelectionModel extends ChangeNotifier {
   // Relating to text selection.
   SelectionSection _selectedSection = SelectionSection.gptResponse;
@@ -117,6 +119,7 @@ class _SelectionPageState extends State<SelectionPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return ChangeNotifierProvider(
         create: (context) => SelectionModel(),
         child: ClipRRect(
@@ -164,12 +167,12 @@ class _SelectionPageState extends State<SelectionPage> {
                   ),
                   Divider(
                     height: 2,
-                    color: Theme.of(context).primaryColorLight,
+                    color: theme.primaryColorLight,
                     thickness: 2,
                   ),
                   Padding(
-                    padding: const EdgeInsets.only(
-                        left: 20, right: 10, top: 10, bottom: 15),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 15.0, vertical: 10.0),
                     child: Column(
                       children: [
                         Consumer<SelectionModel>(
@@ -192,35 +195,79 @@ class _SelectionPageState extends State<SelectionPage> {
                         Consumer<SelectionModel>(
                           builder: (context, selection, child) {
                             return Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
                               children: [
-                                FilledButton(
-                                  onPressed: () {
-                                    showDialog(
-                                        context: context,
-                                        builder: (BuildContext context) {
-                                          return DeeplinkSelectionDialog(
-                                              queryString:
-                                                  selection.selectedText);
-                                        });
-                                  },
-                                  style: ButtonStyle(
-                                    backgroundColor: MaterialStateProperty.all(
-                                        Theme.of(context).primaryColorLight),
+                                Expanded(
+                                  child: PopupMenuButton<SelectionAction>(
+                                    onSelected: (SelectionAction action) {
+                                      if (action ==
+                                          SelectionAction.openAsDeeplink) {
+                                        showDialog(
+                                            context: context,
+                                            builder: (BuildContext context) {
+                                              return DeeplinkSelectionDialog(
+                                                  queryString:
+                                                      selection.selectedText);
+                                            });
+                                      }
+                                    },
+                                    itemBuilder: (BuildContext context) =>
+                                        <PopupMenuEntry<SelectionAction>>[
+                                      const PopupMenuItem<SelectionAction>(
+                                        value: SelectionAction.openAsDeeplink,
+                                        child: Text("Open as deeplink"),
+                                      ),
+                                      const PopupMenuItem<SelectionAction>(
+                                        value: SelectionAction.sendToAnki,
+                                        enabled: false,
+                                        child:
+                                            Text("Send to Anki (Coming Soon)"),
+                                      ),
+                                    ],
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      mainAxisSize: MainAxisSize.max,
+                                      children: [
+                                        Icon(
+                                          Icons.menu_open,
+                                          color: theme.primaryColorLight,
+                                        ),
+                                        const SizedBox(width: 10.0),
+                                        Text(
+                                          "Actions",
+                                          style: TextStyle(
+                                            color: theme.primaryColorLight,
+                                            fontSize: 16.0,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 15.0),
+                                      ],
+                                    ),
                                   ),
-                                  child: const Text("Open as Deeplink",
-                                      style: TextStyle(color: Colors.black)),
                                 ),
-                                FilledButton(
-                                  onPressed: () {
-                                    Navigator.of(context).pop();
-                                  },
-                                  style: ButtonStyle(
-                                    backgroundColor: MaterialStateProperty.all(
-                                        Theme.of(context).primaryColorLight),
+                                const SizedBox(width: 20.0),
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                      left: 20.0, right: 10.0),
+                                  child: ElevatedButton(
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                    style: ButtonStyle(
+                                      padding: MaterialStateProperty.all(
+                                          const EdgeInsets.symmetric(
+                                              horizontal: 30.0)),
+                                      backgroundColor:
+                                          MaterialStateProperty.all<Color>(
+                                              theme.primaryColorLight),
+                                    ),
+                                    child: const Text(
+                                      "Close",
+                                      style: TextStyle(color: Colors.black),
+                                    ),
                                   ),
-                                  child: const Text("Close",
-                                      style: TextStyle(color: Colors.black)),
                                 ),
                               ],
                             );
