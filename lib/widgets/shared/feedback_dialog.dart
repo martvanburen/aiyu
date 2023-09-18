@@ -104,31 +104,41 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
       content: IndexedStack(
         index: _pageIndex,
         children: <Widget>[
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              const Text("TODO: Add message."),
-              TextField(
-                controller: textController,
-                decoration: const InputDecoration(
-                  labelText: "Feedback",
-                  counterText: "",
+          SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                const Text(
+                    "I'm just an independant developer, working on this app as a hobby project "
+                    "because I spend so much of my life in Anki. There will certainly be bugs, "
+                    "but I'll try my best to listen to your feedback and fix what I can. I hope "
+                    "this app useful to you, please let me know whatever suggestions you have "
+                    "to improve it."),
+                TextField(
+                  controller: textController,
+                  decoration: const InputDecoration(
+                    labelText: "Feedback Input",
+                    counterText: "",
+                  ),
+                  maxLines: 5,
+                  textCapitalization: TextCapitalization.sentences,
                 ),
-                maxLines: 5,
-                textCapitalization: TextCapitalization.sentences,
-              ),
-              const SizedBox(height: 10.0),
-              _error != null
-                  ? Text(
-                      _error!,
-                      style: Theme.of(context)
-                          .textTheme
-                          .bodySmall
-                          ?.copyWith(color: Colors.red),
-                    )
-                  : Container(),
-            ],
+                const SizedBox(height: 10.0),
+                if (_error != null) ...[
+                  Text(
+                    _error!,
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodySmall
+                        ?.copyWith(color: Colors.red),
+                  ),
+                  const SizedBox(height: 10.0),
+                ],
+                const Text(
+                    "Note: Your user id will be sent along with the feedback."),
+              ],
+            ),
           ),
           const Column(
             mainAxisSize: MainAxisSize.min,
