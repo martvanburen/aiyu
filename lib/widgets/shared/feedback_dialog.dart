@@ -32,6 +32,16 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
     if (text.isEmpty) {
       return (false, null, "Please enter feedback in text field.");
     }
+    if (text == "HEALTH") {
+      // For debugging: easter egg to check API health / region.
+      final region = await Amplify.API
+          .get(
+            "/health",
+            apiName: "aiyu-backend",
+          )
+          .response;
+      return (false, null, region.decodeBody());
+    }
     try {
       // If user is logged in, add the id token to the request.
       String? identityId;
@@ -74,7 +84,7 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
         await _uploadFeedback(textController.text);
     if (success) {
       EventRecorder.feedbackSubmit();
-    } else {
+    } else if (errorCode != null) {
       EventRecorder.errorSendingFeedback(code: errorCode);
     }
     setState(() {

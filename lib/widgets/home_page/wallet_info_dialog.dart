@@ -13,10 +13,9 @@ class WalletInfoDialog extends StatelessWidget {
       builder: (context, wallet, child) {
         return AlertDialog(
           title: const Text("Wallet Information"),
-          content: SingleChildScrollView(
+          content: const SingleChildScrollView(
             child: Text(
-              wallet.regionText,
-              // "TODO(Mart): Add wallet information here.",
+              "TODO(Mart): Add wallet information here.",
             ),
           ),
           actions: <Widget>[
