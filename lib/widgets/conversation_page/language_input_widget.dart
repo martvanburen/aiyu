@@ -114,7 +114,20 @@ class LanguageInputWidgetState extends State<LanguageInputWidget> {
       preferences.setAutoConversationMode(false);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text("Auto mode disabled. Hold mic to re-enable."),
+          content: Text.rich(
+            TextSpan(
+              children: [
+                TextSpan(text: "Auto mode disabled. Hold "),
+                WidgetSpan(
+                    child: Icon(
+                  Icons.mic_none,
+                  size: 16.0,
+                  color: Colors.white,
+                )),
+                TextSpan(text: " to re-enable."),
+              ],
+            ),
+          ),
           duration: Duration(seconds: 5),
         ),
       );
