@@ -110,8 +110,8 @@ class ConversationLaunchDialogState extends State<ConversationLaunchDialog> {
                                 title: const Text("Automatic mode."),
                                 content: const Text("""
 If enabled, the app will automatically:
-- Start listening when it's your turn to speak.
-- Submit if it's confident it understood you correctly."""),
+- Start listening, when it's your turn to speak.
+- Submit, if it's confident it understood you correctly."""),
                                 actions: <Widget>[
                                   TextButton(
                                     child: const Text("OK"),

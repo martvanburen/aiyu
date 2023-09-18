@@ -45,10 +45,20 @@ class LanguageInputWidgetState extends State<LanguageInputWidget> {
     }
   }
 
-  void _toggleListening() {
+  void _toggleListening({userInitiated = false}) {
     if (isListening) {
-      stopListening();
+      stopListening(userInitiated: userInitiated);
     } else {
+      startListening();
+    }
+  }
+
+  void _toggleAutoConversationMode() {
+    final preferences = Provider.of<PreferencesModel>(context, listen: false);
+    preferences.toggleAutoConversationMode();
+    // If user just turned on auto conversation mode,
+    // start listening right away.
+    if (preferences.isAutoConversationMode) {
       startListening();
     }
   }
@@ -90,9 +100,28 @@ class LanguageInputWidgetState extends State<LanguageInputWidget> {
     });
   }
 
-  void stopListening({clearPrompt = true}) async {
+  void stopListening({clearPrompt = true, userInitiated = false}) async {
     speechRecognition.cancel();
-    if (clearPrompt) _clearPrompt();
+    if (clearPrompt) {
+      _clearPrompt();
+    }
+    if (userInitiated) {
+      // If user initiated stop, clear prompt and disable automatic mode.
+      _disableAutoConversationModeAndNotifyUser();
+    }
+  }
+
+  void _disableAutoConversationModeAndNotifyUser() {
+    final preferences = Provider.of<PreferencesModel>(context, listen: false);
+    if (preferences.isAutoConversationMode) {
+      preferences.setAutoConversationMode(false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Auto mode disabled. Hold mic button to re-enable."),
+          duration: Duration(seconds: 5),
+        ),
+      );
+    }
   }
 
   void _listeningCompletedHandler(SpeechRecognitionResult val) async {
@@ -154,67 +183,68 @@ class LanguageInputWidgetState extends State<LanguageInputWidget> {
             ),
             child: Row(
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    FutureBuilder<bool>(
-                        future: speechRecognitionInitialization,
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState ==
-                              ConnectionState.waiting) {
-                            return const CircularProgressIndicator();
-                          } else if (snapshot.hasError ||
-                              snapshot.data == false) {
-                            return IconButton(
-                              style: ButtonStyle(
-                                padding: MaterialStateProperty.all(
-                                  const EdgeInsets.all(20.0),
-                                ),
+                Consumer<PreferencesModel>(
+                    builder: (context, preferences, child) {
+                  return InkWell(
+                    onTap: () => _toggleListening(userInitiated: true),
+                    onLongPress: _toggleAutoConversationMode,
+                    child: Ink(
+                      padding: const EdgeInsets.all(20.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          FutureBuilder<bool>(
+                              future: speechRecognitionInitialization,
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState ==
+                                    ConnectionState.waiting) {
+                                  return IconButton(
+                                    style: ButtonStyle(
+                                      padding: MaterialStateProperty.all(
+                                        const EdgeInsets.all(20.0),
+                                      ),
+                                    ),
+                                    onPressed: null,
+                                    icon: const Icon(Icons.pending),
+                                  );
+                                } else if (snapshot.hasError ||
+                                    snapshot.data == false) {
+                                  return IconButton(
+                                    style: ButtonStyle(
+                                      padding: MaterialStateProperty.all(
+                                        const EdgeInsets.all(20.0),
+                                      ),
+                                    ),
+                                    onPressed: null,
+                                    icon: const Icon(Icons.mic_off),
+                                  );
+                                } else {
+                                  return Icon(
+                                      isListening
+                                          ? Icons.cancel
+                                          : (preferences.isAutoConversationMode
+                                              ? Icons.auto_mode
+                                              : Icons.mic_none),
+                                      color: theme.primaryColor);
+                                }
+                              }),
+                          if (preferences.isAutoConversationMode) ...[
+                            const SizedBox(height: 8.0),
+                            Center(
+                                child: Text(
+                              "AUTO\nMODE",
+                              style: TextStyle(
+                                fontSize: 10,
+                                color: Theme.of(context).primaryColor,
+                                fontWeight: FontWeight.bold,
                               ),
-                              onPressed: null,
-                              icon: const Icon(Icons.mic_off),
-                            );
-                          } else {
-                            return IconButton(
-                              style: ButtonStyle(
-                                padding: MaterialStateProperty.all(
-                                  const EdgeInsets.all(20.0),
-                                ),
-                              ),
-                              onPressed: _toggleListening,
-                              icon: Icon(
-                                  isListening ? Icons.cancel : Icons.mic_none,
-                                  color: theme.primaryColor),
-                            );
-                          }
-                        }),
-                    Consumer<PreferencesModel>(
-                        builder: (context, preferences, child) {
-                      return SizedBox(
-                        height: 30,
-                        child: GestureDetector(
-                          onTap: () => preferences.toggleAutoConversationMode(),
-                          child: Center(
-                              child: Text(
-                            "AUTO",
-                            style: TextStyle(
-                              fontSize: 10,
-                              decoration: preferences.isAutoConversationMode
-                                  ? null
-                                  : TextDecoration.lineThrough,
-                              color: preferences.isAutoConversationMode
-                                  ? Theme.of(context).primaryColor
-                                  : Colors.black,
-                              fontWeight: preferences.isAutoConversationMode
-                                  ? FontWeight.bold
-                                  : null,
-                            ),
-                          )),
-                        ),
-                      );
-                    }),
-                  ],
-                ),
+                            )),
+                          ],
+                        ],
+                      ),
+                    ),
+                  );
+                }),
                 Expanded(
                   child: Container(
                     margin: const EdgeInsets.symmetric(vertical: 10.0),
