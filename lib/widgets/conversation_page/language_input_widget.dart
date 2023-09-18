@@ -195,26 +195,12 @@ class LanguageInputWidgetState extends State<LanguageInputWidget> {
                               builder: (context, snapshot) {
                                 if (snapshot.connectionState ==
                                     ConnectionState.waiting) {
-                                  return IconButton(
-                                    style: ButtonStyle(
-                                      padding: MaterialStateProperty.all(
-                                        const EdgeInsets.all(20.0),
-                                      ),
-                                    ),
-                                    onPressed: null,
-                                    icon: const Icon(Icons.pending),
-                                  );
+                                  return Icon(Icons.pending,
+                                      color: theme.colorScheme.secondary);
                                 } else if (snapshot.hasError ||
                                     snapshot.data == false) {
-                                  return IconButton(
-                                    style: ButtonStyle(
-                                      padding: MaterialStateProperty.all(
-                                        const EdgeInsets.all(20.0),
-                                      ),
-                                    ),
-                                    onPressed: null,
-                                    icon: const Icon(Icons.mic_off),
-                                  );
+                                  return Icon(Icons.mic_off,
+                                      color: theme.colorScheme.secondary);
                                 } else {
                                   return Icon(
                                       isListening
