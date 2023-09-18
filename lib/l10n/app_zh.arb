@@ -1,5 +1,8 @@
 {
     "title": "AiYu",
     "subtitle": "Anki 伴侣",
+    "conversation_page_title": "会话练习",
     "conversation_page_intro_message": "你想讨论什么呢？"
+    "close": "关闭",
+    "back: "返回",
 }
