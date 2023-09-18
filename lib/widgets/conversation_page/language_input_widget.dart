@@ -45,9 +45,9 @@ class LanguageInputWidgetState extends State<LanguageInputWidget> {
     }
   }
 
-  void _toggleListening({userInitiated = false}) {
+  void _toggleListening() {
     if (isListening) {
-      stopListening(userInitiated: userInitiated);
+      stopListening();
     } else {
       startListening();
     }
@@ -100,24 +100,21 @@ class LanguageInputWidgetState extends State<LanguageInputWidget> {
     });
   }
 
-  void stopListening({clearPrompt = true, userInitiated = false}) async {
+  void stopListening({clearPrompt = true}) async {
     speechRecognition.cancel();
     if (clearPrompt) {
       _clearPrompt();
-    }
-    if (userInitiated) {
-      // If user initiated stop, clear prompt and disable automatic mode.
-      _disableAutoConversationModeAndNotifyUser();
+      _disableAutoModeAndNotifyUser();
     }
   }
 
-  void _disableAutoConversationModeAndNotifyUser() {
+  void _disableAutoModeAndNotifyUser() {
     final preferences = Provider.of<PreferencesModel>(context, listen: false);
     if (preferences.isAutoConversationMode) {
       preferences.setAutoConversationMode(false);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text("Auto mode disabled. Hold mic button to re-enable."),
+          content: Text("Auto mode disabled. Hold mic to re-enable."),
           duration: Duration(seconds: 5),
         ),
       );
@@ -186,7 +183,7 @@ class LanguageInputWidgetState extends State<LanguageInputWidget> {
                 Consumer<PreferencesModel>(
                     builder: (context, preferences, child) {
                   return InkWell(
-                    onTap: () => _toggleListening(userInitiated: true),
+                    onTap: _toggleListening,
                     onLongPress: _toggleAutoConversationMode,
                     child: Ink(
                       padding: const EdgeInsets.all(20.0),
