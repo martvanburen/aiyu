@@ -4,9 +4,12 @@ import 'package:ai_yu/awsconfiguration.dart';
 import "package:ai_yu/data/state_models/aws_model.dart";
 import "package:ai_yu/utils/event_recorder.dart";
 import "package:ai_yu/utils/password_generator.dart";
+import "package:amplify_auth_cognito/amplify_auth_cognito.dart";
 import "package:amplify_flutter/amplify_flutter.dart";
 import "package:flutter/material.dart";
 import "package:provider/provider.dart";
+
+const String testUser = "test_user";
 
 enum AuthenticationMode { restoreAccount, addEmail }
 
@@ -91,6 +94,12 @@ class _AuthenticationDialogState extends State<AuthenticationDialog> {
   }
 
   Future<(bool, String)> _startResetPassword() async {
+    // Special log-in path for test users.
+    if (emailController.text == testUser) {
+      _username = testUser;
+      return (true, "");
+    }
+
     EventRecorder.authRecoverUsernameStart();
 
     // Fetch username from email.
@@ -114,6 +123,26 @@ class _AuthenticationDialogState extends State<AuthenticationDialog> {
   }
 
   Future<(bool, String)> _completeResetPasswordAndLogin() async {
+    // Special log-in path for test users.
+    if (_username == testUser) {
+      try {
+        if ((await Amplify.Auth.signIn(
+          username: _username!,
+          password: codeController.text,
+        ))
+            .isSignedIn) {
+          EventRecorder.authTestUserLoginSuccess();
+          return (true, "");
+        } else {
+          EventRecorder.authTestUserLoginFailure();
+          return (false, "Failed to sign in.");
+        }
+      } on NotAuthorizedServiceException catch (e) {
+        return (false, e.message);
+      }
+    }
+
+    // Otherwise generate random password, reset password, and log in.
     final String randomPassword = generateCryptographicallySecurePassword();
     try {
       ResetPasswordResult resetPasswordResult =

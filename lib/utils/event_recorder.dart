@@ -14,6 +14,16 @@ class EventRecorder {
     await Amplify.Analytics.recordEvent(event: event);
   }
 
+  static authTestUserLoginSuccess() async {
+    final event = AnalyticsEvent("AuthTestUserLoginSuccess");
+    await Amplify.Analytics.recordEvent(event: event);
+  }
+
+  static authTestUserLoginFailure() async {
+    final event = AnalyticsEvent("AuthTestUserLoginFailure");
+    await Amplify.Analytics.recordEvent(event: event);
+  }
+
   static authAddEmailStart() async {
     final event = AnalyticsEvent("AuthAddEmailStart");
     await Amplify.Analytics.recordEvent(event: event);
