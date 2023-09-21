@@ -22,7 +22,7 @@ class InAppPurchaseUtil extends Object with Disposable {
   }
 
   void initialize50cTopUp() {
-    _initializePurchase("wallet-add-50c");
+    _initializePurchase("wallet_add_50c");
   }
 
   // Private:
