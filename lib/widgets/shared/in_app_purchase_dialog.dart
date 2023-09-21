@@ -39,6 +39,7 @@ class _InAppPurchaseDialogState extends State<InAppPurchaseDialog> {
       case PurchaseStatus.initializing:
       case PurchaseStatus.finalizing:
         return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
             const SizedBox(height: 20),
