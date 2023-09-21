@@ -33,9 +33,9 @@ class AWSModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<bool> initializeTemporaryAccount() async {
+  static Future<bool> initializeTemporaryAccount() async {
     // Skip if user is signed in already.
-    if ((await Amplify.Auth.fetchAuthSession()).isSignedIn) return false;
+    if ((await Amplify.Auth.fetchAuthSession()).isSignedIn) return true;
 
     // Otherwise, make temporary credentials for them.
     final username = generateUsername();
@@ -61,7 +61,7 @@ class AWSModel extends ChangeNotifier {
     return false;
   }
 
-  void signOut() async {
+  static void signOut() async {
     final result = await Amplify.Auth.signOut();
     if (result is CognitoCompleteSignOut) {
       EventRecorder.authSignOut();

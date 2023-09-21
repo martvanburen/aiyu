@@ -1,5 +1,7 @@
+import "package:ai_yu/data/state_models/wallet_model.dart";
 import "package:ai_yu/utils/in_app_purchase_util.dart";
 import "package:flutter/material.dart";
+import "package:provider/provider.dart";
 
 class InAppPurchaseDialog extends StatefulWidget {
   const InAppPurchaseDialog({super.key});
@@ -9,7 +11,7 @@ class InAppPurchaseDialog extends StatefulWidget {
 }
 
 class _InAppPurchaseDialogState extends State<InAppPurchaseDialog> {
-  final InAppPurchaseUtil iapUtil = InAppPurchaseUtil();
+  late final InAppPurchaseUtil _iapUtil;
 
   PurchaseStatus _purchaseStatus = PurchaseStatus.finalizing;
   String? _message;
@@ -17,7 +19,8 @@ class _InAppPurchaseDialogState extends State<InAppPurchaseDialog> {
   @override
   void initState() {
     super.initState();
-    iapUtil.purchase50cTopUp(updateHandler: _onUpdate);
+    _iapUtil = InAppPurchaseUtil(onUpdate: _onUpdate);
+    _iapUtil.initialize50cTopUp();
   }
 
   @override
@@ -105,6 +108,9 @@ class _InAppPurchaseDialogState extends State<InAppPurchaseDialog> {
       _purchaseStatus = status;
       _message = message;
     });
+    if (status == PurchaseStatus.complete) {
+      Provider.of<WalletModel>(context, listen: false).refresh();
+    }
   }
 }
 

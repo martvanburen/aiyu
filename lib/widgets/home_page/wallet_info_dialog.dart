@@ -56,7 +56,7 @@ class WalletInfoDialog extends StatelessWidget {
                 } else {
                   text = "Sign Out";
                   action = () {
-                    aws.signOut();
+                    AWSModel.signOut();
                   };
                 }
 

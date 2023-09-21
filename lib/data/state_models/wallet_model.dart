@@ -77,16 +77,6 @@ class WalletModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  /* Future<bool> add50Cent() async {
-    final result = await _aws?.initializeTemporaryAccount() ?? false;
-    if (result == true) {
-      safePrint("Signed in as temporary account.");
-    } else {
-      safePrint("Failed to sign in as temporary account.");
-    }
-    return result;
-  } */
-
   void setBalance({required int microcents}) {
     _microcentBalance = microcents;
     notifyListeners();
@@ -98,6 +88,10 @@ class WalletModel extends ChangeNotifier {
 
   double calculateQueryCostInCents() {
     return _calculateQueryCost() / 100.0;
+  }
+
+  void refresh() {
+    _fetchWalletBalance();
   }
 
   @override
