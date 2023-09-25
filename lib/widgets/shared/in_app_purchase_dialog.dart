@@ -1,5 +1,7 @@
+import "package:ai_yu/data/state_models/aws_model.dart";
 import "package:ai_yu/data/state_models/wallet_model.dart";
 import "package:ai_yu/utils/in_app_purchase_util.dart";
+import "package:ai_yu/widgets/shared/temporary_account_warning.dart";
 import "package:flutter/material.dart";
 import "package:provider/provider.dart";
 
@@ -75,7 +77,7 @@ class _InAppPurchaseDialogState extends State<InAppPurchaseDialog> {
         break;
     }
     return TextButton(
-      onPressed: () => Navigator.of(context).maybePop(),
+      onPressed: _close,
       child: Text(buttonText),
     );
   }
@@ -120,14 +122,26 @@ class _InAppPurchaseDialogState extends State<InAppPurchaseDialog> {
       Provider.of<WalletModel>(context, listen: false).refresh();
     }
   }
+
+  void _close() {
+    Navigator.of(context).maybePop(_purchaseStatus);
+  }
 }
 
-void showInAppPurchaseDialog(BuildContext context) {
-  showDialog(
+void showInAppPurchaseDialog(BuildContext context) async {
+  await showDialog(
     context: context,
     barrierDismissible: false,
     builder: (BuildContext context) {
       return const InAppPurchaseDialog();
     },
-  );
+  ).then((result) {
+    // If purchase is complete, and user is using a temporary account, suggest
+    // backing up their account.
+    if (result == PurchaseStatus.complete &&
+        Provider.of<AWSModel>(context, listen: false).isTemporaryAccount ==
+            true) {
+      showTemporaryAccountWarningDialog(context);
+    }
+  });
 }

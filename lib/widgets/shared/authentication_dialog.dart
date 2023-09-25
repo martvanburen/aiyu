@@ -332,3 +332,17 @@ class _AuthenticationDialogState extends State<AuthenticationDialog> {
     }
   }
 }
+
+void showBackupAccountDialog(BuildContext context) {
+  if (Provider.of<AWSModel>(context, listen: false).isTemporaryAccount !=
+      true) {
+    // Only allowed is user is using temporary account.
+    return;
+  }
+  showDialog(
+    context: context,
+    builder: (BuildContext context) => const AuthenticationDialog(
+      mode: AuthenticationMode.addEmail,
+    ),
+  );
+}
