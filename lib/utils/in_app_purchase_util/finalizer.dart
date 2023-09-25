@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:ai_yu/awsconfiguration.dart';
 import 'package:ai_yu/core/result.dart';
+import 'package:ai_yu/utils/event_recorder.dart';
 import 'package:amplify_auth_cognito/amplify_auth_cognito.dart';
 import 'package:amplify_flutter/amplify_flutter.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
@@ -52,6 +53,7 @@ class IAPFinalizer {
     if (purchaseDetails.status == PurchaseStatus.purchased) {
       return VoidResult.ok();
     } else {
+      EventRecorder.errorIAPFinalizationCheckPurchaseStatus();
       return VoidResult.err(
           "Purchase was not fully completed, so the transaction was not finalized. "
           "If your card was charged, it will be refunded automatically after 3 days.");
@@ -62,6 +64,7 @@ class IAPFinalizer {
     if ((await Amplify.Auth.fetchAuthSession()).isSignedIn) {
       return VoidResult.ok();
     } else {
+      EventRecorder.errorIAPFinalizationCheckLoggedIn();
       return VoidResult.err(
           "An internal error occured: an account should have been "
           "auto-generated for you before starting the in-app-purchase, but no "
@@ -94,6 +97,7 @@ class IAPFinalizer {
       ).response;
       data = json.decode(response.decodeBody());
     } on ApiException {
+      EventRecorder.errorIAPFinalizationBackendCallout();
       return VoidResult.err(
           "An error occured while communicating with the server to verify your "
           "purchase. The transaction was not completed. If your card was charged, "
@@ -104,11 +108,14 @@ class IAPFinalizer {
       if (data["status_code"] == 200) {
         return VoidResult.ok();
       } else {
+        EventRecorder.errorIAPFinalizationBackendCallout(
+            statusCode: data["status_code"]);
         return VoidResult.err(
             "We could not verify your purchase. The transaction was not completed. "
             "If your card was charged, it will be refunded automatically after 3 days.");
       }
     } catch (e) {
+      EventRecorder.errorIAPFinalizationBackendCallout();
       return VoidResult.err(
           "An error occured while communicating with the server to verify your "
           "purchase. The transaction was not completed. If your card was charged, "

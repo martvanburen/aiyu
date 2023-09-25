@@ -1,5 +1,6 @@
 import 'package:ai_yu/core/result.dart';
 import 'package:ai_yu/data/state_models/aws_model.dart';
+import 'package:ai_yu/utils/event_recorder.dart';
 import 'package:amplify_flutter/amplify_flutter.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 
@@ -56,6 +57,7 @@ class IAPInitializer {
     if (await InAppPurchase.instance.isAvailable()) {
       return VoidResult.ok();
     } else {
+      EventRecorder.errorIAPInitializationCheckConnection();
       return VoidResult.err(
           "In-app-purchases are not available on this device.");
     }
@@ -70,6 +72,7 @@ class IAPInitializer {
       if (success) {
         return VoidResult.ok();
       } else {
+        EventRecorder.errorIAPInitializationCreateTemporaryAccount();
         return VoidResult.err(
             "Failed to create AiYu account, please check your internet "
             "connection and try again. If the problem persists, please contact "
@@ -83,6 +86,7 @@ class IAPInitializer {
         await InAppPurchase.instance.queryProductDetails({productId});
     if (productDetailsSearch.notFoundIDs.isNotEmpty ||
         productDetailsSearch.productDetails.isEmpty) {
+      EventRecorder.errorIAPInitializationLoadProduct();
       return VoidResult.err(
           "Unfortunately, it seems this in-app-purchase is currently not "
           "available in your region. I'm trying to support every region I can, "

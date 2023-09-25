@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:ai_yu/utils/event_recorder.dart';
 import 'package:ai_yu/utils/in_app_purchase_util/finalizer.dart';
 import 'package:ai_yu/utils/in_app_purchase_util/initializer.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
@@ -48,6 +49,7 @@ class InAppPurchaseUtil {
   }
 
   Future<void> _initializePurchase(String productId) async {
+    EventRecorder.iapInitialize(productId);
     final result = await IAPInitializer(productId).run(
       onInitializationUpdate: (message) {
         _onUpdate(PurchaseStatus.initializing, message);
@@ -62,6 +64,11 @@ class InAppPurchaseUtil {
 
   Future<void> _finalizePurchase(List<PurchaseDetails> purchaseDetails) async {
     List<String> finalizationErrors = [];
+    EventRecorder.iapFinalize(purchaseDetails.first.productID);
+    if (purchaseDetails.length > 1) {
+      // Unexpected, not sure when this would occur.
+      EventRecorder.warningIAPMultipleProductsToFinalze(purchaseDetails.length);
+    }
     for (final purchaseDetail in purchaseDetails) {
       final result = await IAPFinalizer(purchaseDetail).run(
         onFinalizationUpdate: (message) {
@@ -73,6 +80,7 @@ class InAppPurchaseUtil {
       }
     }
     if (finalizationErrors.isEmpty) {
+      EventRecorder.iapComplete(purchaseDetails.first.productID);
       _onUpdate(PurchaseStatus.complete, null);
     } else {
       _onUpdate(PurchaseStatus.error, finalizationErrors.join("\n"));

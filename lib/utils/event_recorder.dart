@@ -85,11 +85,41 @@ class EventRecorder {
     await Amplify.Analytics.recordEvent(event: event);
   }
 
+  // In-app purchases.
+  // ---------------------------------------------------------------------------
+
+  static iapInitialize(String productId) async {
+    final event = AnalyticsEvent("IAPInitialize");
+    event.customProperties.addStringProperty("ProductId", productId);
+    await Amplify.Analytics.recordEvent(event: event);
+  }
+
+  static iapFinalize(String productId) async {
+    final event = AnalyticsEvent("IAPFinalize");
+    event.customProperties.addStringProperty("ProductId", productId);
+    await Amplify.Analytics.recordEvent(event: event);
+  }
+
+  static iapComplete(String productId) async {
+    final event = AnalyticsEvent("IAPComplete");
+    event.customProperties.addStringProperty("ProductId", productId);
+    await Amplify.Analytics.recordEvent(event: event);
+  }
+
   // Miscellaneous.
   // ---------------------------------------------------------------------------
 
   static feedbackSubmit() async {
     final event = AnalyticsEvent("FeedbackSubmit");
+    await Amplify.Analytics.recordEvent(event: event);
+  }
+
+  // Warnings.
+  // ---------------------------------------------------------------------------
+
+  static warningIAPMultipleProductsToFinalze(int num) async {
+    final event = AnalyticsEvent("WarningIAPMultipleProductsToFinalze");
+    event.customProperties.addIntProperty("NumProducts", num);
     await Amplify.Analytics.recordEvent(event: event);
   }
 
@@ -137,6 +167,38 @@ class EventRecorder {
   static errorSendingFeedback({int? code}) async {
     final event = AnalyticsEvent("ErrorSendingFeedback");
     event.customProperties.addIntProperty("StatusCode", code ?? -1);
+    await Amplify.Analytics.recordEvent(event: event);
+  }
+
+  static errorIAPInitializationCheckConnection() async {
+    final event = AnalyticsEvent("ErrorIAPInitializationCheckConnection");
+    await Amplify.Analytics.recordEvent(event: event);
+  }
+
+  static errorIAPInitializationCreateTemporaryAccount() async {
+    final event =
+        AnalyticsEvent("ErrorIAPInitializationCreateTemporaryAccount");
+    await Amplify.Analytics.recordEvent(event: event);
+  }
+
+  static errorIAPInitializationLoadProduct() async {
+    final event = AnalyticsEvent("ErrorIAPInitializationLoadProduct");
+    await Amplify.Analytics.recordEvent(event: event);
+  }
+
+  static errorIAPFinalizationCheckPurchaseStatus() async {
+    final event = AnalyticsEvent("ErrorIAPFinalizationCheckPurchaseStatus");
+    await Amplify.Analytics.recordEvent(event: event);
+  }
+
+  static errorIAPFinalizationCheckLoggedIn() async {
+    final event = AnalyticsEvent("ErrorIAPFinalizationCheckLoggedIn");
+    await Amplify.Analytics.recordEvent(event: event);
+  }
+
+  static errorIAPFinalizationBackendCallout({int? statusCode}) async {
+    final event = AnalyticsEvent("ErrorIAPFinalizationBackendCallout");
+    event.customProperties.addIntProperty("StatusCode", statusCode ?? -1);
     await Amplify.Analytics.recordEvent(event: event);
   }
 }
