@@ -47,7 +47,7 @@ class WalletModel extends ChangeNotifier {
     _isLoading = true;
     notifyListeners();
 
-    if (_aws!.isSignedIn == false) {
+    if (_aws!.isSignedIn == null) {
       // If log-in state pending, balance is unavailable.
       _microcentBalance = null;
     } else if (_aws!.isSignedIn == false) {
