@@ -31,13 +31,13 @@ class _WalletDisplayWidgetState extends State<WalletDisplayWidget> {
                       "Wallet Balance:",
                       style: TextStyle(fontSize: 12, color: Colors.grey),
                     ),
-                    wallet.isLoading
+                    (wallet.isLoading || wallet.centBalance == null)
                         ? Container(
                             width: 80,
                             margin: const EdgeInsets.symmetric(vertical: 24.0),
                             child: const LinearProgressIndicator(),
                           )
-                        : Text("${wallet.centBalance.toStringAsFixed(1)}¢",
+                        : Text("${wallet.centBalance!.toStringAsFixed(1)}¢",
                             style: const TextStyle(fontSize: 36)),
                   ],
                 ),

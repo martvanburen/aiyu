@@ -10,11 +10,11 @@ import "package:flutter/material.dart";
 class AWSModel extends ChangeNotifier {
   late final StreamSubscription<AuthHubEvent> _authEventSubscription;
 
-  bool _isSignedIn = false;
-  bool get isSignedIn => _isSignedIn;
+  bool? _isSignedIn;
+  bool? get isSignedIn => _isSignedIn;
 
-  bool _isTemporaryAccount = true;
-  bool get isTemporaryAccount => _isTemporaryAccount;
+  bool? _isTemporaryAccount;
+  bool? get isTemporaryAccount => _isTemporaryAccount;
 
   AWSModel() {
     onAuthEvent(null);
@@ -23,7 +23,7 @@ class AWSModel extends ChangeNotifier {
 
   Future<void> onAuthEvent(AuthHubEvent? event) async {
     _isSignedIn = (await Amplify.Auth.fetchAuthSession()).isSignedIn;
-    if (_isSignedIn) {
+    if (_isSignedIn == true) {
       _isTemporaryAccount = (await Amplify.Auth.fetchUserAttributes())
               .firstWhereOrNull((a) =>
                   a.userAttributeKey == AuthUserAttributeKey.emailVerified)
@@ -69,18 +69,6 @@ class AWSModel extends ChangeNotifier {
       EventRecorder.errorSignOut();
     }
   }
-
-  /* Future<String> getUserIdentity() async {
-    await initialization;
-    final cognitoPlugin = Amplify.Auth.getPlugin(AmplifyAuthCognito.pluginKey);
-    return (await cognitoPlugin.fetchAuthSession()).identityIdResult.value;
-  } */
-
-  /* Future<String> getUserSub() async {
-    await initialization;
-    final cognitoPlugin = Amplify.Auth.getPlugin(AmplifyAuthCognito.pluginKey);
-    return (await cognitoPlugin.fetchAuthSession()).userSubResult.value;
-  } */
 
   @override
   void dispose() {

@@ -24,10 +24,10 @@ class WalletInfoDialog extends StatelessWidget {
           actions: <Widget>[
             Consumer<AWSModel>(
               builder: (context, aws, child) {
-                String text = "";
-                Function action = () {};
+                String? text;
+                void Function()? action;
 
-                if (!aws.isSignedIn) {
+                if (aws.isSignedIn == false) {
                   text = "Restore Account";
                   action = () {
                     Navigator.of(context).pop();
@@ -40,7 +40,7 @@ class WalletInfoDialog extends StatelessWidget {
                         builder: (context) => const AuthenticationDialog(
                             mode: AuthenticationMode.restoreAccount));
                   };
-                } else if (aws.isTemporaryAccount) {
+                } else if (aws.isTemporaryAccount == true) {
                   text = "Backup Account";
                   action = () {
                     Navigator.of(context).pop();
@@ -53,15 +53,19 @@ class WalletInfoDialog extends StatelessWidget {
                         builder: (context) => const AuthenticationDialog(
                             mode: AuthenticationMode.addEmail));
                   };
-                } else {
+                } else if (aws.isSignedIn == true) {
                   text = "Sign Out";
                   action = () {
                     AWSModel.signOut();
                   };
+                } else {
+                  // Still loading log-in state.
+                  text = "";
+                  action = null;
                 }
 
                 return TextButton(
-                  onPressed: () => action(),
+                  onPressed: action,
                   child: Text(text),
                 );
               },

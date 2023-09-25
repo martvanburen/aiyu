@@ -24,6 +24,12 @@ class _InAppPurchaseDialogState extends State<InAppPurchaseDialog> {
   }
 
   @override
+  void dispose() {
+    _iapUtil.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return WillPopScope(
         onWillPop: _onWillPop,
@@ -51,7 +57,8 @@ class _InAppPurchaseDialogState extends State<InAppPurchaseDialog> {
       case PurchaseStatus.error:
         return Text(_message ?? "Unknown error occurred.");
       case PurchaseStatus.complete:
-        return const Text("Purchase completed successfully!");
+        return const Text(
+            "Purchase completed successfully, and wallet balance has been updated. Thank you!");
     }
   }
 

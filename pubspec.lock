@@ -898,14 +898,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.4"
-  w_common:
-    dependency: "direct main"
-    description:
-      name: w_common
-      sha256: "54e34b485571aa5332a7ab22658fcd1f747558f03fb04d9715e2d2d9bd6ee32e"
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.0.0"
   web_socket_channel:
     dependency: transitive
     description:

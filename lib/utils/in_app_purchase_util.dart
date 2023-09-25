@@ -3,14 +3,13 @@ import 'dart:async';
 import 'package:ai_yu/utils/in_app_purchase_util/finalizer.dart';
 import 'package:ai_yu/utils/in_app_purchase_util/initializer.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
-import 'package:w_common/disposable.dart';
 
 enum PurchaseStatus { initializing, finalizing, error, complete }
 
 typedef UpdateHandler = void Function(PurchaseStatus status, String? message);
 typedef CompletionHandler = void Function();
 
-class InAppPurchaseUtil extends Object with Disposable {
+class InAppPurchaseUtil {
   // Public:
   // ---------------------------------------------------------------------------
 
@@ -18,7 +17,11 @@ class InAppPurchaseUtil extends Object with Disposable {
   InAppPurchaseUtil({required void Function(PurchaseStatus, String?) onUpdate})
       : _onUpdate = onUpdate {
     _startListeningForPurchaseCompletions();
-    getManagedDisposer(_dispose);
+  }
+
+  // Must be called by users of this util on widget disposal.
+  Future<void> dispose() async {
+    _purchaseCompletionSubscription.cancel();
   }
 
   void initialize50cTopUp() {
@@ -74,9 +77,5 @@ class InAppPurchaseUtil extends Object with Disposable {
     } else {
       _onUpdate(PurchaseStatus.error, finalizationErrors.join("\n"));
     }
-  }
-
-  Future<void> _dispose() async {
-    _purchaseCompletionSubscription.cancel();
   }
 }

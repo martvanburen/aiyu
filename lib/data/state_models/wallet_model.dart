@@ -15,17 +15,19 @@ class WalletModel extends ChangeNotifier {
   Future<void> get initialization => _initialization;
 
   // Measured in 100ths of a cent.
-  late int _microcentBalance;
+  late int? _microcentBalance;
 
-  int get microcentBalance => _microcentBalance;
-  double get centBalance => _microcentBalance / 100.0;
-  double get dollarBalance => _microcentBalance / 10000.0;
+  int? get microcentBalance => _microcentBalance;
+  double? get centBalance =>
+      _microcentBalance != null ? _microcentBalance! / 100.0 : null;
+  double? get dollarBalance =>
+      _microcentBalance != null ? _microcentBalance! / 10000.0 : null;
 
   bool _isLoading = false;
   bool get isLoading => _isLoading;
 
   WalletModel(this._aws, WalletModel? previousWallet) {
-    _microcentBalance = previousWallet?._microcentBalance ?? 0;
+    _microcentBalance = previousWallet?._microcentBalance;
     _initialization = _fetchWalletBalance();
   }
 
@@ -45,7 +47,10 @@ class WalletModel extends ChangeNotifier {
     _isLoading = true;
     notifyListeners();
 
-    if (!_aws!.isSignedIn) {
+    if (_aws!.isSignedIn == false) {
+      // If log-in state pending, balance is unavailable.
+      _microcentBalance = null;
+    } else if (_aws!.isSignedIn == false) {
       // If not logged in, balance is 0.
       _microcentBalance = 0;
     } else {

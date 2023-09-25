@@ -10,11 +10,20 @@ class MiniWalletWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<WalletModel>(
       builder: (context, wallet, child) {
-        return TextButton(
-          style: TextButton.styleFrom(foregroundColor: Colors.grey),
-          onPressed: () => showInAppPurchaseDialog(context),
-          child: Text("${wallet.centBalance.toStringAsFixed(0)}¢"),
-        );
+        return wallet.centBalance != null
+            ? TextButton(
+                style: TextButton.styleFrom(foregroundColor: Colors.grey),
+                onPressed: () => showInAppPurchaseDialog(context),
+                child: Text("${wallet.centBalance!.toStringAsFixed(0)}¢"),
+              )
+            : const Padding(
+                padding: EdgeInsets.only(right: 20.0),
+                child: SizedBox(
+                  width: 30,
+                  height: 5,
+                  child: LinearProgressIndicator(),
+                ),
+              );
       },
     );
   }
