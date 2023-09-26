@@ -23,7 +23,12 @@ import "package:uni_links/uni_links.dart";
 
 import 'awsconfiguration.dart';
 
-Future<void> _configureAmplify() async {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  runApp(await buildApp());
+}
+
+Future<Widget> buildApp() async {
   try {
     await Amplify.addPlugins([
       AmplifyAuthCognito(),
@@ -34,12 +39,7 @@ Future<void> _configureAmplify() async {
   } on Exception catch (e) {
     safePrint("ERROR: Failed to initialize Amplify. $e.");
   }
-}
-
-Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await _configureAmplify();
-  runApp(MultiProvider(
+  return MultiProvider(
     providers: [
       ChangeNotifierProvider(create: (context) => PreferencesModel()),
       ChangeNotifierProvider(create: (context) => DeeplinksModel()),
@@ -51,7 +51,7 @@ Future<void> main() async {
       ),
     ],
     child: const AiYuApp(),
-  ));
+  );
 }
 
 class AiYuApp extends StatefulWidget {

@@ -45,7 +45,7 @@ class _TemporaryAccountWarningDialogState
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: const Text("Yes, I\'m Sure"),
+              child: const Text("Yes, I'm Sure"),
             ),
           TextButton(
             onPressed: () {
