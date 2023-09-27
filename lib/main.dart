@@ -66,7 +66,7 @@ class AiYuAppState extends State<AiYuApp> {
   final FlutterShortcuts _flutterShortcuts = FlutterShortcuts();
   StreamSubscription? _deeplinkSubscription;
   String? _appOpenFlutterShortcutsAction;
-  Uri? _appOpenDeeplink;
+  Uri? _appDeeplink;
 
   @override
   void initState() {
@@ -139,7 +139,7 @@ class AiYuAppState extends State<AiYuApp> {
 
   void triggerDeeplink(Uri? uri) {
     setState(() {
-      _appOpenDeeplink = uri;
+      _appDeeplink = uri;
     });
   }
 
@@ -152,8 +152,8 @@ class AiYuAppState extends State<AiYuApp> {
       final language = _appOpenFlutterShortcutsAction!
           .substring("start_conversation_".length);
       home = LanguagePracticePage(language: language);
-    } else if (_appOpenDeeplink != null) {
-      home = DeeplinkPage.fromUri(uri: _appOpenDeeplink!);
+    } else if (_appDeeplink != null) {
+      home = DeeplinkPage.fromUri(uri: _appDeeplink!);
     } else {
       home = const HomePage();
     }

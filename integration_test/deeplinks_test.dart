@@ -1,3 +1,4 @@
+import "package:ai_yu/main.dart";
 import "package:flutter/material.dart";
 import "package:flutter_test/flutter_test.dart";
 import "package:integration_test/integration_test.dart";
@@ -6,6 +7,9 @@ import "test_utils.dart";
 
 const String _testDeeplinkName = "Automated Test Item";
 const String _testDeeplinkUrl = "automated-test";
+
+const String _testQuery =
+    "What fruit is yellow, sweet, elongated, and curved? Output only the answer in lowercase.";
 
 Future<void> _createBasicDeeplink(
     WidgetTester tester, CommonFinders find) async {
@@ -69,6 +73,20 @@ Future<void> _deleteBasicDeeplink(
   // Return home.
   final Finder backButton = find.byIcon(Icons.arrow_back);
   await tester.tap(backButton);
+  await tester.pumpAndSettle();
+}
+
+Future<void> _openDeeplink(WidgetTester tester, CommonFinders find,
+    GlobalKey<AiYuAppState> appKey, String url) async {
+  appKey.currentState!.triggerDeeplink(Uri.parse(url));
+  await tester.pumpAndSettle();
+}
+
+Future<void> _closeDeeplink(WidgetTester tester, CommonFinders find,
+    GlobalKey<AiYuAppState> appKey) async {
+  // Close button will close the app (to quickly return user to Anki), so
+  // return home by setting deeplink URI to null instead.
+  appKey.currentState!.triggerDeeplink(null);
   await tester.pumpAndSettle();
 }
 
@@ -168,32 +186,97 @@ void main() {
       expect(find.text("aiyu://my-test-item"), findsNothing);
     });
 
-    testWidgets("log in, create basic deeplink, trigger, log out",
-        (tester) async {
+    testWidgets("log in, create deeplink, trigger, log out", (tester) async {
       final appKey = await initApp(tester, find);
       await logInAsTestUser(tester, find);
       await _createBasicDeeplink(tester, find);
 
       // Trigger deeplink.
-      appKey.currentState!.triggerDeeplink(
-          Uri.parse("aiyu://$_testDeeplinkUrl?q=What is the meaning of life?"));
-      await tester.pumpAndSettle();
+      await _openDeeplink(
+          tester, find, appKey, "aiyu://$_testDeeplinkUrl?q=$_testQuery");
 
       // Ensure deeplink page shown.
       expect(find.text("Deeplink Action"), findsOneWidget);
-      expect(find.text("Test: <What is the meaning of life?>"), findsOneWidget);
+      expect(find.text("Test: <$_testQuery>"), findsOneWidget);
+      expect(find.textContaining("banana"), findsOneWidget);
       expect(find.byIcon(Icons.copy), findsOneWidget);
       expect(find.byIcon(Icons.east), findsOneWidget);
       expect(find.text("Close"), findsOneWidget);
 
-      // Close button will close the app, so return home by setting null
-      // deeplink URI instead.
-      appKey.currentState!.triggerDeeplink(null);
-      await tester.pumpAndSettle();
-      expect(find.text("Deeplink Action"), findsNothing);
-
+      // Return home & clean up.
+      await _closeDeeplink(tester, find, appKey);
       await _deleteBasicDeeplink(tester, find);
       await signOutTestUser(tester, find);
+    });
+
+    testWidgets("guest, create deeplink, trigger incorrect URL",
+        (tester) async {
+      final appKey = await initApp(tester, find);
+      await _createBasicDeeplink(tester, find);
+
+      // Trigger incorrect deeplink.
+      await _openDeeplink(
+          tester, find, appKey, "aiyu://incorrect-url?q=$_testQuery");
+
+      // Ensure error page shown.
+      expect(find.text("Deeplink Action"), findsOneWidget);
+      expect(
+          find.text(
+              "No matching deeplink config found for 'aiyu://incorrect-url'."),
+          findsOneWidget);
+      expect(find.textContaining("banana"), findsNothing);
+      expect(find.byIcon(Icons.copy), findsNothing);
+      expect(find.byIcon(Icons.east), findsNothing);
+
+      // Return home & clean up.
+      await _closeDeeplink(tester, find, appKey);
+      await _deleteBasicDeeplink(tester, find);
+    });
+
+    testWidgets("guest, create deeplink, trigger incorrect query param",
+        (tester) async {
+      final appKey = await initApp(tester, find);
+      await _createBasicDeeplink(tester, find);
+
+      // Trigger incorrect deeplink.
+      await _openDeeplink(tester, find, appKey,
+          "aiyu://$_testDeeplinkUrl?incorrect=$_testQuery");
+
+      // Ensure error page shown.
+      expect(find.text("Deeplink Action"), findsOneWidget);
+      expect(find.textContaining("No query string found."), findsOneWidget);
+      expect(find.textContaining("banana"), findsNothing);
+      expect(find.byIcon(Icons.copy), findsNothing);
+      expect(find.byIcon(Icons.east), findsNothing);
+
+      // Return home & clean up.
+      await _closeDeeplink(tester, find, appKey);
+      await _deleteBasicDeeplink(tester, find);
+    });
+
+    testWidgets("guest, create deeplink, trigger but no balance",
+        (tester) async {
+      final appKey = await initApp(tester, find);
+      await _createBasicDeeplink(tester, find);
+
+      // Trigger incorrect deeplink.
+      await _openDeeplink(
+          tester, find, appKey, "aiyu://$_testDeeplinkUrl?q=$_testQuery");
+
+      // Ensure error page shown.
+      expect(find.text("Deeplink Action"), findsOneWidget);
+      expect(
+          find.text(
+              "A minimum balance of 1 cent is required to send GPT requests."),
+          findsOneWidget);
+      expect(find.textContaining("banana"), findsNothing);
+      expect(find.byIcon(Icons.copy), findsOneWidget);
+      expect(find.byIcon(Icons.east), findsOneWidget);
+      expect(find.text("Close"), findsOneWidget);
+
+      // Return home & clean up.
+      await _closeDeeplink(tester, find, appKey);
+      await _deleteBasicDeeplink(tester, find);
     });
   });
 }
