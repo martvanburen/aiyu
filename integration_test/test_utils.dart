@@ -4,15 +4,19 @@ import "package:amplify_flutter/amplify_flutter.dart";
 import "package:flutter/material.dart";
 import "package:flutter_test/flutter_test.dart";
 
-Future<void> initApp(WidgetTester tester, CommonFinders find) async {
+Future<GlobalKey<AiYuAppState>> initApp(
+    WidgetTester tester, CommonFinders find) async {
+  GlobalKey<AiYuAppState> appKey = GlobalKey<AiYuAppState>();
+  WidgetController.hitTestWarningShouldBeFatal = true;
   try {
-    await tester.pumpWidget(await buildApp());
+    await tester.pumpWidget(await buildApp(key: appKey));
   } on Exception catch (e) {
     safePrint("Note: Failed to initialize Amplify. $e.");
   }
   await tester.pumpAndSettle();
   expect(find.text("0.0¢"), findsOneWidget);
   expect(find.text("Add 50¢"), findsOneWidget);
+  return appKey;
 }
 
 Future<void> logInAsTestUser(WidgetTester tester, CommonFinders find) async {
@@ -59,9 +63,9 @@ Future<void> waitForWalletBalanceNonZero(
   }
 }
 
-// For backed-up accounts, sign out using sign-out button.
-Future<void> signOutBackedUpUser(
-    WidgetTester tester, CommonFinders find) async {
+// For backed-up accounts such as the test account, sign out using sign-out
+// button.
+Future<void> signOutTestUser(WidgetTester tester, CommonFinders find) async {
   // Open wallet info and check user is signed in.
   final Finder infoButton = find.byIcon(Icons.info);
   await tester.tap(infoButton);

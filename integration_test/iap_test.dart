@@ -115,7 +115,7 @@ void main() {
       expect(find.text("Wallet Balance:"), findsOneWidget);
 
       // Sign out.
-      await signOutBackedUpUser(tester, find);
+      await signOutTestUser(tester, find);
     });
   });
 
@@ -253,7 +253,7 @@ void main() {
       );
 
       // Sign out.
-      await signOutBackedUpUser(tester, find);
+      await signOutTestUser(tester, find);
     });
   });
 }

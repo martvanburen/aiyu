@@ -28,7 +28,7 @@ Future<void> main() async {
   runApp(await buildApp());
 }
 
-Future<Widget> buildApp() async {
+Future<Widget> buildApp({Key? key}) async {
   try {
     await Amplify.addPlugins([
       AmplifyAuthCognito(),
@@ -50,7 +50,7 @@ Future<Widget> buildApp() async {
             WalletModel(auth, previousWallet),
       ),
     ],
-    child: const AiYuApp(),
+    child: AiYuApp(key: key),
   );
 }
 
@@ -58,10 +58,10 @@ class AiYuApp extends StatefulWidget {
   const AiYuApp({super.key});
 
   @override
-  State<AiYuApp> createState() => _AiYuAppState();
+  State<AiYuApp> createState() => AiYuAppState();
 }
 
-class _AiYuAppState extends State<AiYuApp> {
+class AiYuAppState extends State<AiYuApp> {
   // App shortcuts & deeplinks.
   final FlutterShortcuts _flutterShortcuts = FlutterShortcuts();
   StreamSubscription? _deeplinkSubscription;
@@ -117,9 +117,7 @@ class _AiYuAppState extends State<AiYuApp> {
     try {
       final initialUri = await getInitialUri();
       if (initialUri != null && initialUri.scheme == "aiyu") {
-        setState(() {
-          _appOpenDeeplink = initialUri;
-        });
+        triggerDeeplink(initialUri);
       }
     } on PlatformException {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -131,13 +129,17 @@ class _AiYuAppState extends State<AiYuApp> {
     // Subscribe to future links.
     _deeplinkSubscription = uriLinkStream.listen((Uri? uri) {
       if (uri != null && uri.scheme == "aiyu") {
-        setState(() {
-          _appOpenDeeplink = uri;
-        });
+        triggerDeeplink(uri);
       }
     }, onError: (err) {
       ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Failed to open deeplink.")));
+    });
+  }
+
+  void triggerDeeplink(Uri? uri) {
+    setState(() {
+      _appOpenDeeplink = uri;
     });
   }
 

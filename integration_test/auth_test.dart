@@ -118,7 +118,7 @@ void main() {
       expect(find.text("0.0¢"), findsNothing);
 
       // Sign out.
-      await signOutBackedUpUser(tester, find);
+      await signOutTestUser(tester, find);
 
       // Check wallet info updated.
       expect(find.text("Wallet Information"), findsNothing);
