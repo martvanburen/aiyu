@@ -7,6 +7,8 @@ import "test_utils.dart";
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
+  // Tester should accept permissions for following tests:
+  // ---------------------------------------------------------------------------
   group("end-to-end tests for conversation functionality", () {
     testWidgets(
         "log in, start chinese conversation, select word, open deeplink, log out",
