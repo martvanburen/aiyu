@@ -54,6 +54,7 @@ class ConversationLaunchDialogState extends State<ConversationLaunchDialog> {
                     const SizedBox(width: 10),
                     Expanded(
                       child: DropdownButton<String>(
+                        key: const ValueKey('languageDropdown'),
                         isExpanded: true,
                         value: _selectedLanguage,
                         onChanged: (String? newValue) {
@@ -88,6 +89,7 @@ class ConversationLaunchDialogState extends State<ConversationLaunchDialog> {
                     children: [
                       Expanded(
                         child: CheckboxListTile(
+                          key: const ValueKey('automaticModeCheckbox'),
                           contentPadding: const EdgeInsets.all(0.0),
                           title: const Text(
                             "Automatic mode.",
