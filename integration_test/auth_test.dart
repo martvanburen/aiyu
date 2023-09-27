@@ -1,18 +1,15 @@
-import "package:ai_yu/main.dart";
 import "package:flutter/material.dart";
 import "package:flutter_test/flutter_test.dart";
 import "package:integration_test/integration_test.dart";
+
+import "test_utils.dart";
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   group("end-to-end tests for login & wallet functionality", () {
     testWidgets("basic wallet info", (tester) async {
-      await tester.pumpWidget(await buildApp());
-      await tester.pumpAndSettle();
-
-      expect(find.text("0.0¢"), findsOneWidget);
-      expect(find.text("Add 50¢"), findsOneWidget);
+      await initApp(tester, find);
 
       final Finder infoButton = find.byIcon(Icons.info);
       await tester.tap(infoButton);
@@ -30,8 +27,7 @@ void main() {
     });
 
     testWidgets("restore real account (initiate only)", (tester) async {
-      await tester.pumpWidget(await buildApp());
-      await tester.pumpAndSettle();
+      await initApp(tester, find);
 
       // Open wallet info.
       final Finder infoButton = find.byIcon(Icons.info);
@@ -79,9 +75,7 @@ void main() {
     });
 
     testWidgets("restore test account (and sign out)", (tester) async {
-      int i = 0;
-      await tester.pumpWidget(await buildApp());
-      await tester.pumpAndSettle();
+      await initApp(tester, find);
 
       // Open wallet info and initiate restore.
       final Finder infoButton = find.byIcon(Icons.info);
@@ -116,41 +110,17 @@ void main() {
       expect(find.text("Account restored!"), findsOneWidget);
 
       // Wait until balance is updated.
-      i = 0;
-      while (find.text("0.0¢").evaluate().isNotEmpty) {
-        if (i++ > 5) {
-          fail("Wallet balance fetch did not get triggered on sign-in.");
-        }
-        await tester.pumpAndSettle(const Duration(seconds: 1));
-      }
+      await waitForWalletBalanceNonZero(tester, find);
 
       // Check dialog dismissed and wallet info updated.
       expect(find.text("Restore Account"), findsNothing);
       expect(find.text("Wallet Balance:"), findsOneWidget);
       expect(find.text("0.0¢"), findsNothing);
 
-      // Open wallet info and logout.
-      await tester.tap(infoButton);
-      await tester.pumpAndSettle();
-      expect(find.text("Sign Out"), findsOneWidget);
-      final Finder signOutButton = find.text("Sign Out");
-      await tester.tap(signOutButton);
-      await tester.pumpAndSettle();
+      // Sign out.
+      await signOutBackedUpUser(tester, find);
 
-      // Wait until sign-out is complete.
-      i = 0;
-      while (find.text("Sign Out").evaluate().isNotEmpty) {
-        if (i++ > 10) {
-          fail("Sign out took too long.");
-        }
-        await tester.pumpAndSettle(const Duration(seconds: 1));
-      }
-      expect(find.text("Restore Account"), findsOneWidget);
-
-      // Close dialog and check wallet info updated.
-      final Finder closeButton = find.text("Close");
-      await tester.tap(closeButton);
-      await tester.pumpAndSettle();
+      // Check wallet info updated.
       expect(find.text("Wallet Information"), findsNothing);
       expect(find.text("Wallet Balance:"), findsOneWidget);
       expect(find.text("0.0¢"), findsOneWidget);

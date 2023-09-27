@@ -1,66 +1,8 @@
-import "package:ai_yu/data/state_models/aws_model.dart";
-import "package:ai_yu/main.dart";
 import "package:flutter/material.dart";
 import "package:flutter_test/flutter_test.dart";
 import "package:integration_test/integration_test.dart";
 
-Future<void> _logInAsTestUser(WidgetTester tester, CommonFinders find) async {
-  // Open wallet info dialog.
-  final Finder infoButton = find.byIcon(Icons.info);
-  await tester.tap(infoButton);
-  await tester.pumpAndSettle();
-
-  // Initiate restore-account.
-  final Finder restoreButton = find.text("Restore Account");
-  await tester.tap(restoreButton);
-  await tester.pumpAndSettle();
-
-  // Enter test credentials email.
-  final Finder emailField = find.ancestor(
-    of: find.text("Email"),
-    matching: find.byType(TextField),
-  );
-  await tester.enterText(emailField, "test_user");
-  final Finder nextButton = find.text("Next");
-  await tester.tap(nextButton);
-  await tester.pumpAndSettle();
-
-  // Enter test credentials password.
-  final Finder verificationCodeField = find.ancestor(
-    of: find.text("Verification Code"),
-    matching: find.byType(TextField),
-  );
-  await tester.enterText(
-      verificationCodeField, "012345678901234567890123456789");
-  final Finder completeButton = find.text("Complete");
-  await tester.tap(completeButton);
-  await tester.pumpAndSettle();
-}
-
-Future<void> _waitForWalletBalanceUpdate(
-    WidgetTester tester, CommonFinders find) async {
-  int i = 0;
-  while (find.text("0.0¢").evaluate().isNotEmpty) {
-    if (i++ > 5) {
-      fail("Wallet balance fetch did not get triggered on sign-in.");
-    }
-    await tester.pumpAndSettle(const Duration(seconds: 1));
-  }
-}
-
-Future<void> _pressSignOutAndWait(
-    WidgetTester tester, CommonFinders find) async {
-  final Finder signOutButton = find.text("Sign Out");
-  await tester.tap(signOutButton);
-  await tester.pumpAndSettle();
-  int i = 0;
-  while (find.text("Sign Out").evaluate().isNotEmpty) {
-    if (i++ > 10) {
-      fail("Sign out took too long.");
-    }
-    await tester.pumpAndSettle(const Duration(seconds: 1));
-  }
-}
+import "test_utils.dart";
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -70,11 +12,7 @@ void main() {
   group("end-to-end tests for in-app-purchases | declined purchase", () {
     testWidgets("guest, start purchase, cancel, try back-up account, log out",
         (tester) async {
-      await tester.pumpWidget(await buildApp());
-      await tester.pumpAndSettle();
-
-      expect(find.text("0.0¢"), findsOneWidget);
-      expect(find.text("Add 50¢"), findsOneWidget);
+      await initApp(tester, find);
 
       // Start top-up purchase.
       final Finder topUpButton = find.text("Add 50¢");
@@ -143,19 +81,13 @@ void main() {
           findsOneWidget);
 
       // Sign out.
-      AWSModel.signOut();
+      await signOutTemporaryUser(tester, find);
     });
 
     testWidgets("log in, start purchase, cancel, log out", (tester) async {
-      await tester.pumpWidget(await buildApp());
-      await tester.pumpAndSettle();
-
-      expect(find.text("0.0¢"), findsOneWidget);
-      expect(find.text("Add 50¢"), findsOneWidget);
-
-      await _logInAsTestUser(tester, find);
-      await _waitForWalletBalanceUpdate(tester, find);
-      expect(find.text("0.0¢"), findsOneWidget);
+      await initApp(tester, find);
+      await logInAsTestUser(tester, find);
+      await waitForWalletBalanceNonZero(tester, find);
 
       // Start top-up purchase.
       final Finder topUpButton = find.text("Add 50¢");
@@ -182,15 +114,8 @@ void main() {
       expect(find.text("Confirmation"), findsNothing);
       expect(find.text("Wallet Balance:"), findsOneWidget);
 
-      // Open wallet info and check user is signed in.
-      final Finder infoButton = find.byIcon(Icons.info);
-      await tester.tap(infoButton);
-      await tester.pumpAndSettle();
-      expect(find.text("Sign Out"), findsOneWidget);
-
       // Sign out.
-      await _pressSignOutAndWait(tester, find);
-      expect(find.text("Restore Account"), findsOneWidget);
+      await signOutBackedUpUser(tester, find);
     });
   });
 
@@ -199,11 +124,7 @@ void main() {
   group("end-to-end tests for in-app-purchases | successful purchase", () {
     testWidgets("guest, start purchase, approved, try back-up account, log out",
         (tester) async {
-      await tester.pumpWidget(await buildApp());
-      await tester.pumpAndSettle();
-
-      expect(find.text("0.0¢"), findsOneWidget);
-      expect(find.text("Add 50¢"), findsOneWidget);
+      await initApp(tester, find);
 
       // Start top-up purchase.
       final Finder topUpButton = find.text("Add 50¢");
@@ -282,18 +203,13 @@ void main() {
       expect(find.text("50.0¢"), findsOneWidget);
 
       // Sign out.
-      AWSModel.signOut();
+      await signOutTemporaryUser(tester, find);
     });
 
     testWidgets("log in, start purchase, approved, log out", (tester) async {
-      await tester.pumpWidget(await buildApp());
-      await tester.pumpAndSettle();
-
-      expect(find.text("0.0¢"), findsOneWidget);
-      expect(find.text("Add 50¢"), findsOneWidget);
-
-      await _logInAsTestUser(tester, find);
-      await _waitForWalletBalanceUpdate(tester, find);
+      await initApp(tester, find);
+      await logInAsTestUser(tester, find);
+      await waitForWalletBalanceNonZero(tester, find);
 
       // Find wallet balance.
       final Finder balanceFinder = find.byKey(const ValueKey('balanceText'));
@@ -336,15 +252,8 @@ void main() {
         equals(balance + 50.0),
       );
 
-      // Open wallet info and check user is signed in.
-      final Finder infoButton = find.byIcon(Icons.info);
-      await tester.tap(infoButton);
-      await tester.pumpAndSettle();
-      expect(find.text("Sign Out"), findsOneWidget);
-
       // Sign out.
-      await _pressSignOutAndWait(tester, find);
-      expect(find.text("Restore Account"), findsOneWidget);
+      await signOutBackedUpUser(tester, find);
     });
   });
 }
